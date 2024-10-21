@@ -10,12 +10,15 @@ import java.nio.charset.Charset
 @Suppress("SameParameterValue")
 object Universities {
     private val universities = run {
-        val result = mutableMapOf<Int, UniversityModel>()
+        val result = mutableMapOf<Int, University>()
 
         for (resource in getResourceFiles("universities")) {
             if (resource.endsWith(".json")) {
-                val university = Json.decodeFromString<UniversityModel>(getResourceAsStream("universities/${resource}").readAllBytes().toString(
-                    Charset.defaultCharset()))
+                val university = Json.decodeFromString<University>(
+                    getResourceAsStream("universities/${resource}").readAllBytes().toString(
+                        Charset.defaultCharset()
+                    )
+                )
 
                 result[university.id] = university
             }
@@ -24,7 +27,7 @@ object Universities {
         result
     }
 
-    operator fun get(universityId: Int): UniversityModel {
+    operator fun get(universityId: Int): University {
         return universities[universityId]!!
     }
 

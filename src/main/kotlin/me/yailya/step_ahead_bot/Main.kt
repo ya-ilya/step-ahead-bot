@@ -2,14 +2,15 @@ package me.yailya.step_ahead_bot
 
 import eu.vendeli.tgbot.TelegramBot
 import eu.vendeli.tgbot.api.answer.answerCallbackQuery
+import eu.vendeli.tgbot.types.internal.getUser
 import eu.vendeli.tgbot.utils.onCallbackQuery
 import kotlinx.coroutines.Dispatchers
 import me.yailya.step_ahead_bot.commands.handleStartCommand
-import me.yailya.step_ahead_bot.handlers.handleReviewsCallback
-import me.yailya.step_ahead_bot.handlers.handleSpecialitiesCallback
-import me.yailya.step_ahead_bot.handlers.handleUniversityCallback
+import me.yailya.step_ahead_bot.handlers.*
+import me.yailya.step_ahead_bot.review.Reviews
 import me.yailya.step_ahead_bot.university.Universities
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -21,7 +22,7 @@ suspend fun main() {
     val database = Database.connect(jdbcURL, driverClassName)
 
     transaction(database) {
-        // SchemaUtils.create(...)
+        SchemaUtils.create(Reviews)
 
         addLogger(StdOutSqlLogger)
     }
@@ -33,6 +34,38 @@ suspend fun main() {
             handleStartCommand(user, bot)
         }
 
+        for (university in Universities) {
+            onInput("create_review_step1_${university.key}") {
+                handleCreateReviewStep1Input(
+                    update.getUser(),
+                    bot,
+                    university.value,
+                    update.text,
+                    update.origin.message!!.messageId
+                )
+            }
+
+            onInput("create_review_step2_${university.key}") {
+                handleCreateReviewStep2Input(
+                    update.getUser(),
+                    bot,
+                    university.value,
+                    update.text,
+                    update.origin.message!!.messageId
+                )
+            }
+
+            onInput("create_review_step3_${university.key}") {
+                handleCreateReviewStep3Input(
+                    update.getUser(),
+                    bot,
+                    university.value,
+                    update.text,
+                    update.origin.message!!.messageId
+                )
+            }
+        }
+
         onCallbackQuery {
             val university = Universities[update.callbackQuery.data!!.split("_").last().toInt()]
 
@@ -42,11 +75,19 @@ suspend fun main() {
                 }
 
                 update.callbackQuery.data!!.contains("_") -> {
-                    val callbackName = update.callbackQuery.data!!.split("_")[0]
+                    val callbackNameSplit = update.callbackQuery.data!!
+                        .split("_")
+                        .dropLast(1)
 
-                    when (callbackName) {
+                    when (val callbackName = callbackNameSplit.joinToString("_")) {
                         "specialities" -> handleSpecialitiesCallback(update.user, bot, university)
                         "reviews" -> handleReviewsCallback(update.user, bot, university)
+                        "create_review" -> handleCreateReviewCallback(update.user, bot, university)
+                        else -> when {
+                            callbackName.startsWith("create_review_step4_") -> {
+                                handleCreateReviewStep4(update.user, bot, university, callbackNameSplit.last().toInt())
+                            }
+                        }
                     }
                 }
             }

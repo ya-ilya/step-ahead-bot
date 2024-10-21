@@ -3,7 +3,7 @@ package me.yailya.step_ahead_bot.university
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UniversityModel(
+data class University(
     val id: Int,
     val shortName: String,
     val name: String,
