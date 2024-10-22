@@ -11,7 +11,11 @@ import me.yailya.step_ahead_bot.review.ReviewConversationInputs
 import me.yailya.step_ahead_bot.review.ReviewEntity
 import me.yailya.step_ahead_bot.university.University
 
-suspend fun handleUniversityCallback(user: User, bot: TelegramBot, university: University) {
+suspend fun handleUniversityCallback(
+    user: User,
+    bot: TelegramBot,
+    university: University
+) {
     message {
         var extraPointsText = ""
 
@@ -51,7 +55,11 @@ suspend fun handleUniversityCallback(user: User, bot: TelegramBot, university: U
     }.send(user, bot)
 }
 
-suspend fun handleSpecialitiesCallback(user: User, bot: TelegramBot, university: University) {
+suspend fun handleSpecialitiesCallback(
+    user: User,
+    bot: TelegramBot,
+    university: University
+) {
     message {
         "" - bold { "Специальности в ${university.shortName}" } -
                 "\n" + "Доступные специальности:" -
@@ -59,7 +67,11 @@ suspend fun handleSpecialitiesCallback(user: User, bot: TelegramBot, university:
     }.send(user, bot)
 }
 
-suspend fun handleReviewsCallback(user: User, bot: TelegramBot, university: University) {
+suspend fun handleReviewsCallback(
+    user: User,
+    bot: TelegramBot,
+    university: University
+) {
     val reviews = ReviewEntity.queriedModelsByUniversity(university)
 
     message {
@@ -85,7 +97,11 @@ suspend fun handleReviewsCallback(user: User, bot: TelegramBot, university: Univ
     }.send(user, bot)
 }
 
-suspend fun handleCreateReviewCallback(user: User, bot: TelegramBot, university: University) {
+suspend fun handleCreateReviewCallback(
+    user: User,
+    bot: TelegramBot,
+    university: University
+) {
     bot.inputListener[user] = "create_review_step1_${university.id}"
 
     val message = message {

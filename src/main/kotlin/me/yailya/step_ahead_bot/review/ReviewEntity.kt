@@ -11,8 +11,6 @@ class ReviewEntity(id: EntityID<Int>) : IntEntity(id) {
         suspend fun queriedModelsByUniversity(university: University) = databaseQuery {
             find { Reviews.universityId eq university.id }.map { it.toModel() }
         }
-
-        suspend fun queriedAllModels() = databaseQuery { all().map { it.toModel() } }
     }
 
     var userId by Reviews.userId
@@ -22,9 +20,7 @@ class ReviewEntity(id: EntityID<Int>) : IntEntity(id) {
     var comment by Reviews.comment
     var rating by Reviews.rating
 
-    suspend fun queriedToModel() = databaseQuery { toModel() }
-
-    fun toModel() = ReviewModel(
+    fun toModel() = Review(
         id.value,
         userId,
         universityId,

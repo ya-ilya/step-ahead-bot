@@ -5,6 +5,7 @@ import eu.vendeli.tgbot.api.answer.answerCallbackQuery
 import eu.vendeli.tgbot.types.internal.getUser
 import eu.vendeli.tgbot.utils.onCallbackQuery
 import kotlinx.coroutines.Dispatchers
+import me.yailya.step_ahead_bot.commands.handleFAQCommand
 import me.yailya.step_ahead_bot.commands.handleStartCommand
 import me.yailya.step_ahead_bot.handlers.*
 import me.yailya.step_ahead_bot.review.Reviews
@@ -32,6 +33,10 @@ suspend fun main() {
     bot.handleUpdates {
         onCommand("/start") {
             handleStartCommand(user, bot)
+        }
+
+        onCommand("/faq") {
+            handleFAQCommand(user, bot)
         }
 
         for (university in Universities) {

@@ -1,6 +1,6 @@
 package me.yailya.step_ahead_bot.review
 
-data class ReviewModel(
+data class Review(
     val id: Int,
     val userId: Long,
     val universityId: Int,
