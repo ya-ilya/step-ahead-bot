@@ -1,4 +1,4 @@
-package me.yailya.step_ahead_bot.review
+package me.yailya.step_ahead_bot.review.inputs
 
 class ReviewConversationInputs(
     val inputs: MutableList<String> = mutableListOf(),

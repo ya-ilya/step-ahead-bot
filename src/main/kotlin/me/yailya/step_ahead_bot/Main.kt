@@ -7,9 +7,10 @@ import eu.vendeli.tgbot.utils.onCallbackQuery
 import kotlinx.coroutines.Dispatchers
 import me.yailya.step_ahead_bot.commands.handleFAQCommand
 import me.yailya.step_ahead_bot.commands.handleStartCommand
-import me.yailya.step_ahead_bot.handlers.*
 import me.yailya.step_ahead_bot.review.Reviews
 import me.yailya.step_ahead_bot.university.Universities
+import me.yailya.step_ahead_bot.university.handlers.*
+import me.yailya.step_ahead_bot.university.ranking.EduRankRanking
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
@@ -18,6 +19,8 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 
 suspend fun main() {
+    println("Loaded EduRank ranking. ${EduRankRanking.ranking.size} entries")
+
     val driverClassName = "org.h2.Driver"
     val jdbcURL = "jdbc:h2:file:./database"
     val database = Database.connect(jdbcURL, driverClassName)

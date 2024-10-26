@@ -1,4 +1,4 @@
-package me.yailya.step_ahead_bot.handlers
+package me.yailya.step_ahead_bot.university.handlers
 
 import eu.vendeli.tgbot.TelegramBot
 import eu.vendeli.tgbot.api.message.deleteMessage
@@ -7,9 +7,10 @@ import eu.vendeli.tgbot.api.message.message
 import eu.vendeli.tgbot.types.User
 import eu.vendeli.tgbot.types.internal.getOrNull
 import me.yailya.step_ahead_bot.databaseQuery
-import me.yailya.step_ahead_bot.review.ReviewConversationInputs
+import me.yailya.step_ahead_bot.review.inputs.ReviewConversationInputs
 import me.yailya.step_ahead_bot.review.ReviewEntity
 import me.yailya.step_ahead_bot.university.University
+import me.yailya.step_ahead_bot.university.ranking.EduRankRanking
 
 suspend fun handleUniversityCallback(
     user: User,
@@ -37,6 +38,7 @@ suspend fun handleUniversityCallback(
                 "\n" - "- Средняя стоимость: ${university.paidInfo.averagePrice}" -
                 "\n" - "- Самая низкая стоимость: ${university.paidInfo.minimalPrice}" -
                 "\n" - bold { "В цифрах" } -
+                "\n" - "- Ранг в Москве (EduRank): #${EduRankRanking.ranking[university.name_en]!!.rankInMoscow}" -
                 "\n" - "- Студентов: ${university.inNumbers.studentsCount}" -
                 "\n" - "- Преподователей: ${university.inNumbers.professorsCount}" -
                 "\n" - "- Год основания: ${university.inNumbers.yearOfFoundation}" -

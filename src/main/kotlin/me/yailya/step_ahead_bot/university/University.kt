@@ -7,6 +7,7 @@ data class University(
     val id: Int,
     val shortName: String,
     val name: String,
+    val name_en: String,
     val description: String,
     val website: String,
     val location: String,
