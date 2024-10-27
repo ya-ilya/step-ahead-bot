@@ -37,6 +37,10 @@
     "email": "abitur@hse.ru"
   },
   "listOfApplicants": "https://ba.hse.ru/finlist",
+  "socialNetworks": {
+    "vk": "https://vk.com/hse",
+    "tg": "https://t.me/s/hse_official"
+  },
   "specialities": [
     "Актер",
     "Античность (История)",

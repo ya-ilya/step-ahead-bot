@@ -17,6 +17,7 @@ data class University(
     val extraPoints: Map<ExtraPointsReason, Int>,
     val inNumbers: UniversityInNumbers,
     val contacts: UniversityContacts,
+    val socialNetworks: UniversitySocialNetworks,
     val listOfApplicants: String,
     val specialities: List<String>
 ) {
@@ -48,6 +49,12 @@ data class University(
     data class UniversityContacts(
         val phone: String,
         val email: String
+    )
+
+    @Serializable
+    data class UniversitySocialNetworks(
+        val vk: String,
+        val tg: String
     )
 
     enum class UniversityFacility(val text: String) {

@@ -14,6 +14,7 @@ object EduRankRanking {
     private val UNIVERSITY_RANK_PLACE_REGEX = """<span class="ranks__place">(.*?)</span>""".toRegex()
 
     class EduRankData(
+        val rankingUrl: String,
         val rankInMoscow: Int,
         val rankInRussia: Int,
         val rankInEurope: Int,
@@ -43,6 +44,7 @@ object EduRankRanking {
             val universityRankPlaces = UNIVERSITY_RANK_PLACE_REGEX.findAll(universityTBody).map { it.groupValues[1].trim().removeSuffix("%").toInt() }.toList()
 
             result[name] = EduRankData(
+                href,
                 universityRankPlaces[3],
                 universityRankPlaces[2],
                 universityRankPlaces[1],

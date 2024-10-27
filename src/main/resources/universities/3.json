@@ -36,6 +36,10 @@
     "phone": "+7 (495) 408-48-00",
     "email": "pk.bachelor@mipt.ru"
   },
+  "socialNetworks": {
+    "vk": "https://vk.com/miptru",
+    "tg": "https://t.me/s/miptru"
+  },
   "listOfApplicants": "https://pk.mipt.ru/bachelor/2024_decree/",
   "specialities": [
     "Прикладная математика и информатика",

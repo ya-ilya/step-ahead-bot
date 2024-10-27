@@ -34,6 +34,10 @@
     "phone": "8 (495) 939-10-00",
     "email": "info@rector.msu.ru"
   },
+  "socialNetworks": {
+    "vk": "https://vk.com/msu_official",
+    "tg": "https://t.me/s/naukamsu"
+  },
   "listOfApplicants": "https://cpk.msu.ru/rating",
   "specialities": [
     "Математика",

@@ -7,16 +7,37 @@ import eu.vendeli.tgbot.api.message.message
 import eu.vendeli.tgbot.types.User
 import eu.vendeli.tgbot.types.internal.getOrNull
 import me.yailya.step_ahead_bot.databaseQuery
-import me.yailya.step_ahead_bot.review.inputs.ReviewConversationInputs
 import me.yailya.step_ahead_bot.review.ReviewEntity
+import me.yailya.step_ahead_bot.review.inputs.ReviewConversationInputs
+import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.university.University
 import me.yailya.step_ahead_bot.university.ranking.EduRankRanking
+import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
+import me.yailya.step_ahead_bot.update_request.UpdateRequestStatus
+import me.yailya.step_ahead_bot.update_request.inputs.UpdateRequestConversationInputs
+
+suspend fun handleUniversitiesCallback(
+    user: User,
+    bot: TelegramBot
+) {
+    message { "Приветствуем вас! Выберете один из ВУЗов:" }.inlineKeyboardMarkup {
+        for (university in Universities) {
+            if (university.key % 4 == 0) {
+                newLine()
+            }
+
+            "(${university.key}) ${university.value.shortName}" callback "university_${university.key}"
+        }
+    }.send(user, bot)
+}
 
 suspend fun handleUniversityCallback(
     user: User,
     bot: TelegramBot,
     university: University
 ) {
+    val universityRankData = EduRankRanking.ranking[university.name_en]!!
+
     message {
         var extraPointsText = ""
 
@@ -38,7 +59,7 @@ suspend fun handleUniversityCallback(
                 "\n" - "- Средняя стоимость: ${university.paidInfo.averagePrice}" -
                 "\n" - "- Самая низкая стоимость: ${university.paidInfo.minimalPrice}" -
                 "\n" - bold { "В цифрах" } -
-                "\n" - "- Ранг в Москве (EduRank): #${EduRankRanking.ranking[university.name_en]!!.rankInMoscow}" -
+                "\n" - "- Ранг в Москве: " - textLink(universityRankData.rankingUrl) { "#${universityRankData.rankInMoscow}" } -
                 "\n" - "- Студентов: ${university.inNumbers.studentsCount}" -
                 "\n" - "- Преподователей: ${university.inNumbers.professorsCount}" -
                 "\n" - "- Год основания: ${university.inNumbers.yearOfFoundation}" -
@@ -47,10 +68,15 @@ suspend fun handleUniversityCallback(
                 "\n" - "Списки поступающих доступны на этом сайте: " - url { university.listOfApplicants } -
                 "\n" - bold { "Контакты ${university.shortName}" } -
                 "\n" - "- Номер телефона: ${university.contacts.phone}" -
-                "\n" - "- Электронная почта: ${university.contacts.email}"
+                "\n" - "- Электронная почта: ${university.contacts.email}" -
+                "\n" - bold { "Социальные сети: " } - textLink(university.socialNetworks.vk) { "ВКонтакте" } - ", " - textLink(
+            university.socialNetworks.tg
+        ) { "Telegram" }
     }.inlineKeyboardMarkup {
         "Специальности" callback "specialities_${university.id}"
         "Отзывы" callback "reviews_${university.id}"
+        newLine()
+        "Создать запрос на изменение информации" callback "create_update_request_${university.id}"
     }.options {
         // photo(...)
         disableWebPagePreview()
@@ -99,6 +125,60 @@ suspend fun handleReviewsCallback(
     }.send(user, bot)
 }
 
+val updateRequestInputs = mutableMapOf<Long, UpdateRequestConversationInputs>()
+
+suspend fun handleCreateUpdateRequestCallback(
+    user: User,
+    bot: TelegramBot,
+    university: University
+) {
+    bot.inputListener[user] = "create_update_request_step1_${university.id}"
+
+    val message = message {
+        "" - bold { "Создание запроса на изменение информации о ${university.shortName}" } -
+                "\n" - "Какую информацию, по вашему мнению, нужно изменить?"
+    }.sendAsync(user, bot).getOrNull()
+
+    updateRequestInputs[user.id] = UpdateRequestConversationInputs(originMessageId = message!!.messageId)
+}
+
+suspend fun handleCreateUpdateRequestStep1Input(
+    user: User,
+    bot: TelegramBot,
+    university: University,
+    input: String,
+    messageId: Long
+) {
+    updateRequestInputs[user.id]!!.apply {
+        inputs.add(input)
+        messages.add(messageId)
+    }
+
+    val currentUserInputs = updateRequestInputs[user.id]!!
+
+    for (message in currentUserInputs.messages) {
+        deleteMessage(message).send(user, bot)
+    }
+
+    val updateRequest = databaseQuery {
+        UpdateRequestEntity.new {
+            this.userId = user.id
+            this.universityId = university.id
+            this.text = currentUserInputs.inputs[0]
+            this.status = UpdateRequestStatus.Open
+        }.toModel()
+    }
+
+    bot.inputListener.del(user.id)
+    updateRequestInputs.remove(user.id)
+
+    editMessageText(currentUserInputs.originMessageId) {
+        "Спасибо за ваше запрос на изменение информации о ${university.shortName}. В скором времени он будет рассмотрен модерацией. Номер запроса: #${updateRequest.id}"
+    }.send(user, bot)
+}
+
+val reviewInputs = mutableMapOf<Long, ReviewConversationInputs>()
+
 suspend fun handleCreateReviewCallback(
     user: User,
     bot: TelegramBot,
@@ -113,8 +193,6 @@ suspend fun handleCreateReviewCallback(
 
     reviewInputs[user.id] = ReviewConversationInputs(originMessageId = message!!.messageId)
 }
-
-val reviewInputs = mutableMapOf<Long, ReviewConversationInputs>()
 
 suspend fun handleCreateReviewStep1Input(
     user: User,
@@ -184,7 +262,7 @@ suspend fun handleCreateReviewStep3Input(
     }
 }
 
-suspend fun handleCreateReviewStep4(user: User, bot: TelegramBot, university: University, rating: Int) {
+suspend fun handleCreateReviewStep4Callback(user: User, bot: TelegramBot, university: University, rating: Int) {
     if (!reviewInputs.containsKey(user.id)) {
         return
     }
@@ -206,6 +284,7 @@ suspend fun handleCreateReviewStep4(user: User, bot: TelegramBot, university: Un
         }.toModel()
     }
 
+    bot.inputListener.del(user.id)
     reviewInputs.remove(user.id)
 
     editMessageText(currentUserInputs.originMessageId) {
