@@ -6,7 +6,13 @@ import eu.vendeli.tgbot.types.internal.getUser
 import eu.vendeli.tgbot.utils.onCallbackQuery
 import kotlinx.coroutines.Dispatchers
 import me.yailya.step_ahead_bot.commands.handleFAQCommand
+import me.yailya.step_ahead_bot.commands.handleModerateCommand
 import me.yailya.step_ahead_bot.commands.handleStartCommand
+import me.yailya.step_ahead_bot.moderator.ModeratorEntity
+import me.yailya.step_ahead_bot.moderator.Moderators
+import me.yailya.step_ahead_bot.moderator.handlers.handleModerateUpdateRequestCallback
+import me.yailya.step_ahead_bot.moderator.handlers.handleModerateUpdateRequestCloseCallback
+import me.yailya.step_ahead_bot.moderator.handlers.handleModerateUpdateRequestCloseDoneCallback
 import me.yailya.step_ahead_bot.review.Reviews
 import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.university.handlers.*
@@ -28,9 +34,17 @@ suspend fun main() {
     val database = Database.connect(jdbcURL, driverClassName)
 
     transaction(database) {
-        SchemaUtils.create(Reviews, UpdateRequests)
+        SchemaUtils.create(Reviews, UpdateRequests, Moderators)
 
         addLogger(StdOutSqlLogger)
+    }
+
+    databaseQuery {
+        if (ModeratorEntity.all().empty()) {
+            ModeratorEntity.new {
+                this.userId = 1005465506
+            }
+        }
     }
 
     val bot = TelegramBot(System.getenv("TELEGRAM_BOT_TOKEN"))
@@ -44,8 +58,12 @@ suspend fun main() {
             handleFAQCommand(user, bot)
         }
 
+        onCommand("/moderate") {
+            handleModerateCommand(user, bot)
+        }
+
         for (university in Universities) {
-            onInput("create_review_step1_${university.key}") {
+            onInput("university_create_review_step1_${university.key}") {
                 handleCreateReviewStep1Input(
                     update.getUser(),
                     bot,
@@ -55,7 +73,7 @@ suspend fun main() {
                 )
             }
 
-            onInput("create_review_step2_${university.key}") {
+            onInput("university_create_review_step2_${university.key}") {
                 handleCreateReviewStep2Input(
                     update.getUser(),
                     bot,
@@ -65,7 +83,7 @@ suspend fun main() {
                 )
             }
 
-            onInput("create_review_step3_${university.key}") {
+            onInput("university_create_review_step3_${university.key}") {
                 handleCreateReviewStep3Input(
                     update.getUser(),
                     bot,
@@ -75,7 +93,7 @@ suspend fun main() {
                 )
             }
 
-            onInput("create_update_request_step1_${university.key}") {
+            onInput("university_create_update_request_step1_${university.key}") {
                 handleCreateUpdateRequestStep1Input(
                     update.getUser(),
                     bot,
@@ -87,36 +105,85 @@ suspend fun main() {
         }
 
         onCallbackQuery {
-            if (update.callbackQuery.data!!.last().isDigit()) {
-                val university = Universities[update.callbackQuery.data!!.split("_").last().toInt()]
+            val data = update.callbackQuery.data!!
 
-                when {
-                    update.callbackQuery.data!!.startsWith("university_") -> {
-                        handleUniversityCallback(update.user, bot, university)
-                    }
+            when {
+                data == "universities" -> {
+                    handleUniversitiesCallback(update.user, bot)
+                }
 
-                    update.callbackQuery.data!!.contains("_") -> {
-                        val callbackNameSplit = update.callbackQuery.data!!
-                            .split("_")
-                            .dropLast(1)
+                data == "update_requests" -> {
+                    handleUpdateRequestsCallback(update.user, bot)
+                }
 
-                        when (val callbackName = callbackNameSplit.joinToString("_")) {
-                            "specialities" -> handleSpecialitiesCallback(update.user, bot, university)
-                            "reviews" -> handleReviewsCallback(update.user, bot, university)
-                            "create_review" -> handleCreateReviewCallback(update.user, bot, university)
-                            "create_update_request" -> handleCreateUpdateRequestCallback(update.user, bot, university)
-                            else -> when {
-                                callbackName.startsWith("create_review_step4_") -> {
-                                    handleCreateReviewStep4Callback(update.user, bot, university, callbackNameSplit.last().toInt())
+                data == "moderate_update_requests" -> {
+                    handleModerateUpdateRequestCallback(update.user, bot, -1)
+                }
+
+                data.startsWith("university_") -> {
+                    val university = Universities[data.split("_").last().toInt()]
+
+                    when {
+                        data == "university_${university.id}" -> {
+                            handleUniversityCallback(update.user, bot, university)
+                        }
+
+                        else -> {
+                            val dataSplit = data
+                                .split("_")
+                                .dropLast(1)
+
+                            when (val dataWithoutUniversityId = dataSplit.joinToString("_")) {
+                                "university_specialities" -> handleSpecialitiesCallback(update.user, bot, university)
+                                "university_reviews" -> handleReviewsCallback(update.user, bot, university)
+                                "university_create_review" -> handleCreateReviewCallback(update.user, bot, university)
+                                "university_create_update_request" -> handleCreateUpdateRequestCallback(
+                                    update.user,
+                                    bot,
+                                    university
+                                )
+
+                                else -> when {
+                                    dataWithoutUniversityId.startsWith("university_create_review_step4_") -> {
+                                        handleCreateReviewStep4Callback(
+                                            update.user,
+                                            bot,
+                                            university,
+                                            dataSplit.last().toInt()
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            } else {
-                when (update.callbackQuery.data) {
-                    "universities" -> handleUniversitiesCallback(update.user, bot)
-                    "update_requests" -> handleUpdateRequestsCallback(update.user, bot)
+
+                data.startsWith("moderate_update_request_") -> {
+                    val updateRequestId = data.split("_").last().toInt()
+                    val dataSplit = data
+                        .split("_")
+                        .dropLast(1)
+
+                    when (dataSplit.joinToString("_")) {
+                        "moderate_update_request" -> handleModerateUpdateRequestCallback(
+                            update.user,
+                            bot,
+                            updateRequestId,
+                            update.callbackQuery.message!!.messageId
+                        )
+
+                        "moderate_update_request_close_" -> handleModerateUpdateRequestCloseCallback(
+                            update.user,
+                            bot,
+                            updateRequestId
+                        )
+
+                        "moderate_update_request_close_done_" -> handleModerateUpdateRequestCloseDoneCallback(
+                            update.user,
+                            bot,
+                            updateRequestId
+                        )
+                    }
                 }
             }
 

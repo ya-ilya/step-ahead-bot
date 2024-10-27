@@ -10,7 +10,7 @@ suspend fun handleUpdateRequestsCallback(
     user: User,
     bot: TelegramBot
 ) {
-    val updateRequests = UpdateRequestEntity.queriedModelsByUserId(user.id)
+    val updateRequests = UpdateRequestEntity.getModelsByUserId(user.id)
 
     message {
         var result = if (updateRequests.isNotEmpty()) {

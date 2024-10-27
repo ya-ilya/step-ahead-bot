@@ -8,7 +8,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 
 class ReviewEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<ReviewEntity>(Reviews) {
-        suspend fun queriedModelsByUniversity(university: University) = databaseQuery {
+        suspend fun getModelsByUniversity(university: University) = databaseQuery {
             find { Reviews.universityId eq university.id }.map { it.toModel() }
         }
     }

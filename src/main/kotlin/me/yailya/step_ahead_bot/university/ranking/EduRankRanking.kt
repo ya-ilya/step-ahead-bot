@@ -41,7 +41,8 @@ object EduRankRanking {
             ).body().replace("\n", "")
 
             val universityTBody = UNIVERSITY_TBODY_REGEX.find(universityResponse)!!.groupValues[1].trim()
-            val universityRankPlaces = UNIVERSITY_RANK_PLACE_REGEX.findAll(universityTBody).map { it.groupValues[1].trim().removeSuffix("%").toInt() }.toList()
+            val universityRankPlaces = UNIVERSITY_RANK_PLACE_REGEX.findAll(universityTBody)
+                .map { it.groupValues[1].trim().removeSuffix("%").toInt() }.toList()
 
             result[name] = EduRankData(
                 href,
