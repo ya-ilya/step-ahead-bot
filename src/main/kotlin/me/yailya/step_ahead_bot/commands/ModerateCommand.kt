@@ -1,14 +1,23 @@
 package me.yailya.step_ahead_bot.commands
 
-import eu.vendeli.tgbot.TelegramBot
-import eu.vendeli.tgbot.api.message.message
-import eu.vendeli.tgbot.types.User
+import dev.inmo.tgbotapi.extensions.api.send.reply
+import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
+import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
+import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
+import dev.inmo.tgbotapi.types.message.content.TextMessage
+import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.moderator.ModeratorEntity
 
-suspend fun handleModerateCommand(user: User, bot: TelegramBot) {
-    val moderator = ModeratorEntity.getModeratorByUserId(user.id) ?: return
+suspend fun BehaviourContext.handleModerateCommand(message: TextMessage) {
+    val moderator = ModeratorEntity.getModeratorByUserId(message.chat.id.chatId.long) ?: return
 
-    message { "Здраствуйте, модератор #${moderator.id.value}. Выберете нужную вам опцию:" }.inlineKeyboardMarkup {
-        "Рассмотреть открытые запросы на изменение" callback "moderate_update_requests"
-    }.send(user, bot)
+    reply(
+        to = message,
+        text = "Здраствуйте, модератор #${moderator.id.value}. Выберете нужную вам опцию:",
+        replyMarkup = inlineKeyboard {
+            row {
+                dataButton("Рассмотреть открытые запросы на изменение", "moderate_update_requests")
+            }
+        }
+    )
 }

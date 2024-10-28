@@ -1,127 +1,88 @@
+@file:OptIn(RiskFeature::class)
+
 package me.yailya.step_ahead_bot.university.handlers
 
-import eu.vendeli.tgbot.TelegramBot
-import eu.vendeli.tgbot.api.message.deleteMessage
-import eu.vendeli.tgbot.api.message.editMessageText
-import eu.vendeli.tgbot.api.message.message
-import eu.vendeli.tgbot.types.User
-import eu.vendeli.tgbot.types.internal.getOrNull
+import dev.inmo.tgbotapi.extensions.api.send.reply
+import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
+import dev.inmo.tgbotapi.extensions.behaviour_builder.expectations.waitCallbackQueries
+import dev.inmo.tgbotapi.extensions.behaviour_builder.expectations.waitText
+import dev.inmo.tgbotapi.extensions.behaviour_builder.expectations.waitTextMessage
+import dev.inmo.tgbotapi.extensions.utils.extensions.raw.message
+import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
+import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
+import dev.inmo.tgbotapi.requests.send.SendTextMessage
+import dev.inmo.tgbotapi.types.message.textsources.bold
+import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
+import dev.inmo.tgbotapi.utils.RiskFeature
+import dev.inmo.tgbotapi.utils.buildEntities
+import dev.inmo.tgbotapi.utils.row
+import kotlinx.coroutines.flow.first
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.review.ReviewEntity
-import me.yailya.step_ahead_bot.review.inputs.ReviewConversationInputs
 import me.yailya.step_ahead_bot.university.University
 
-val reviewInputs = mutableMapOf<Long, ReviewConversationInputs>()
-
-suspend fun handleCreateReviewCallback(
-    user: User,
-    bot: TelegramBot,
+@RiskFeature
+suspend fun BehaviourContext.handleCreateReviewCallback(
+    query: DataCallbackQuery,
     university: University
 ) {
-    bot.inputListener[user] = "university_create_review_step1_${university.id}"
+    val prosMessage = waitTextMessage(
+        SendTextMessage(
+            query.message!!.chat.id,
+            buildEntities {
+                "" + bold("Оставление отзыва о ${university.shortName}") +
+                        "\n" + "Что вам понравилось в данном ВУЗе?"
+            }
+        )
+    ).first()
 
-    val message = message {
-        "" - bold { "Оставление отзыва о ${university.shortName}" } -
-                "\n" - "Что вам понравилось в данном ВУЗе?"
-    }.sendAsync(user, bot).getOrNull()
+    val cons = waitText(
+        SendTextMessage(
+            query.message!!.chat.id,
+            "Что вам не понравилось в данном ВУЗе?"
+        )
+    ).first().text
 
-    reviewInputs[user.id] = ReviewConversationInputs(originMessageId = message!!.messageId)
-}
+    val comment = waitText(
+        SendTextMessage(
+            query.message!!.chat.id,
+            "Оставьте комментарий о данном ВУЗе"
+        )
+    ).first().text
 
-suspend fun handleCreateReviewStep1Input(
-    user: User,
-    bot: TelegramBot,
-    university: University,
-    input: String,
-    messageId: Long
-) {
-    bot.inputListener[user] = "university_create_review_step2_${university.id}"
-
-    val message = message {
-        "" - "Что вам не понравилось в данном ВУЗе?"
-    }.sendAsync(user, bot).getOrNull()
-
-    reviewInputs[user.id]!!.apply {
-        inputs.add(input)
-        messages.add(messageId)
-        messages.add(message!!.messageId)
-    }
-}
-
-suspend fun handleCreateReviewStep2Input(
-    user: User,
-    bot: TelegramBot,
-    university: University,
-    input: String,
-    messageId: Long
-) {
-    bot.inputListener[user] = "university_create_review_step3_${university.id}"
-
-    val message = message {
-        "" - "Оставьте комментарий о данном ВУЗе"
-    }.sendAsync(user, bot).getOrNull()
-
-    reviewInputs[user.id]!!.apply {
-        inputs.add(input)
-        messages.add(messageId)
-        messages.add(message!!.messageId)
-    }
-}
-
-suspend fun handleCreateReviewStep3Input(
-    user: User,
-    bot: TelegramBot,
-    university: University,
-    input: String,
-    messageId: Long
-) {
-    bot.inputListener[user] = "university_create_review_step4_${university.id}"
-
-    val message = message {
-        "" - "Поставьте оценку данному ВУЗу"
-    }.inlineKeyboardMarkup {
-        "1" callback "create_review_step4_1_${university.id}"
-        "2" callback "create_review_step4_2_${university.id}"
-        newLine()
-        "3" callback "create_review_step4_3_${university.id}"
-        "4" callback "create_review_step4_4_${university.id}"
-        newLine()
-        "5" callback "create_review_step4_5_${university.id}"
-    }.sendAsync(user, bot).getOrNull()
-
-    reviewInputs[user.id]!!.apply {
-        inputs.add(input)
-        messages.add(messageId)
-        messages.add(message!!.messageId)
-    }
-}
-
-suspend fun handleCreateReviewStep4Callback(user: User, bot: TelegramBot, university: University, rating: Int) {
-    if (!reviewInputs.containsKey(user.id)) {
-        return
-    }
-
-    val currentUserInputs = reviewInputs[user.id]!!
-
-    for (message in currentUserInputs.messages) {
-        deleteMessage(message).send(user, bot)
-    }
+    val rating = waitCallbackQueries<DataCallbackQuery>(
+        SendTextMessage(
+            query.message!!.chat.id,
+            "Поставьте оценку данному ВУЗу",
+            replyMarkup = inlineKeyboard {
+                row {
+                    dataButton("1", "create_review_step4_1_${university.id}")
+                    dataButton("2", "create_review_step4_2_${university.id}")
+                }
+                row {
+                    dataButton("3", "create_review_step4_3_${university.id}")
+                    dataButton("4", "create_review_step4_4_${university.id}")
+                }
+                row {
+                    dataButton("5", "create_review_step4_5_${university.id}")
+                }
+            }
+        )
+    ).first().data.split("_").dropLast(1).last().toInt()
 
     val review = databaseQuery {
         ReviewEntity.new {
-            this.userId = user.id
+            this.userId = query.user.id.chatId.long
             this.universityId = university.id
-            this.pros = currentUserInputs.inputs[0]
-            this.cons = currentUserInputs.inputs[1]
-            this.comment = currentUserInputs.inputs[2]
+            this.pros = prosMessage.content.text
+            this.cons = cons
+            this.comment = comment
             this.rating = rating
         }.toModel()
     }
 
-    bot.inputListener.del(user.id)
-    reviewInputs.remove(user.id)
-
-    editMessageText(currentUserInputs.originMessageId) {
-        "Спасибо за ваш отзыв об ${university.shortName}! Номер отзыва: #${review.id}"
-    }.send(user, bot)
+    reply(
+        to = prosMessage,
+        text = "Спасибо за ваш отзыв об ${university.shortName}! Номер отзыва: #${review.id}"
+    )
 }

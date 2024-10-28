@@ -1,65 +1,47 @@
+@file:OptIn(RiskFeature::class)
+
 package me.yailya.step_ahead_bot.university.handlers
 
-import eu.vendeli.tgbot.TelegramBot
-import eu.vendeli.tgbot.api.message.deleteMessage
-import eu.vendeli.tgbot.api.message.editMessageText
-import eu.vendeli.tgbot.api.message.message
-import eu.vendeli.tgbot.types.User
-import eu.vendeli.tgbot.types.internal.getOrNull
+import dev.inmo.tgbotapi.extensions.api.send.reply
+import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
+import dev.inmo.tgbotapi.extensions.behaviour_builder.expectations.waitTextMessage
+import dev.inmo.tgbotapi.extensions.utils.extensions.raw.message
+import dev.inmo.tgbotapi.requests.send.SendTextMessage
+import dev.inmo.tgbotapi.types.message.textsources.bold
+import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
+import dev.inmo.tgbotapi.utils.RiskFeature
+import dev.inmo.tgbotapi.utils.buildEntities
+import kotlinx.coroutines.flow.first
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.university.University
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
 import me.yailya.step_ahead_bot.update_request.UpdateRequestStatus
-import me.yailya.step_ahead_bot.update_request.inputs.UpdateRequestConversationInputs
 
-val updateRequestInputs = mutableMapOf<Long, UpdateRequestConversationInputs>()
-
-suspend fun handleCreateUpdateRequestCallback(
-    user: User,
-    bot: TelegramBot,
+suspend fun BehaviourContext.handleCreateUpdateRequestCallback(
+    query: DataCallbackQuery,
     university: University
 ) {
-    bot.inputListener[user] = "university_create_update_request_step1_${university.id}"
-
-    val message = message {
-        "" - bold { "Создание запроса на изменение информации о ${university.shortName}" } -
-                "\n" - "Какую информацию, по вашему мнению, нужно изменить?"
-    }.sendAsync(user, bot).getOrNull()
-
-    updateRequestInputs[user.id] = UpdateRequestConversationInputs(originMessageId = message!!.messageId)
-}
-
-suspend fun handleCreateUpdateRequestStep1Input(
-    user: User,
-    bot: TelegramBot,
-    university: University,
-    input: String,
-    messageId: Long
-) {
-    updateRequestInputs[user.id]!!.apply {
-        inputs.add(input)
-        messages.add(messageId)
-    }
-
-    val currentUserInputs = updateRequestInputs[user.id]!!
-
-    for (message in currentUserInputs.messages) {
-        deleteMessage(message).send(user, bot)
-    }
+    val textMessage = waitTextMessage(
+        SendTextMessage(
+            query.message!!.chat.id,
+            buildEntities {
+                +bold("Создание запроса на изменение информации о ${university.shortName}") +
+                        "\n" + "Какую информацию, по вашему мнению, нужно изменить?"
+            }
+        )
+    ).first()
 
     val updateRequest = databaseQuery {
         UpdateRequestEntity.new {
-            this.userId = user.id
+            this.userId = query.user.id.chatId.long
             this.universityId = university.id
-            this.text = currentUserInputs.inputs[0]
+            this.text = textMessage.content.text
             this.status = UpdateRequestStatus.Open
         }.toModel()
     }
 
-    bot.inputListener.del(user.id)
-    updateRequestInputs.remove(user.id)
-
-    editMessageText(currentUserInputs.originMessageId) {
-        "Спасибо за ваше запрос на изменение информации о ${university.shortName}. В скором времени он будет рассмотрен модерацией. Номер запроса: #${updateRequest.id}"
-    }.send(user, bot)
+    reply(
+        to = textMessage,
+        text = "Спасибо за ваше запрос на изменение информации о ${university.shortName}. В скором времени он будет рассмотрен модерацией. Номер запроса: #${updateRequest.id}"
+    )
 }

@@ -1,32 +1,32 @@
 package me.yailya.step_ahead_bot.update_request.handlers
 
-import eu.vendeli.tgbot.TelegramBot
-import eu.vendeli.tgbot.api.message.message
-import eu.vendeli.tgbot.types.User
+import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
+import dev.inmo.tgbotapi.types.message.textsources.blockquote
+import dev.inmo.tgbotapi.types.message.textsources.bold
+import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
+import dev.inmo.tgbotapi.utils.buildEntities
+import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
 
-suspend fun handleUpdateRequestsCallback(
-    user: User,
-    bot: TelegramBot
-) {
-    val updateRequests = UpdateRequestEntity.getModelsByUserId(user.id)
+suspend fun BehaviourContext.handleUpdateRequestsCallback(query: DataCallbackQuery) {
+    val updateRequests = UpdateRequestEntity.getModelsByUserId(query.user.id.chatId.long)
 
-    message {
-        var result = if (updateRequests.isNotEmpty()) {
-            "" - bold { "Список ваших запросов на изменении информации о ВУЗах:" }
-        } else {
-            "" - bold { "Вы еще не создавали запросы на изменение информации" }
+    reply(
+        to = query,
+        buildEntities {
+            if (updateRequests.isNotEmpty()) {
+                +bold("Список ваших запросов на изменении информации о ВУЗах:")
+            } else {
+                +bold("Вы еще не создавали запросы на изменение информации")
+            }
+
+            for (updateRequest in updateRequests) {
+                val university = Universities[updateRequest.universityId]
+
+                +"\n" + "[Запрос №${updateRequest.id}]\n- Университет: ${university.name}\n- Статус: ${updateRequest.status.text}" +
+                        "\nИнформация, которую пользователь бы хотел поменять: " + blockquote(updateRequest.text)
+            }
         }
-
-        for (updateRequest in updateRequests) {
-            val university = Universities[updateRequest.universityId]
-
-            result =
-                result - "\n" - "[Запрос №${updateRequest.id}]\n- Университет: ${university.name}\n- Статус: ${updateRequest.status.text}" -
-                        "\nИнформация, которую пользователь бы хотел поменять: " - blockquote { updateRequest.text }
-        }
-
-        result
-    }.send(user, bot)
+    )
 }

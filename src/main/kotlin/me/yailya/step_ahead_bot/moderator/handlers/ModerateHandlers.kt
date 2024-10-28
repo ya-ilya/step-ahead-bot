@@ -1,57 +1,81 @@
+@file:OptIn(RiskFeature::class)
+
 package me.yailya.step_ahead_bot.moderator.handlers
 
-import eu.vendeli.tgbot.TelegramBot
-import eu.vendeli.tgbot.api.message.deleteMessage
-import eu.vendeli.tgbot.api.message.message
-import eu.vendeli.tgbot.types.User
+import dev.inmo.tgbotapi.extensions.api.deleteMessage
+import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
+import dev.inmo.tgbotapi.extensions.utils.extensions.raw.message
+import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
+import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
+import dev.inmo.tgbotapi.types.MessageId
+import dev.inmo.tgbotapi.types.message.textsources.blockquote
+import dev.inmo.tgbotapi.types.message.textsources.bold
+import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
+import dev.inmo.tgbotapi.utils.RiskFeature
+import dev.inmo.tgbotapi.utils.buildEntities
+import dev.inmo.tgbotapi.utils.row
+import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.update_request.UpdateRequest
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
 import me.yailya.step_ahead_bot.update_request.UpdateRequestStatus
 
-suspend fun sendUpdateRequestMessage(
-    user: User,
-    bot: TelegramBot,
+suspend fun BehaviourContext.sendUpdateRequestMessage(
+    query: DataCallbackQuery,
     updateRequest: UpdateRequest,
     previousUpdateRequestId: Int,
     nextUpdateRequestId: Int
 ) {
     val university = Universities[updateRequest.universityId]
 
-    message {
-        "[Запрос №${updateRequest.id}]\n- Университет: ${university.name}\n- Статус: ${updateRequest.status.text}" -
-                "\nИнформация, которую пользователь бы хотел поменять: " - blockquote { updateRequest.text }
-    }.inlineKeyboardMarkup {
-        "Закрыть запрос, и пометить как выполненое" callback "moderate_update_request_close_done_${updateRequest.id}"
-        newLine()
-        "Закрыть запрос без его выполнения" callback "moderate_update_request_close_${updateRequest.id}"
-        if (previousUpdateRequestId != -1) {
-            newLine()
-            "Предыдущий" callback "moderate_update_request_${previousUpdateRequestId}"
+    reply(
+        to = query,
+        buildEntities {
+            +"[Запрос №${updateRequest.id}]\n- Университет: ${university.name}\n- Статус: ${updateRequest.status.text}" +
+                    "\nИнформация, которую пользователь бы хотел поменять: " + blockquote(updateRequest.text)
+        },
+        replyMarkup = inlineKeyboard {
+            row {
+                dataButton(
+                    "Закрыть запрос, и пометить как выполненое",
+                    "moderate_update_request_close_done_${updateRequest.id}"
+                )
+            }
+            row {
+                dataButton("Закрыть запрос без его выполнения", "moderate_update_request_close_${updateRequest.id}")
+            }
+            if (previousUpdateRequestId != -1) {
+                row {
+                    dataButton("Предыдущий", "moderate_update_request_${previousUpdateRequestId}")
+                }
+            }
+            if (nextUpdateRequestId != -1) {
+                row {
+                    dataButton("Следущий", "moderate_update_request_${nextUpdateRequestId}")
+                }
+            }
         }
-        if (nextUpdateRequestId != -1) {
-            newLine()
-            "Следущий" callback "moderate_update_request_${nextUpdateRequestId}"
-        }
-    }.send(user, bot)
+    )
 }
 
-suspend fun handleModerateUpdateRequestCallback(
-    user: User,
-    bot: TelegramBot,
+suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
+    query: DataCallbackQuery,
     updateRequestId: Int,
     previousMessageId: Long? = null
 ) {
     if (previousMessageId != null) {
-        deleteMessage(previousMessageId).send(user, bot)
+        deleteMessage(query.message!!.chat, MessageId(previousMessageId))
     }
 
     val updateRequests = UpdateRequestEntity.getModelsByStatus(UpdateRequestStatus.Open)
 
     if (updateRequests.isEmpty()) {
-        message {
-            "" - bold { "Открытых запросов на изменение не найдено" }
-        }.send(user, bot)
+        reply(
+            to = query,
+            buildEntities {
+                +bold("Открытых запросов на изменение не найдено")
+            }
+        )
 
         return
     }
@@ -63,26 +87,9 @@ suspend fun handleModerateUpdateRequestCallback(
     val nextElement = updateRequests.elementAtOrNull(currentElementId + 1)
 
     sendUpdateRequestMessage(
-        user,
-        bot,
+        query,
         currentElement,
         previousElement?.id ?: -1,
         nextElement?.id ?: -1
     )
-}
-
-suspend fun handleModerateUpdateRequestCloseDoneCallback(
-    user: User,
-    bot: TelegramBot,
-    updateRequestId: Int
-) {
-
-}
-
-suspend fun handleModerateUpdateRequestCloseCallback(
-    user: User,
-    bot: TelegramBot,
-    updateRequestId: Int
-) {
-
 }
