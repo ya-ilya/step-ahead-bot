@@ -22,6 +22,8 @@ import me.yailya.step_ahead_bot.commands.handleStartCommand
 import me.yailya.step_ahead_bot.moderator.ModeratorEntity
 import me.yailya.step_ahead_bot.moderator.Moderators
 import me.yailya.step_ahead_bot.moderator.handlers.handleModerateUpdateRequestCallback
+import me.yailya.step_ahead_bot.moderator.handlers.handleModerateUpdateRequestCloseCallback
+import me.yailya.step_ahead_bot.moderator.handlers.handleModerateUpdateRequestCloseDoneCallback
 import me.yailya.step_ahead_bot.review.Reviews
 import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.university.handlers.*
@@ -159,11 +161,11 @@ suspend fun main() {
                 }
 
                 name == "close" -> {
-
+                    this.handleModerateUpdateRequestCloseCallback(it, updateRequestId)
                 }
 
                 name == "close_done" -> {
-
+                    this.handleModerateUpdateRequestCloseDoneCallback(it, updateRequestId)
                 }
             }
 

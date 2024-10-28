@@ -20,7 +20,7 @@ class UpdateRequestEntity(id: EntityID<Int>) : IntEntity(id) {
     var universityId by UpdateRequests.universityId
     var text by UpdateRequests.text
     var moderatorId by UpdateRequests.moderatorId
-    var responseFromModeration by UpdateRequests.responseFromModeration
+    var commentFromModeration by UpdateRequests.commentFromModeration
     var status by UpdateRequests.status
 
     fun toModel() = UpdateRequest(
@@ -29,7 +29,7 @@ class UpdateRequestEntity(id: EntityID<Int>) : IntEntity(id) {
         universityId,
         text,
         moderatorId,
-        responseFromModeration,
+        commentFromModeration,
         status
     )
 }

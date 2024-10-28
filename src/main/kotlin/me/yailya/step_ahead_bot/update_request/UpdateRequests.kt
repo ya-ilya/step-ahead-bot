@@ -7,6 +7,6 @@ object UpdateRequests : IntIdTable() {
     val universityId = integer("universityId")
     val text = text("text")
     val moderatorId = uuid("moderatorId").nullable().default(null)
-    val responseFromModeration = text("responseFromModeration").nullable().default("")
+    val commentFromModeration = text("commentFromModeration").nullable().default("")
     val status = enumeration<UpdateRequestStatus>("status")
 }

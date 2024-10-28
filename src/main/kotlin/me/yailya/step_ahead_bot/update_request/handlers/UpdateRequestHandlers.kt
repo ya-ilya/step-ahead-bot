@@ -24,8 +24,13 @@ suspend fun BehaviourContext.handleUpdateRequestsCallback(query: DataCallbackQue
             for (updateRequest in updateRequests) {
                 val university = Universities[updateRequest.universityId]
 
-                +"\n" + "[Запрос №${updateRequest.id}]\n- Университет: ${university.name}\n- Статус: ${updateRequest.status.text}" +
-                        "\nИнформация, которую пользователь бы хотел поменять: " + blockquote(updateRequest.text)
+                +"\n" + "[Запрос №${updateRequest.id}]\n- Университет: ${university.name}\n- Статус: ${updateRequest.status.text}"
+
+                if (updateRequest.moderatorId != null && updateRequest.commentFromModeration != null) {
+                    +"\n- Комментарий от модератора #${updateRequest.moderatorId}: " + blockquote(updateRequest.commentFromModeration)
+                }
+
+                +"\nИнформация, которую пользователь бы хотел поменять: " + blockquote(updateRequest.text)
             }
         }
     )

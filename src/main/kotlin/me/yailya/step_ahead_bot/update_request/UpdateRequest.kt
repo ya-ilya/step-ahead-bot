@@ -8,6 +8,6 @@ class UpdateRequest(
     val universityId: Int,
     val text: String,
     val moderatorId: UUID?,
-    val responseFromModeration: String?,
+    val commentFromModeration: String?,
     val status: UpdateRequestStatus
 )

@@ -11,6 +11,7 @@ import dev.inmo.tgbotapi.extensions.utils.extensions.raw.message
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
 import dev.inmo.tgbotapi.requests.send.SendTextMessage
+import dev.inmo.tgbotapi.types.ReplyParameters
 import dev.inmo.tgbotapi.types.message.textsources.bold
 import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
 import dev.inmo.tgbotapi.utils.RiskFeature
@@ -32,7 +33,8 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
             buildEntities {
                 "" + bold("Оставление отзыва о ${university.shortName}") +
                         "\n" + "Что вам понравилось в данном ВУЗе?"
-            }
+            },
+            replyParameters = ReplyParameters(metaInfo = query.message!!.metaInfo)
         )
     ).first()
 
