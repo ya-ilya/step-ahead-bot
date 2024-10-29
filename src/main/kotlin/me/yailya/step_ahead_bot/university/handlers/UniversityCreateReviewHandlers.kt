@@ -2,6 +2,7 @@
 
 package me.yailya.step_ahead_bot.university.handlers
 
+import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.api.send.reply
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
 import dev.inmo.tgbotapi.extensions.behaviour_builder.expectations.waitCallbackQueries
@@ -22,7 +23,6 @@ import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.review.ReviewEntity
 import me.yailya.step_ahead_bot.university.University
 
-@RiskFeature
 suspend fun BehaviourContext.handleCreateReviewCallback(
     query: DataCallbackQuery,
     university: University
@@ -31,7 +31,7 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
         SendTextMessage(
             query.message!!.chat.id,
             buildEntities {
-                "" + bold("Оставление отзыва о ${university.shortName}") +
+                +bold("Оставление отзыва о ${university.shortName}") +
                         "\n" + "Что вам понравилось в данном ВУЗе?"
             },
             replyParameters = ReplyParameters(metaInfo = query.message!!.metaInfo)
@@ -52,7 +52,7 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
         )
     ).first().text
 
-    val rating = waitCallbackQueries<DataCallbackQuery>(
+    val ratingQuery = waitCallbackQueries<DataCallbackQuery>(
         SendTextMessage(
             query.message!!.chat.id,
             "Поставьте оценку данному ВУЗу",
@@ -70,7 +70,11 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
                 }
             }
         )
-    ).first().data.split("_").dropLast(1).last().toInt()
+    ).first()
+
+    answerCallbackQuery(ratingQuery)
+
+    val rating = ratingQuery.data.split("_").dropLast(1).last().toInt()
 
     val review = databaseQuery {
         ReviewEntity.new {

@@ -29,7 +29,8 @@ import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.university.handlers.*
 import me.yailya.step_ahead_bot.university.ranking.EduRankRanking
 import me.yailya.step_ahead_bot.update_request.UpdateRequests
-import me.yailya.step_ahead_bot.update_request.handlers.handleUpdateRequestsCallback
+import me.yailya.step_ahead_bot.update_request.handlers.handleUpdateRequestCallback
+import me.yailya.step_ahead_bot.update_request.handlers.handleUpdateRequestCloseCallback
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
@@ -107,7 +108,7 @@ suspend fun main() {
         }
 
         onDataCallbackQuery("update_requests") {
-            this.handleUpdateRequestsCallback(it)
+            this.handleUpdateRequestCallback(it, -1)
             answerCallbackQuery(it)
         }
 
@@ -116,7 +117,28 @@ suspend fun main() {
             answerCallbackQuery(it)
         }
 
+        val updateRequestRegex = "update_request(?:_(.*))?_([^_]*)".toRegex()
+
+        onDataCallbackQuery(updateRequestRegex) {
+            val values = updateRequestRegex.find(it.data)!!.groupValues
+            val name = values[1]
+            val updateRequestId = values[2].toInt()
+
+            when {
+                name.isEmpty() -> {
+                    this.handleUpdateRequestCallback(it, updateRequestId)
+                }
+
+                name == "close" -> {
+                    this.handleUpdateRequestCloseCallback(it, updateRequestId)
+                }
+            }
+
+            answerCallbackQuery(it)
+        }
+
         val universityRegex = "university(?:_(.*))?_([^_]*)".toRegex()
+        val universityReviewRegex = "review_(.*?)$".toRegex()
 
         onDataCallbackQuery(universityRegex) {
             val values = universityRegex.find(it.data)!!.groupValues
@@ -133,7 +155,15 @@ suspend fun main() {
                 }
 
                 name == "reviews" -> {
-                    this.handleReviewsCallback(it, university)
+                    this.handleReviewCallback(it, -1, university)
+                }
+
+                universityReviewRegex.matches(name) -> {
+                    this.handleReviewCallback(
+                        it,
+                        universityReviewRegex.find(name)!!.groupValues[1].toInt(),
+                        university
+                    )
                 }
 
                 name == "create_review" -> {

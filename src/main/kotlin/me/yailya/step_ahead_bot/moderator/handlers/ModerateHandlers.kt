@@ -2,7 +2,6 @@
 
 package me.yailya.step_ahead_bot.moderator.handlers
 
-import dev.inmo.tgbotapi.extensions.api.deleteMessage
 import dev.inmo.tgbotapi.extensions.api.send.reply
 import dev.inmo.tgbotapi.extensions.api.send.send
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
@@ -12,7 +11,6 @@ import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
 import dev.inmo.tgbotapi.requests.send.SendTextMessage
 import dev.inmo.tgbotapi.types.ChatId
-import dev.inmo.tgbotapi.types.MessageId
 import dev.inmo.tgbotapi.types.RawChatId
 import dev.inmo.tgbotapi.types.ReplyParameters
 import dev.inmo.tgbotapi.types.message.textsources.blockquote
@@ -31,13 +29,8 @@ import me.yailya.step_ahead_bot.update_request.UpdateRequestStatus
 
 suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
     query: DataCallbackQuery,
-    updateRequestId: Int,
-    previousMessageId: Long? = null
+    updateRequestId: Int
 ) {
-    if (previousMessageId != null) {
-        deleteMessage(query.message!!.chat, MessageId(previousMessageId))
-    }
-
     val updateRequests = UpdateRequestEntity.getModelsByStatus(UpdateRequestStatus.Open)
 
     if (updateRequests.isEmpty()) {

@@ -110,34 +110,51 @@ suspend fun BehaviourContext.handleSpecialitiesCallback(
     )
 }
 
-suspend fun BehaviourContext.handleReviewsCallback(
+suspend fun BehaviourContext.handleReviewCallback(
     query: DataCallbackQuery,
+    reviewId: Int,
     university: University
 ) {
     val reviews = ReviewEntity.getModelsByUniversity(university)
 
+    if (reviews.isEmpty()) {
+        reply(
+            to = query,
+            buildEntities {
+                +bold("Отзывов о ${university.shortName} не найдено")
+            }
+        )
+
+        return
+    }
+
+    val realReviewId = if (reviewId == -1) reviews.first().id else reviewId
+    val review = reviews.find { it.id == realReviewId }!!
+    val reviewIndex = reviews.indexOf(review)
+    val previousReviewId = reviews.elementAtOrNull(reviewIndex - 1).let { it?.id ?: -1 }
+    val nextReviewId = reviews.elementAtOrNull(reviewIndex + 1).let { it?.id ?: -1 }
+
     reply(
         to = query,
         buildEntities {
-            if (reviews.isNotEmpty()) {
-                +bold("Отзывы о ${university.shortName}")
-
-                for (review in reviews) {
-                    +"\n" + bold("Отзыв №${review.id}. ${review.rating}/5") +
-                            "\n" + "Положительные стороны:" +
-                            "\n" + blockquote(review.pros) +
-                            "\n" + "Отрицательные стороны:" +
-                            "\n" + blockquote(review.cons) +
-                            "\n" + "Комментарий:" +
-                            "\n" + blockquote(review.comment)
-                }
-            } else {
-                +bold("Отзывов о ${university.shortName} не найдено")
-            }
+            +bold("Отзыв №${review.id}. ${review.rating}/5") +
+                    "\n" + "Положительные стороны:" +
+                    "\n" + blockquote(review.pros) +
+                    "\n" + "Отрицательные стороны:" +
+                    "\n" + blockquote(review.cons) +
+                    "\n" + "Комментарий:" +
+                    "\n" + blockquote(review.comment)
         },
         replyMarkup = inlineKeyboard {
-            row {
-                dataButton("Создать отзыв", "university_create_review_${university.id}")
+            if (previousReviewId != -1) {
+                row {
+                    dataButton("Предыдущий", "university_review_${previousReviewId}_${university.id}")
+                }
+            }
+            if (nextReviewId != -1) {
+                row {
+                    dataButton("Следущий", "university_review_${nextReviewId}_${university.id}")
+                }
             }
         }
     )
