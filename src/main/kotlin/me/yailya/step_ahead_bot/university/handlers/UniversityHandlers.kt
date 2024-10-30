@@ -1,5 +1,6 @@
 package me.yailya.step_ahead_bot.university.handlers
 
+import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
@@ -33,6 +34,8 @@ suspend fun BehaviourContext.handleUniversitiesCallback(query: DataCallbackQuery
             }
         }
     )
+
+    answerCallbackQuery(query)
 }
 
 suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, university: University) {
@@ -88,15 +91,24 @@ suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, 
 
             row {
                 dataButton(
+                    "Создать отзыв",
+                    "university_create_review_${university.id}"
+                )
+            }
+
+            row {
+                dataButton(
                     "Создать запрос на изменение информации",
                     "university_create_update_request_${university.id}"
                 )
             }
         }
     )
+
+    answerCallbackQuery(query)
 }
 
-suspend fun BehaviourContext.handleSpecialitiesCallback(
+suspend fun BehaviourContext.handleUniversitySpecialitiesCallback(
     query: DataCallbackQuery,
     university: University
 ) {
@@ -108,9 +120,11 @@ suspend fun BehaviourContext.handleSpecialitiesCallback(
                     "\n" + expandableBlockquote(university.specialities.joinToString("\n") { "- $it" })
         }
     )
+
+    answerCallbackQuery(query)
 }
 
-suspend fun BehaviourContext.handleReviewCallback(
+suspend fun BehaviourContext.handleUniversityReviewCallback(
     query: DataCallbackQuery,
     reviewId: Int,
     university: University
@@ -118,18 +132,26 @@ suspend fun BehaviourContext.handleReviewCallback(
     val reviews = ReviewEntity.getModelsByUniversity(university)
 
     if (reviews.isEmpty()) {
-        reply(
-            to = query,
-            buildEntities {
-                +bold("Отзывов о ${university.shortName} не найдено")
-            }
+        answerCallbackQuery(
+            query,
+            "Отзывов о ${university.shortName} не найдено"
         )
 
         return
     }
 
     val realReviewId = if (reviewId == -1) reviews.first().id else reviewId
-    val review = reviews.find { it.id == realReviewId }!!
+    val review = reviews.find { it.id == realReviewId }
+
+    if (review == null) {
+        answerCallbackQuery(
+            query,
+            "Данного отзыва (#${reviewId}) не существует, либо же он принадлежит другому ВУЗу"
+        )
+
+        return
+    }
+
     val reviewIndex = reviews.indexOf(review)
     val previousReviewId = reviews.elementAtOrNull(reviewIndex - 1).let { it?.id ?: -1 }
     val nextReviewId = reviews.elementAtOrNull(reviewIndex + 1).let { it?.id ?: -1 }
@@ -158,4 +180,6 @@ suspend fun BehaviourContext.handleReviewCallback(
             }
         }
     )
+
+    answerCallbackQuery(query)
 }

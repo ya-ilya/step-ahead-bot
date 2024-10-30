@@ -11,6 +11,10 @@ class ReviewEntity(id: EntityID<Int>) : IntEntity(id) {
         suspend fun getModelsByUniversity(university: University) = databaseQuery {
             find { Reviews.universityId eq university.id }.map { it.toModel() }
         }
+
+        suspend fun getModelsByUserId(userId: Long) = databaseQuery {
+            find { Reviews.userId eq userId }.map { it.toModel() }
+        }
     }
 
     var userId by Reviews.userId

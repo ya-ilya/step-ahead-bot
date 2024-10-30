@@ -2,6 +2,7 @@
 
 package me.yailya.step_ahead_bot.university.handlers
 
+import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.api.send.reply
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
 import dev.inmo.tgbotapi.extensions.behaviour_builder.expectations.waitTextMessage
@@ -44,4 +45,6 @@ suspend fun BehaviourContext.handleCreateUpdateRequestCallback(
         to = textMessage,
         text = "Спасибо за ваше запрос на изменение информации о ${university.shortName}. В скором времени он будет рассмотрен модерацией. Номер запроса: #${updateRequest.id}"
     )
+
+    answerCallbackQuery(query)
 }

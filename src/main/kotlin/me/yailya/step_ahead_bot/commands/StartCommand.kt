@@ -17,6 +17,10 @@ suspend fun BehaviourContext.handleStartCommand(message: TextMessage) {
             }
 
             row {
+                dataButton("Мои отзывы", "reviews")
+            }
+
+            row {
                 dataButton("Мои запросы на изменение информации", "update_requests")
             }
         }

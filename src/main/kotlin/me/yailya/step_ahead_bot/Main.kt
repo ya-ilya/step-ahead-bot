@@ -2,7 +2,6 @@
 
 package me.yailya.step_ahead_bot
 
-import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.api.send.reply
 import dev.inmo.tgbotapi.extensions.api.telegramBot
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
@@ -25,6 +24,8 @@ import me.yailya.step_ahead_bot.moderator.handlers.handleModerateUpdateRequestCa
 import me.yailya.step_ahead_bot.moderator.handlers.handleModerateUpdateRequestCloseCallback
 import me.yailya.step_ahead_bot.moderator.handlers.handleModerateUpdateRequestCloseDoneCallback
 import me.yailya.step_ahead_bot.review.Reviews
+import me.yailya.step_ahead_bot.review.handlers.handleReviewCallback
+import me.yailya.step_ahead_bot.review.handlers.handleReviewDeleteCallback
 import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.university.handlers.*
 import me.yailya.step_ahead_bot.university.ranking.EduRankRanking
@@ -104,17 +105,18 @@ suspend fun main() {
 
         onDataCallbackQuery("universities") {
             this.handleUniversitiesCallback(it)
-            answerCallbackQuery(it)
+        }
+
+        onDataCallbackQuery("reviews") {
+            this.handleReviewCallback(it, -1)
         }
 
         onDataCallbackQuery("update_requests") {
             this.handleUpdateRequestCallback(it, -1)
-            answerCallbackQuery(it)
         }
 
         onDataCallbackQuery("moderate_update_requests") {
             this.handleModerateUpdateRequestCallback(it, -1)
-            answerCallbackQuery(it)
         }
 
         val updateRequestRegex = "update_request(?:_(.*))?_([^_]*)".toRegex()
@@ -133,8 +135,24 @@ suspend fun main() {
                     this.handleUpdateRequestCloseCallback(it, updateRequestId)
                 }
             }
+        }
 
-            answerCallbackQuery(it)
+        val reviewRegex = "review(?:_(.*))?_([^_]*)".toRegex()
+
+        onDataCallbackQuery(reviewRegex) {
+            val values = reviewRegex.find(it.data)!!.groupValues
+            val name = values[1]
+            val reviewId = values[2].toInt()
+
+            when {
+                name.isEmpty() -> {
+                    this.handleReviewCallback(it, reviewId)
+                }
+
+                name == "delete" -> {
+                    this.handleReviewDeleteCallback(it, reviewId)
+                }
+            }
         }
 
         val universityRegex = "university(?:_(.*))?_([^_]*)".toRegex()
@@ -151,15 +169,15 @@ suspend fun main() {
                 }
 
                 name == "specialities" -> {
-                    this.handleSpecialitiesCallback(it, university)
+                    this.handleUniversitySpecialitiesCallback(it, university)
                 }
 
                 name == "reviews" -> {
-                    this.handleReviewCallback(it, -1, university)
+                    this.handleUniversityReviewCallback(it, -1, university)
                 }
 
                 universityReviewRegex.matches(name) -> {
-                    this.handleReviewCallback(
+                    this.handleUniversityReviewCallback(
                         it,
                         universityReviewRegex.find(name)!!.groupValues[1].toInt(),
                         university
@@ -174,8 +192,6 @@ suspend fun main() {
                     this.handleCreateUpdateRequestCallback(it, university)
                 }
             }
-
-            answerCallbackQuery(it)
         }
 
         val moderateUpdateRequestRegex = "moderate_update_request(?:_(.*))?_([^_]*)".toRegex()
@@ -198,8 +214,6 @@ suspend fun main() {
                     this.handleModerateUpdateRequestCloseDoneCallback(it, updateRequestId)
                 }
             }
-
-            answerCallbackQuery(it)
         }
     }.join()
 }

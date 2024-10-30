@@ -1,14 +1,11 @@
-@file:OptIn(RiskFeature::class)
-
 package me.yailya.step_ahead_bot.update_request.handlers
 
+import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
 import dev.inmo.tgbotapi.types.message.textsources.blockquote
-import dev.inmo.tgbotapi.types.message.textsources.bold
 import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
-import dev.inmo.tgbotapi.utils.RiskFeature
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.databaseQuery
@@ -24,18 +21,26 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
     val updateRequests = UpdateRequestEntity.getModelsByUserId(query.user.id.chatId.long)
 
     if (updateRequests.isEmpty()) {
-        reply(
-            to = query,
-            buildEntities {
-                +bold("Вы еще не создавали запросы на изменение информации")
-            }
+        answerCallbackQuery(
+            query,
+            "Вы еще не создавали запросы на изменение информации"
         )
 
         return
     }
 
     val realUpdateRequestId = if (updateRequestId == -1) updateRequests.first().id else updateRequestId
-    val updateRequest = updateRequests.find { it.id == realUpdateRequestId }!!
+    val updateRequest = updateRequests.find { it.id == realUpdateRequestId }
+
+    if (updateRequest == null) {
+        answerCallbackQuery(
+            query,
+            "Данный запрос на изменение (#${updateRequestId}) не существует, либо же его создали не вы"
+        )
+
+        return
+    }
+
     val updateRequestIndex = updateRequests.indexOf(updateRequest)
     val previousUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex - 1).let { it?.id ?: -1 }
     val nextUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex + 1).let { it?.id ?: -1 }
@@ -71,6 +76,8 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
             }
         }
     )
+
+    answerCallbackQuery(query)
 }
 
 suspend fun BehaviourContext.handleUpdateRequestCloseCallback(
@@ -87,4 +94,6 @@ suspend fun BehaviourContext.handleUpdateRequestCloseCallback(
         to = query,
         text = "Запрос #${updateRequestId} был успешно закрыт"
     )
+
+    answerCallbackQuery(query)
 }

@@ -2,6 +2,7 @@
 
 package me.yailya.step_ahead_bot.moderator.handlers
 
+import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.api.send.reply
 import dev.inmo.tgbotapi.extensions.api.send.send
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
@@ -34,11 +35,9 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
     val updateRequests = UpdateRequestEntity.getModelsByStatus(UpdateRequestStatus.Open)
 
     if (updateRequests.isEmpty()) {
-        reply(
-            to = query,
-            buildEntities {
-                +bold("Открытых запросов на изменение не найдено")
-            }
+        answerCallbackQuery(
+            query,
+            "Открытых запросов на изменение не найдено"
         )
 
         return
@@ -78,6 +77,8 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
             }
         }
     )
+
+    answerCallbackQuery(query)
 }
 
 suspend fun BehaviourContext.handleModerateUpdateRequestCloseCallback(
@@ -106,6 +107,8 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCloseCallback(
         to = commentMessage,
         "Запрос #${updateRequestId} успешно закрыт без пометки о выполнении"
     )
+
+    answerCallbackQuery(query)
 }
 
 suspend fun BehaviourContext.handleModerateUpdateRequestCloseDoneCallback(
@@ -145,4 +148,6 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCloseDoneCallback(
         to = commentMessage,
         "Запрос #${updateRequestId} закрыт с пометкой о выполнении"
     )
+
+    answerCallbackQuery(query)
 }
