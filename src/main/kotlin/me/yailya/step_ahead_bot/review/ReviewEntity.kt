@@ -1,5 +1,6 @@
 package me.yailya.step_ahead_bot.review
 
+import me.yailya.step_ahead_bot.bot_user.BotUserEntity
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.university.University
 import org.jetbrains.exposed.dao.IntEntity
@@ -11,13 +12,9 @@ class ReviewEntity(id: EntityID<Int>) : IntEntity(id) {
         suspend fun getModelsByUniversity(university: University) = databaseQuery {
             find { Reviews.universityId eq university.id }.map { it.toModel() }
         }
-
-        suspend fun getModelsByUserId(userId: Long) = databaseQuery {
-            find { Reviews.userId eq userId }.map { it.toModel() }
-        }
     }
 
-    var userId by Reviews.userId
+    var botUser by BotUserEntity referencedOn Reviews.botUser
     var universityId by Reviews.universityId
     var pros by Reviews.pros
     var cons by Reviews.cons
@@ -26,7 +23,7 @@ class ReviewEntity(id: EntityID<Int>) : IntEntity(id) {
 
     fun toModel() = Review(
         id.value,
-        userId,
+        botUser.toModel(),
         universityId,
         pros,
         cons,

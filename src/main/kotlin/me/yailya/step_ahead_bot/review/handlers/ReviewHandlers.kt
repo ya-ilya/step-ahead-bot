@@ -14,6 +14,7 @@ import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
 import dev.inmo.tgbotapi.utils.RiskFeature
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
+import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.review.ReviewEntity
@@ -22,7 +23,7 @@ suspend fun BehaviourContext.handleReviewCallback(
     query: DataCallbackQuery,
     reviewId: Int
 ) {
-    val reviews = ReviewEntity.getModelsByUserId(query.user.id.chatId.long)
+    val reviews = databaseQuery { query.botUser().first.reviews.map { it.toModel() } }
 
     if (reviews.isEmpty()) {
         answerCallbackQuery(
@@ -84,6 +85,8 @@ suspend fun BehaviourContext.handleReviewDeleteCallback(
     query: DataCallbackQuery,
     reviewId: Int
 ) {
+    val otherBotUser = query.botUser()
+
     databaseQuery {
         val review = ReviewEntity.findById(reviewId)
 
@@ -96,7 +99,7 @@ suspend fun BehaviourContext.handleReviewDeleteCallback(
             return@databaseQuery
         }
 
-        if (review.userId != query.user.id.chatId.long) {
+        if (review.botUser.id != otherBotUser.first.id) {
             answerCallbackQuery(
                 query,
                 "Вы не можете удалить не ваш отзыв"

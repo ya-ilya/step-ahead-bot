@@ -6,14 +6,19 @@ import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
 import dev.inmo.tgbotapi.types.message.content.TextMessage
 import dev.inmo.tgbotapi.utils.row
-import me.yailya.step_ahead_bot.moderator.ModeratorEntity
+import me.yailya.step_ahead_bot.bot_user.botUser
+import me.yailya.step_ahead_bot.databaseQuery
 
 suspend fun BehaviourContext.handleModerateCommand(message: TextMessage) {
-    val moderator = ModeratorEntity.getModeratorByUserId(message.chat.id.chatId.long) ?: return
+    val (_, botUser) = message.botUser()
+
+    if (!databaseQuery { botUser.isModerator }) {
+        return
+    }
 
     reply(
         to = message,
-        text = "Здраствуйте, модератор #${moderator.id.value}. Выберете нужную вам опцию:",
+        text = "Здраствуйте, модератор #${botUser.id}. Выберете нужную вам опцию:",
         replyMarkup = inlineKeyboard {
             row {
                 dataButton("Рассмотреть открытые запросы на изменение", "moderate_update_requests")

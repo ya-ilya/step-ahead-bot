@@ -1,6 +1,6 @@
 @file:OptIn(RiskFeature::class)
 
-package me.yailya.step_ahead_bot.moderator.handlers
+package me.yailya.step_ahead_bot.moderate_handlers
 
 import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.api.send.reply
@@ -21,8 +21,8 @@ import dev.inmo.tgbotapi.utils.RiskFeature
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
 import kotlinx.coroutines.flow.first
+import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
-import me.yailya.step_ahead_bot.moderator.ModeratorEntity
 import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
@@ -52,7 +52,7 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
     reply(
         to = query,
         buildEntities {
-            +"[Запрос №${updateRequest.id}]\n- Университет: ${Universities[updateRequest.universityId].name}\n- Статус: ${updateRequest.status.text}" +
+            +"[Запрос #${updateRequest.id}]\n- Университет: ${Universities[updateRequest.universityId].name}\n- Статус: ${updateRequest.status.text}" +
                     "\nИнформация, которую пользователь бы хотел поменять: " + blockquote(updateRequest.text)
         },
         replyMarkup = inlineKeyboard {
@@ -81,10 +81,58 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
     answerCallbackQuery(query)
 }
 
+suspend fun BehaviourContext.notifyUserAboutUpdateRequestClosed(entity: UpdateRequestEntity) {
+    send(
+        ChatId(RawChatId(entity.botUser.userId)),
+        buildEntities {
+            +bold("Изменение статуса запроса #${entity.id.value} о ${Universities[entity.universityId].shortName}") +
+                    "\n" + "- Статус изменен с ${UpdateRequestStatus.Open.text} на ${entity.status.text}"
+
+            if (entity.moderator != null && entity.commentFromModeration != null) {
+                +"\n" + "- Комментарий от модератора #${entity.moderator!!.id}:" + "\n" + blockquote(entity.commentFromModeration!!)
+            }
+        }
+    )
+}
+
+suspend fun BehaviourContext.checkUpdateRequestNotClosed(
+    query: DataCallbackQuery,
+    updateRequestId: Int
+): Pair<Boolean, UpdateRequestEntity?> {
+    val updateRequestEntity = databaseQuery { UpdateRequestEntity.findById(updateRequestId) }
+
+    if (updateRequestEntity == null) {
+        answerCallbackQuery(
+            query,
+            "Этого запроса не существует"
+        )
+
+        return false to updateRequestEntity
+    }
+
+    if (databaseQuery { updateRequestEntity.status } != UpdateRequestStatus.Open) {
+        answerCallbackQuery(
+            query,
+            "Этот запрос уже был закрыт"
+        )
+
+        return false to updateRequestEntity
+    }
+
+    return true to updateRequestEntity
+}
+
 suspend fun BehaviourContext.handleModerateUpdateRequestCloseCallback(
     query: DataCallbackQuery,
     updateRequestId: Int
 ) {
+    val (botUserEntity, _) = query.botUser()
+    val (isCheckSuccessful, updateRequestEntity) = checkUpdateRequestNotClosed(query, updateRequestId)
+
+    if (!isCheckSuccessful) {
+        return
+    }
+
     val commentMessage = waitTextMessage(
         SendTextMessage(
             query.message!!.chat.id,
@@ -97,9 +145,12 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCloseCallback(
     ).first()
 
     databaseQuery {
-        UpdateRequestEntity.findById(updateRequestId)!!.apply {
+        updateRequestEntity!!.apply {
             this.status = UpdateRequestStatus.Closed
+            this.moderator = botUserEntity
             this.commentFromModeration = commentMessage.content.text
+
+            notifyUserAboutUpdateRequestClosed(this)
         }
     }
 
@@ -115,6 +166,13 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCloseDoneCallback(
     query: DataCallbackQuery,
     updateRequestId: Int
 ) {
+    val (botUserEntity, _) = query.botUser()
+    val (isCheckSuccessful, updateRequestEntity) = checkUpdateRequestNotClosed(query, updateRequestId)
+
+    if (!isCheckSuccessful) {
+        return
+    }
+
     val commentMessage = waitTextMessage(
         SendTextMessage(
             query.message!!.chat.id,
@@ -127,20 +185,12 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCloseDoneCallback(
     ).first()
 
     databaseQuery {
-        UpdateRequestEntity.findById(updateRequestId)!!.apply {
+        updateRequestEntity!!.apply {
             this.status = UpdateRequestStatus.ClosedAndDone
-            this.moderatorId = ModeratorEntity.getModeratorByUserId(query.user.id.chatId.long)!!.id.value
+            this.moderator = botUserEntity
             this.commentFromModeration = commentMessage.content.text
 
-            send(
-                ChatId(RawChatId(this.userId)),
-                buildEntities {
-                    +bold("Изменение статуса запроса #${id.value} о ${Universities[universityId].shortName}") +
-                            "\n" + "- Статус изменен с ${UpdateRequestStatus.Open.text} на ${status.text}" +
-                            "\n" + "- Комментарий от модератора ${moderatorId}:" +
-                            "\n" + blockquote(commentFromModeration!!)
-                }
-            )
+            notifyUserAboutUpdateRequestClosed(this)
         }
     }
 

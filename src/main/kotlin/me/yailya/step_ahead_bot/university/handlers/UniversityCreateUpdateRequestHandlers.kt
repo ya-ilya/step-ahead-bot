@@ -13,6 +13,7 @@ import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
 import dev.inmo.tgbotapi.utils.RiskFeature
 import dev.inmo.tgbotapi.utils.buildEntities
 import kotlinx.coroutines.flow.first
+import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.university.University
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
@@ -22,6 +23,8 @@ suspend fun BehaviourContext.handleCreateUpdateRequestCallback(
     query: DataCallbackQuery,
     university: University
 ) {
+    val (botUserEntity) = query.botUser()
+
     val textMessage = waitTextMessage(
         SendTextMessage(
             query.message!!.chat.id,
@@ -34,7 +37,7 @@ suspend fun BehaviourContext.handleCreateUpdateRequestCallback(
 
     val updateRequest = databaseQuery {
         UpdateRequestEntity.new {
-            this.userId = query.user.id.chatId.long
+            this.botUser = botUserEntity
             this.universityId = university.id
             this.text = textMessage.content.text
             this.status = UpdateRequestStatus.Open

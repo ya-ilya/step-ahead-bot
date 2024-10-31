@@ -5,7 +5,7 @@ package me.yailya.step_ahead_bot.university.handlers
 import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.api.send.reply
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
-import dev.inmo.tgbotapi.extensions.behaviour_builder.expectations.waitCallbackQueries
+import dev.inmo.tgbotapi.extensions.behaviour_builder.expectations.waitDataCallbackQuery
 import dev.inmo.tgbotapi.extensions.behaviour_builder.expectations.waitText
 import dev.inmo.tgbotapi.extensions.behaviour_builder.expectations.waitTextMessage
 import dev.inmo.tgbotapi.extensions.utils.extensions.raw.message
@@ -19,6 +19,7 @@ import dev.inmo.tgbotapi.utils.RiskFeature
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
 import kotlinx.coroutines.flow.first
+import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.review.ReviewEntity
 import me.yailya.step_ahead_bot.university.University
@@ -27,6 +28,8 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
     query: DataCallbackQuery,
     university: University
 ) {
+    val (botUserEntity) = query.botUser()
+
     val prosMessage = waitTextMessage(
         SendTextMessage(
             query.message!!.chat.id,
@@ -52,21 +55,21 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
         )
     ).first().text
 
-    val ratingQuery = waitCallbackQueries<DataCallbackQuery>(
+    val ratingQuery = waitDataCallbackQuery(
         SendTextMessage(
             query.message!!.chat.id,
             "Поставьте оценку данному ВУЗу",
             replyMarkup = inlineKeyboard {
                 row {
-                    dataButton("1", "create_review_step4_1_${university.id}")
-                    dataButton("2", "create_review_step4_2_${university.id}")
+                    dataButton("1", "1")
+                    dataButton("2", "2")
                 }
                 row {
-                    dataButton("3", "create_review_step4_3_${university.id}")
-                    dataButton("4", "create_review_step4_4_${university.id}")
+                    dataButton("3", "3")
+                    dataButton("4", "4")
                 }
                 row {
-                    dataButton("5", "create_review_step4_5_${university.id}")
+                    dataButton("5", "5")
                 }
             }
         )
@@ -74,11 +77,11 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
 
     answerCallbackQuery(ratingQuery)
 
-    val rating = ratingQuery.data.split("_").dropLast(1).last().toInt()
+    val rating = ratingQuery.data.toInt()
 
     val review = databaseQuery {
         ReviewEntity.new {
-            this.userId = query.user.id.chatId.long
+            this.botUser = botUserEntity
             this.universityId = university.id
             this.pros = prosMessage.content.text
             this.cons = cons

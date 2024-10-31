@@ -13,10 +13,6 @@ suspend fun BehaviourContext.handleStartCommand(message: TextMessage) {
         text = "Приветствуем вас!",
         replyMarkup = inlineKeyboard {
             row {
-                dataButton("Посмотреть доступные ВУЗы", "universities")
-            }
-
-            row {
                 dataButton("Мои отзывы", "reviews")
             }
 

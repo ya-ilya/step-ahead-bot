@@ -16,27 +16,8 @@ import dev.inmo.tgbotapi.utils.expandableBlockquote
 import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.review.ReviewEntity
-import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.university.University
 import me.yailya.step_ahead_bot.university.ranking.EduRankRanking
-
-suspend fun BehaviourContext.handleUniversitiesCallback(query: DataCallbackQuery) {
-    reply(
-        to = query,
-        text = "Приветствуем вас! Выберете один из ВУЗов:",
-        replyMarkup = inlineKeyboard {
-            for (chunk in Universities.iterator().asSequence().toList().chunked(4)) {
-                row {
-                    for (university in chunk) {
-                        dataButton("(${university.key}) ${university.value.shortName}", "university_${university.key}")
-                    }
-                }
-            }
-        }
-    )
-
-    answerCallbackQuery(query)
-}
 
 suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, university: University) {
     val universityRankData = EduRankRanking.ranking[university.name_en]!!
@@ -159,7 +140,7 @@ suspend fun BehaviourContext.handleUniversityReviewCallback(
     reply(
         to = query,
         buildEntities {
-            +bold("Отзыв №${review.id}. ${review.rating}/5") +
+            +bold("Отзыв #${review.id}. ${review.rating}/5") +
                     "\n" + "Положительные стороны:" +
                     "\n" + blockquote(review.pros) +
                     "\n" + "Отрицательные стороны:" +

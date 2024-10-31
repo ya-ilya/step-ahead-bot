@@ -15,14 +15,14 @@ import dev.inmo.tgbotapi.types.message.textsources.TextSourcesList
 import dev.inmo.tgbotapi.types.queries.callback.CallbackQuery
 import dev.inmo.tgbotapi.utils.RiskFeature
 import kotlinx.coroutines.Dispatchers
+import me.yailya.step_ahead_bot.bot_user.BotUserEntity
 import me.yailya.step_ahead_bot.commands.handleFaqCommand
 import me.yailya.step_ahead_bot.commands.handleModerateCommand
 import me.yailya.step_ahead_bot.commands.handleStartCommand
-import me.yailya.step_ahead_bot.moderator.ModeratorEntity
-import me.yailya.step_ahead_bot.moderator.Moderators
-import me.yailya.step_ahead_bot.moderator.handlers.handleModerateUpdateRequestCallback
-import me.yailya.step_ahead_bot.moderator.handlers.handleModerateUpdateRequestCloseCallback
-import me.yailya.step_ahead_bot.moderator.handlers.handleModerateUpdateRequestCloseDoneCallback
+import me.yailya.step_ahead_bot.commands.handleUniversitiesCommand
+import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCallback
+import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCloseCallback
+import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCloseDoneCallback
 import me.yailya.step_ahead_bot.review.Reviews
 import me.yailya.step_ahead_bot.review.handlers.handleReviewCallback
 import me.yailya.step_ahead_bot.review.handlers.handleReviewDeleteCallback
@@ -75,15 +75,16 @@ suspend fun main() {
     val database = Database.connect(jdbcURL, driverClassName)
 
     transaction(database) {
-        SchemaUtils.create(Reviews, UpdateRequests, Moderators)
+        SchemaUtils.create(Reviews, UpdateRequests)
 
         addLogger(StdOutSqlLogger)
     }
 
     databaseQuery {
-        if (ModeratorEntity.all().empty()) {
-            ModeratorEntity.new {
+        if (BotUserEntity.all().empty()) {
+            BotUserEntity.new {
                 this.userId = 1005465506
+                this.isModerator = true
             }
         }
     }
@@ -103,8 +104,8 @@ suspend fun main() {
             this.handleModerateCommand(it)
         }
 
-        onDataCallbackQuery("universities") {
-            this.handleUniversitiesCallback(it)
+        onCommand("universities") {
+            this.handleUniversitiesCommand(it)
         }
 
         onDataCallbackQuery("reviews") {

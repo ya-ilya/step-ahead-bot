@@ -1,13 +1,13 @@
 package me.yailya.step_ahead_bot.update_request
 
-import java.util.*
+import me.yailya.step_ahead_bot.bot_user.BotUser
 
 class UpdateRequest(
     val id: Int,
-    val userId: Long,
+    val botUser: BotUser,
     val universityId: Int,
     val text: String,
-    val moderatorId: UUID?,
+    val moderator: BotUser?,
     val commentFromModeration: String?,
     val status: UpdateRequestStatus
 )

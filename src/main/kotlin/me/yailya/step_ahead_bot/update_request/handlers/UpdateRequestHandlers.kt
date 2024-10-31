@@ -8,6 +8,7 @@ import dev.inmo.tgbotapi.types.message.textsources.blockquote
 import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
+import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.university.Universities
@@ -18,7 +19,7 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
     query: DataCallbackQuery,
     updateRequestId: Int
 ) {
-    val updateRequests = UpdateRequestEntity.getModelsByUserId(query.user.id.chatId.long)
+    val updateRequests = databaseQuery { query.botUser().first.updateRequests.map { it.toModel() } }
 
     if (updateRequests.isEmpty()) {
         answerCallbackQuery(
@@ -50,10 +51,10 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
         buildEntities {
             val university = Universities[updateRequest.universityId]
 
-            +"\n" + "[Запрос №${updateRequest.id}]\n- Университет: ${university.name}\n- Статус: ${updateRequest.status.text}"
+            +"\n" + "[Запрос #${updateRequest.id}]\n- Университет: ${university.name}\n- Статус: ${updateRequest.status.text}"
 
-            if (updateRequest.moderatorId != null && updateRequest.commentFromModeration != null) {
-                +"\n- Комментарий от модератора #${updateRequest.moderatorId}: " + blockquote(updateRequest.commentFromModeration)
+            if (updateRequest.moderator != null && updateRequest.commentFromModeration != null) {
+                +"\n- Комментарий от модератора #${updateRequest.moderator.id}: " + blockquote(updateRequest.commentFromModeration)
             }
 
             +"\nИнформация, которую пользователь бы хотел поменять: " + blockquote(updateRequest.text)
