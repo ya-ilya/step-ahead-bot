@@ -36,7 +36,7 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
     if (updateRequest == null) {
         answerCallbackQuery(
             query,
-            "Данный запрос на изменение (#${updateRequestId}) не существует, либо же его создали не вы"
+            "Данный запрос на изменение не существует, либо же его создали не вы"
         )
 
         return

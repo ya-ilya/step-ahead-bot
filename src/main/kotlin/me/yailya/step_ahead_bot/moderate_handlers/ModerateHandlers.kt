@@ -107,7 +107,7 @@ suspend fun BehaviourContext.checkUpdateRequestNotClosed(
             "Этого запроса не существует"
         )
 
-        return false to updateRequestEntity
+        return false to null
     }
 
     if (databaseQuery { updateRequestEntity.status } != UpdateRequestStatus.Open) {

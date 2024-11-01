@@ -1,5 +1,7 @@
 package me.yailya.step_ahead_bot.bot_user
 
+import me.yailya.step_ahead_bot.question.QuestionEntity
+import me.yailya.step_ahead_bot.question.Questions
 import me.yailya.step_ahead_bot.review.ReviewEntity
 import me.yailya.step_ahead_bot.review.Reviews
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
@@ -14,6 +16,7 @@ class BotUserEntity(id: EntityID<Int>) : IntEntity(id) {
     var userId by BotUsers.userId
     var isModerator by BotUsers.isModerator
 
+    val questions by QuestionEntity referrersOn Questions.botUser
     val reviews by ReviewEntity referrersOn Reviews.botUser
     val updateRequests by UpdateRequestEntity referrersOn UpdateRequests.botUser
 

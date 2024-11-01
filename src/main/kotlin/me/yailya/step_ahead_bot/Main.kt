@@ -23,6 +23,10 @@ import me.yailya.step_ahead_bot.commands.handleUniversitiesCommand
 import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCallback
 import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCloseCallback
 import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCloseDoneCallback
+import me.yailya.step_ahead_bot.question.Questions
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswers
+import me.yailya.step_ahead_bot.question.handlers.handleQuestionAnswerCallback
+import me.yailya.step_ahead_bot.question.handlers.handleQuestionCallback
 import me.yailya.step_ahead_bot.review.Reviews
 import me.yailya.step_ahead_bot.review.handlers.handleReviewCallback
 import me.yailya.step_ahead_bot.review.handlers.handleReviewDeleteCallback
@@ -75,7 +79,7 @@ suspend fun main() {
     val database = Database.connect(jdbcURL, driverClassName)
 
     transaction(database) {
-        SchemaUtils.create(Reviews, UpdateRequests)
+        SchemaUtils.create(Reviews, UpdateRequests, Questions, QuestionAnswers)
 
         addLogger(StdOutSqlLogger)
     }
@@ -108,6 +112,10 @@ suspend fun main() {
             this.handleUniversitiesCommand(it)
         }
 
+        onDataCallbackQuery("questions") {
+            this.handleQuestionCallback(it, -1)
+        }
+
         onDataCallbackQuery("reviews") {
             this.handleReviewCallback(it, -1)
         }
@@ -138,6 +146,37 @@ suspend fun main() {
             }
         }
 
+        val questionRegex = "question(?:_(.*))?_([^_]*)".toRegex()
+        val questionAnswerRegex = "answer_(.*?)$".toRegex()
+
+        onDataCallbackQuery(questionRegex) {
+            val values = questionRegex.find(it.data)!!.groupValues
+            val name = values[1]
+            val questionId = values[2].toInt()
+
+            when {
+                name.isEmpty() -> {
+                    this.handleQuestionCallback(it, questionId)
+                }
+
+                name == "answers" -> {
+                    this.handleQuestionAnswerCallback(
+                        it,
+                        questionId,
+                        -1
+                    )
+                }
+
+                questionAnswerRegex.matches(name) -> {
+                    this.handleQuestionAnswerCallback(
+                        it,
+                        questionId,
+                        questionAnswerRegex.find(name)!!.groupValues[1].toInt()
+                    )
+                }
+            }
+        }
+
         val reviewRegex = "review(?:_(.*))?_([^_]*)".toRegex()
 
         onDataCallbackQuery(reviewRegex) {
@@ -158,6 +197,7 @@ suspend fun main() {
 
         val universityRegex = "university(?:_(.*))?_([^_]*)".toRegex()
         val universityReviewRegex = "review_(.*?)$".toRegex()
+        val universityCreateQuestionAnswerRegex = "create_question_answer_(.*?)$".toRegex()
 
         onDataCallbackQuery(universityRegex) {
             val values = universityRegex.find(it.data)!!.groupValues
@@ -173,6 +213,10 @@ suspend fun main() {
                     this.handleUniversitySpecialitiesCallback(it, university)
                 }
 
+                name == "questions" -> {
+                    this.handleUniversityQuestionCallback(it, -1, university)
+                }
+
                 name == "reviews" -> {
                     this.handleUniversityReviewCallback(it, -1, university)
                 }
@@ -181,6 +225,18 @@ suspend fun main() {
                     this.handleUniversityReviewCallback(
                         it,
                         universityReviewRegex.find(name)!!.groupValues[1].toInt(),
+                        university
+                    )
+                }
+
+                name == "create_question" -> {
+                    this.handleCreateQuestionCallback(it, university)
+                }
+
+                universityCreateQuestionAnswerRegex.matches(name) -> {
+                    this.handleCreateQuestionAnswerCallback(
+                        it,
+                        universityCreateQuestionAnswerRegex.find(name)!!.groupValues[1].toInt(),
                         university
                     )
                 }

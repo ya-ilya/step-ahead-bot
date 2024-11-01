@@ -14,6 +14,7 @@ import dev.inmo.tgbotapi.utils.EntitiesBuilder
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.expandableBlockquote
 import dev.inmo.tgbotapi.utils.row
+import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.review.ReviewEntity
 import me.yailya.step_ahead_bot.university.University
@@ -67,10 +68,15 @@ suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, 
         replyMarkup = inlineKeyboard {
             row {
                 dataButton("Специальности", "university_specialities_${university.id}")
+                dataButton("Вопросы", "university_questions_${university.id}")
                 dataButton("Отзывы", "university_reviews_${university.id}")
             }
 
             row {
+                dataButton(
+                    "Задать вопрос",
+                    "university_create_question_${university.id}"
+                )
                 dataButton(
                     "Создать отзыв",
                     "university_create_review_${university.id}"
@@ -99,6 +105,70 @@ suspend fun BehaviourContext.handleUniversitySpecialitiesCallback(
             +"" + bold("Специальности в ${university.shortName}") +
                     "\n" + "Доступные специальности:" +
                     "\n" + expandableBlockquote(university.specialities.joinToString("\n") { "- $it" })
+        }
+    )
+
+    answerCallbackQuery(query)
+}
+
+suspend fun BehaviourContext.handleUniversityQuestionCallback(
+    query: DataCallbackQuery,
+    questionId: Int,
+    university: University
+) {
+    val questions = QuestionEntity.getModelsByUniversity(university)
+
+    if (questions.isEmpty()) {
+        answerCallbackQuery(
+            query,
+            "Вопросов о ${university.shortName} не найдено"
+        )
+
+        return
+    }
+
+    val realQuestionId = if (questionId == -1) questions.first().id else questionId
+    val question = questions.find { it.id == realQuestionId }
+
+    if (question == null) {
+        answerCallbackQuery(
+            query,
+            "Данного вопроса (#${questionId}) не существует"
+        )
+
+        return
+    }
+
+    val questionIndex = questions.indexOf(question)
+    val previousQuestionId = questions.elementAtOrNull(questionIndex - 1).let { it?.id ?: -1 }
+    val nextQuestionId = questions.elementAtOrNull(questionIndex + 1).let { it?.id ?: -1 }
+
+    reply(
+        to = query,
+        buildEntities {
+            +bold("Вопрос #${question.id}") +
+                    "\n" + question.text
+        },
+        replyMarkup = inlineKeyboard {
+            row {
+                dataButton(
+                    "Создать ответ на этот вопрос",
+                    "university_create_question_answer_${question.id}_${university.id}"
+                )
+            }
+            row {
+                dataButton("Посмотреть ответы на этот вопрос", "question_answers_${question.id}")
+            }
+            if (previousQuestionId != -1) {
+                row {
+                    dataButton("Предыдущий", "university_question_${previousQuestionId}_${university.id}")
+                }
+            }
+            if (nextQuestionId != -1) {
+                row {
+                    dataButton("Следущий", "university_question_${nextQuestionId}_${university.id}")
+                }
+            }
         }
     )
 

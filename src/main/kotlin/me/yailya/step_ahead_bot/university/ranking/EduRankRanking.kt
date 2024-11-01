@@ -4,6 +4,8 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse.BodyHandlers
+import java.net.http.HttpTimeoutException
+import java.time.Duration
 
 object EduRankRanking {
     private const val URL = "https://edurank.org/geo/ru-moscow/"
@@ -22,37 +24,41 @@ object EduRankRanking {
     )
 
     val ranking = run {
-        val httpClient = HttpClient.newHttpClient()
+        try {
+            val httpClient = HttpClient.newHttpClient()
 
-        val universitiesResponse = httpClient.send(
-            HttpRequest.newBuilder().GET().uri(URI.create(URL)).build(),
-            BodyHandlers.ofString()
-        ).body().replace("\n", "")
-
-        val result = mutableMapOf<String, EduRankData>()
-
-        for (universityBlock in UNIVERSITY_BLOCK_REGEX.findAll(universitiesResponse).map { it.groupValues[1] }) {
-            val name = UNIVERSITY_NAME_REGEX.find(universityBlock)!!.groupValues[1].trim()
-            val href = UNIVERSITY_HREF_REGEX.find(universityBlock)!!.groupValues[1].trim()
-
-            val universityResponse = httpClient.send(
-                HttpRequest.newBuilder().GET().uri(URI.create(href)).build(),
+            val universitiesResponse = httpClient.send(
+                HttpRequest.newBuilder().GET().uri(URI.create(URL)).timeout(Duration.ofSeconds(5)).build(),
                 BodyHandlers.ofString()
             ).body().replace("\n", "")
 
-            val universityTBody = UNIVERSITY_TBODY_REGEX.find(universityResponse)!!.groupValues[1].trim()
-            val universityRankPlaces = UNIVERSITY_RANK_PLACE_REGEX.findAll(universityTBody)
-                .map { it.groupValues[1].trim().removeSuffix("%").toInt() }.toList()
+            val result = mutableMapOf<String, EduRankData>()
 
-            result[name] = EduRankData(
-                href,
-                universityRankPlaces[3],
-                universityRankPlaces[2],
-                universityRankPlaces[1],
-                universityRankPlaces[0]
-            )
+            for (universityBlock in UNIVERSITY_BLOCK_REGEX.findAll(universitiesResponse).map { it.groupValues[1] }) {
+                val name = UNIVERSITY_NAME_REGEX.find(universityBlock)!!.groupValues[1].trim()
+                val href = UNIVERSITY_HREF_REGEX.find(universityBlock)!!.groupValues[1].trim()
+
+                val universityResponse = httpClient.send(
+                    HttpRequest.newBuilder().GET().uri(URI.create(href)).build(),
+                    BodyHandlers.ofString()
+                ).body().replace("\n", "")
+
+                val universityTBody = UNIVERSITY_TBODY_REGEX.find(universityResponse)!!.groupValues[1].trim()
+                val universityRankPlaces = UNIVERSITY_RANK_PLACE_REGEX.findAll(universityTBody)
+                    .map { it.groupValues[1].trim().removeSuffix("%").toInt() }.toList()
+
+                result[name] = EduRankData(
+                    href,
+                    universityRankPlaces[3],
+                    universityRankPlaces[2],
+                    universityRankPlaces[1],
+                    universityRankPlaces[0]
+                )
+            }
+
+            result
+        } catch (ex: HttpTimeoutException) {
+            emptyMap()
         }
-
-        result
     }
 }
