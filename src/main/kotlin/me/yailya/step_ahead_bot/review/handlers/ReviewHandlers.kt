@@ -16,7 +16,7 @@ import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
-import me.yailya.step_ahead_bot.reply
+import me.yailya.step_ahead_bot.replyOrEdit
 import me.yailya.step_ahead_bot.review.ReviewEntity
 
 suspend fun BehaviourContext.handleReviewCallback(
@@ -50,8 +50,9 @@ suspend fun BehaviourContext.handleReviewCallback(
     val previousReviewId = reviews.elementAtOrNull(reviewIndex - 1).let { it?.id ?: -1 }
     val nextReviewId = reviews.elementAtOrNull(reviewIndex + 1).let { it?.id ?: -1 }
 
-    reply(
-        to = query,
+    replyOrEdit(
+        reviewId == -1,
+        query,
         buildEntities {
             +bold("Отзыв #${review.id}. ${review.rating}/5") +
                     "\n" + "Положительные стороны:" +
@@ -61,7 +62,7 @@ suspend fun BehaviourContext.handleReviewCallback(
                     "\n" + "Комментарий:" +
                     "\n" + blockquote(review.comment)
         },
-        replyMarkup = inlineKeyboard {
+        inlineKeyboard {
             row {
                 dataButton("Удалить отзыв", "review_delete_${review.id}")
             }

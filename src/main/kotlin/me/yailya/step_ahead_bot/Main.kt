@@ -2,6 +2,7 @@
 
 package me.yailya.step_ahead_bot
 
+import dev.inmo.tgbotapi.extensions.api.edit.edit
 import dev.inmo.tgbotapi.extensions.api.send.reply
 import dev.inmo.tgbotapi.extensions.api.telegramBot
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
@@ -10,7 +11,10 @@ import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onComman
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onDataCallbackQuery
 import dev.inmo.tgbotapi.extensions.utils.extensions.raw.message
 import dev.inmo.tgbotapi.types.LinkPreviewOptions
+import dev.inmo.tgbotapi.types.buttons.InlineKeyboardMarkup
 import dev.inmo.tgbotapi.types.buttons.KeyboardMarkup
+import dev.inmo.tgbotapi.types.message.abstracts.ContentMessage
+import dev.inmo.tgbotapi.types.message.content.TextContent
 import dev.inmo.tgbotapi.types.message.textsources.TextSourcesList
 import dev.inmo.tgbotapi.types.queries.callback.CallbackQuery
 import dev.inmo.tgbotapi.utils.RiskFeature
@@ -69,6 +73,42 @@ suspend fun BehaviourContext.reply(
         linkPreviewOptions = linkPreviewOptions,
         replyMarkup = replyMarkup
     )
+}
+
+@Suppress("UNCHECKED_CAST")
+suspend fun BehaviourContext.edit(
+    query: CallbackQuery,
+    entities: TextSourcesList,
+    linkPreviewOptions: LinkPreviewOptions? = null,
+    replyMarkup: InlineKeyboardMarkup? = null
+) {
+    edit(
+        message = query.message!! as ContentMessage<TextContent>,
+        entities = entities,
+        linkPreviewOptions = linkPreviewOptions,
+        replyMarkup = replyMarkup
+    )
+}
+
+suspend fun BehaviourContext.replyOrEdit(
+    conditionToReply: Boolean,
+    query: CallbackQuery,
+    entities: TextSourcesList,
+    replyMarkup: InlineKeyboardMarkup? = null
+) {
+    if (conditionToReply) {
+        reply(
+            to = query,
+            entities = entities,
+            replyMarkup = replyMarkup
+        )
+    } else {
+        edit(
+            query = query,
+            entities = entities,
+            replyMarkup = replyMarkup
+        )
+    }
 }
 
 suspend fun main() {

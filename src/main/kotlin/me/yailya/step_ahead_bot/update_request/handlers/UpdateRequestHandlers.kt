@@ -11,6 +11,7 @@ import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.reply
+import me.yailya.step_ahead_bot.replyOrEdit
 import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
 import me.yailya.step_ahead_bot.update_request.UpdateRequestStatus
@@ -46,8 +47,9 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
     val previousUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex - 1).let { it?.id ?: -1 }
     val nextUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex + 1).let { it?.id ?: -1 }
 
-    reply(
-        to = query,
+    replyOrEdit(
+        updateRequestId == -1,
+        query,
         buildEntities {
             val university = Universities[updateRequest.universityId]
 
@@ -59,7 +61,7 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
 
             +"\nИнформация, которую пользователь бы хотел поменять: " + blockquote(updateRequest.text)
         },
-        replyMarkup = inlineKeyboard {
+        inlineKeyboard {
             if (updateRequest.status == UpdateRequestStatus.Open) {
                 row {
                     dataButton("Закрыть запрос", "update_request_close_${updateRequest.id}")

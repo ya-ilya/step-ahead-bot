@@ -14,8 +14,10 @@ import dev.inmo.tgbotapi.utils.EntitiesBuilder
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.expandableBlockquote
 import dev.inmo.tgbotapi.utils.row
+import me.yailya.step_ahead_bot.edit
 import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.reply
+import me.yailya.step_ahead_bot.replyOrEdit
 import me.yailya.step_ahead_bot.review.ReviewEntity
 import me.yailya.step_ahead_bot.university.University
 import me.yailya.step_ahead_bot.university.ranking.EduRankRanking
@@ -143,34 +145,46 @@ suspend fun BehaviourContext.handleUniversityQuestionCallback(
     val previousQuestionId = questions.elementAtOrNull(questionIndex - 1).let { it?.id ?: -1 }
     val nextQuestionId = questions.elementAtOrNull(questionIndex + 1).let { it?.id ?: -1 }
 
-    reply(
-        to = query,
-        buildEntities {
-            +bold("Вопрос #${question.id}") +
-                    "\n" + question.text
-        },
-        replyMarkup = inlineKeyboard {
+    val entities = buildEntities {
+        +bold("Вопрос #${question.id}") +
+                "\n" + question.text
+    }
+
+    val replyMarkup = inlineKeyboard {
+        row {
+            dataButton(
+                "Создать ответ на этот вопрос",
+                "university_create_question_answer_${question.id}_${university.id}"
+            )
+        }
+        row {
+            dataButton("Посмотреть ответы на этот вопрос", "question_answers_${question.id}")
+        }
+        if (previousQuestionId != -1) {
             row {
-                dataButton(
-                    "Создать ответ на этот вопрос",
-                    "university_create_question_answer_${question.id}_${university.id}"
-                )
-            }
-            row {
-                dataButton("Посмотреть ответы на этот вопрос", "question_answers_${question.id}")
-            }
-            if (previousQuestionId != -1) {
-                row {
-                    dataButton("Предыдущий", "university_question_${previousQuestionId}_${university.id}")
-                }
-            }
-            if (nextQuestionId != -1) {
-                row {
-                    dataButton("Следущий", "university_question_${nextQuestionId}_${university.id}")
-                }
+                dataButton("Предыдущий", "university_question_${previousQuestionId}_${university.id}")
             }
         }
-    )
+        if (nextQuestionId != -1) {
+            row {
+                dataButton("Следущий", "university_question_${nextQuestionId}_${university.id}")
+            }
+        }
+    }
+
+    if (questionId == -1) {
+        reply(
+            to = query,
+            entities = entities,
+            replyMarkup = replyMarkup
+        )
+    } else {
+        edit(
+            query = query,
+            entities = entities,
+            replyMarkup = replyMarkup
+        )
+    }
 
     answerCallbackQuery(query)
 }
@@ -207,8 +221,9 @@ suspend fun BehaviourContext.handleUniversityReviewCallback(
     val previousReviewId = reviews.elementAtOrNull(reviewIndex - 1).let { it?.id ?: -1 }
     val nextReviewId = reviews.elementAtOrNull(reviewIndex + 1).let { it?.id ?: -1 }
 
-    reply(
-        to = query,
+    replyOrEdit(
+        reviewId == -1,
+        query,
         buildEntities {
             +bold("Отзыв #${review.id}. ${review.rating}/5") +
                     "\n" + "Положительные стороны:" +
@@ -218,7 +233,7 @@ suspend fun BehaviourContext.handleUniversityReviewCallback(
                     "\n" + "Комментарий:" +
                     "\n" + blockquote(review.comment)
         },
-        replyMarkup = inlineKeyboard {
+        inlineKeyboard {
             if (previousReviewId != -1) {
                 row {
                     dataButton("Предыдущий", "university_review_${previousReviewId}_${university.id}")

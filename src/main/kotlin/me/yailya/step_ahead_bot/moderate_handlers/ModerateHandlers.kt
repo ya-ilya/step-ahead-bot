@@ -23,7 +23,7 @@ import dev.inmo.tgbotapi.utils.row
 import kotlinx.coroutines.flow.first
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
-import me.yailya.step_ahead_bot.reply
+import me.yailya.step_ahead_bot.replyOrEdit
 import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
 import me.yailya.step_ahead_bot.update_request.UpdateRequestStatus
@@ -49,13 +49,14 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
     val previousUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex - 1).let { it?.id ?: -1 }
     val nextUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex + 1).let { it?.id ?: -1 }
 
-    reply(
-        to = query,
+    replyOrEdit(
+        updateRequestId == -1,
+        query,
         buildEntities {
             +"[Запрос #${updateRequest.id}]\n- Университет: ${Universities[updateRequest.universityId].name}\n- Статус: ${updateRequest.status.text}" +
                     "\nИнформация, которую пользователь бы хотел поменять: " + blockquote(updateRequest.text)
         },
-        replyMarkup = inlineKeyboard {
+        inlineKeyboard {
             row {
                 dataButton(
                     "Закрыть запрос, и пометить как выполненое",

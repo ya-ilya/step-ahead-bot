@@ -11,7 +11,8 @@ import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.question.QuestionEntity
-import me.yailya.step_ahead_bot.reply
+import me.yailya.step_ahead_bot.replyOrEdit
+import me.yailya.step_ahead_bot.university.Universities
 
 suspend fun BehaviourContext.handleQuestionCallback(
     query: DataCallbackQuery,
@@ -44,13 +45,14 @@ suspend fun BehaviourContext.handleQuestionCallback(
     val previousQuestionId = questions.elementAtOrNull(questionIndex - 1).let { it?.id ?: -1 }
     val nextQuestionId = questions.elementAtOrNull(questionIndex + 1).let { it?.id ?: -1 }
 
-    reply(
-        to = query,
+    replyOrEdit(
+        questionId == -1,
+        query,
         buildEntities {
-            +bold("Вопрос #${question.id} об ${question.universityId}") +
+            +bold("Вопрос #${question.id} об ${Universities[question.universityId].shortName}") +
                     "\n" + question.text
         },
-        replyMarkup = inlineKeyboard {
+        inlineKeyboard {
             row {
                 dataButton("Посмотреть ответы на этот вопрос", "question_answers_${question.id}")
             }
@@ -102,13 +104,14 @@ suspend fun BehaviourContext.handleQuestionAnswerCallback(
     val previousAnswerIndex = answers.elementAtOrNull(answerIndex - 1).let { it?.id ?: -1 }
     val nextAnswerIndex = answers.elementAtOrNull(answerIndex + 1).let { it?.id ?: -1 }
 
-    reply(
-        to = query,
+    replyOrEdit(
+        answerId == -1,
+        query,
         buildEntities {
             +bold("Ответ на вопрос #${answer.id}") +
                     "\n" + answer.text
         },
-        replyMarkup = inlineKeyboard {
+        inlineKeyboard {
             if (previousAnswerIndex != -1) {
                 row {
                     dataButton("Предыдущий", "question_answer_${previousAnswerIndex}_${questionId}")
