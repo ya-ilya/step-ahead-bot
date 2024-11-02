@@ -19,6 +19,8 @@ import dev.inmo.tgbotapi.types.message.textsources.TextSourcesList
 import dev.inmo.tgbotapi.types.queries.callback.CallbackQuery
 import dev.inmo.tgbotapi.utils.RiskFeature
 import kotlinx.coroutines.Dispatchers
+import me.yailya.step_ahead_bot.answer.Answers
+import me.yailya.step_ahead_bot.answer.handlers.handleAnswerCallback
 import me.yailya.step_ahead_bot.bot_user.BotUserEntity
 import me.yailya.step_ahead_bot.commands.handleFaqCommand
 import me.yailya.step_ahead_bot.commands.handleModerateCommand
@@ -28,7 +30,6 @@ import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCal
 import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCloseCallback
 import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCloseDoneCallback
 import me.yailya.step_ahead_bot.question.Questions
-import me.yailya.step_ahead_bot.question.answer.QuestionAnswers
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionAnswerCallback
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionCallback
 import me.yailya.step_ahead_bot.review.Reviews
@@ -119,7 +120,7 @@ suspend fun main() {
     val database = Database.connect(jdbcURL, driverClassName)
 
     transaction(database) {
-        SchemaUtils.create(Reviews, UpdateRequests, Questions, QuestionAnswers)
+        SchemaUtils.create(Reviews, UpdateRequests, Questions, Answers)
 
         addLogger(StdOutSqlLogger)
     }
@@ -150,6 +151,10 @@ suspend fun main() {
 
         onCommand("universities") {
             this.handleUniversitiesCommand(it)
+        }
+
+        onDataCallbackQuery("answers") {
+            this.handleAnswerCallback(it, -1)
         }
 
         onDataCallbackQuery("questions") {

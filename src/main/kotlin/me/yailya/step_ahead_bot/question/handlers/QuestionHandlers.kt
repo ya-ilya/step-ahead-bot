@@ -94,7 +94,7 @@ suspend fun BehaviourContext.handleQuestionAnswerCallback(
     if (answer == null) {
         answerCallbackQuery(
             query,
-            "Данного ответа на вопрос не существует, либо же его создали не вы"
+            "Данного ответа на вопрос не существует"
         )
 
         return

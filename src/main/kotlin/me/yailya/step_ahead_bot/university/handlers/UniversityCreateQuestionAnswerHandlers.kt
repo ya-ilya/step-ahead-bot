@@ -17,14 +17,14 @@ import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
 import dev.inmo.tgbotapi.utils.RiskFeature
 import dev.inmo.tgbotapi.utils.buildEntities
 import kotlinx.coroutines.flow.first
+import me.yailya.step_ahead_bot.answer.AnswerEntity
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.question.QuestionEntity
-import me.yailya.step_ahead_bot.question.answer.QuestionAnswerEntity
 import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.university.University
 
-suspend fun BehaviourContext.notifyUserAboutQuestionAnswerCreated(entity: QuestionAnswerEntity) {
+suspend fun BehaviourContext.notifyUserAboutQuestionAnswerCreated(entity: AnswerEntity) {
     val university = Universities[entity.question.universityId]
     send(
         ChatId(RawChatId(entity.question.botUser.userId)),
@@ -64,7 +64,7 @@ suspend fun BehaviourContext.handleCreateQuestionAnswerCallback(
     ).first()
 
     val answer = databaseQuery {
-        QuestionAnswerEntity.new {
+        AnswerEntity.new {
             this.botUser = botUserEntity
             this.question = questionEntity
             this.text = textMessage.content.text
