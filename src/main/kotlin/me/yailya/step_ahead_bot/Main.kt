@@ -9,8 +9,14 @@ import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
 import dev.inmo.tgbotapi.extensions.behaviour_builder.buildBehaviourWithLongPolling
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onCommand
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onDataCallbackQuery
+import dev.inmo.tgbotapi.extensions.utils.extensions.raw.entities
 import dev.inmo.tgbotapi.extensions.utils.extensions.raw.message
+import dev.inmo.tgbotapi.extensions.utils.extensions.raw.reply_markup
+import dev.inmo.tgbotapi.extensions.utils.types.buttons.InlineKeyboardBuilder
+import dev.inmo.tgbotapi.extensions.utils.types.buttons.InlineKeyboardRowBuilder
+import dev.inmo.tgbotapi.extensions.utils.types.buttons.build
 import dev.inmo.tgbotapi.types.LinkPreviewOptions
+import dev.inmo.tgbotapi.types.buttons.InlineKeyboardButtons.InlineKeyboardButton
 import dev.inmo.tgbotapi.types.buttons.InlineKeyboardMarkup
 import dev.inmo.tgbotapi.types.buttons.KeyboardMarkup
 import dev.inmo.tgbotapi.types.message.abstracts.ContentMessage
@@ -21,6 +27,7 @@ import dev.inmo.tgbotapi.utils.RiskFeature
 import kotlinx.coroutines.Dispatchers
 import me.yailya.step_ahead_bot.answer.Answers
 import me.yailya.step_ahead_bot.answer.handlers.handleAnswerCallback
+import me.yailya.step_ahead_bot.answer.handlers.handleAnswerDeleteCallback
 import me.yailya.step_ahead_bot.bot_user.BotUserEntity
 import me.yailya.step_ahead_bot.commands.handleFaqCommand
 import me.yailya.step_ahead_bot.commands.handleModerateCommand
@@ -30,6 +37,7 @@ import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCal
 import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCloseCallback
 import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCloseDoneCallback
 import me.yailya.step_ahead_bot.question.Questions
+import me.yailya.step_ahead_bot.question.handlers.handleQuestionAcceptAnswerCallback
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionAnswerCallback
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionCallback
 import me.yailya.step_ahead_bot.review.Reviews
@@ -79,15 +87,15 @@ suspend fun BehaviourContext.reply(
 @Suppress("UNCHECKED_CAST")
 suspend fun BehaviourContext.edit(
     query: CallbackQuery,
-    entities: TextSourcesList,
+    entities: TextSourcesList? = null,
     linkPreviewOptions: LinkPreviewOptions? = null,
     replyMarkup: InlineKeyboardMarkup? = null
 ) {
     edit(
         message = query.message!! as ContentMessage<TextContent>,
-        entities = entities,
+        entities = entities ?: query.message!!.entities!!,
         linkPreviewOptions = linkPreviewOptions,
-        replyMarkup = replyMarkup
+        replyMarkup = replyMarkup ?: query.message!!.reply_markup
     )
 }
 
@@ -110,6 +118,34 @@ suspend fun BehaviourContext.replyOrEdit(
             replyMarkup = replyMarkup
         )
     }
+}
+
+suspend fun BehaviourContext.editInlineButton(
+    query: CallbackQuery,
+    buttonFilter: (InlineKeyboardButton) -> Boolean,
+    buttonTransformer: (InlineKeyboardButton) -> InlineKeyboardButton
+) {
+    val keyboardBuilder = InlineKeyboardBuilder()
+
+    for (row in query.message!!.reply_markup!!.keyboard) {
+        val rowBuilder = InlineKeyboardRowBuilder()
+
+        for (button in row) {
+            if (buttonFilter(button)) {
+                rowBuilder.add(buttonTransformer(button))
+            } else {
+                rowBuilder.add(button)
+            }
+        }
+
+        keyboardBuilder.add(rowBuilder.row)
+    }
+
+    edit(
+        query = query,
+        entities = query.message!!.entities!!,
+        replyMarkup = keyboardBuilder.build()
+    )
 }
 
 suspend fun main() {
@@ -191,7 +227,26 @@ suspend fun main() {
             }
         }
 
+        val answerRegex = "answer(?:_(.*))?_([^_]*)".toRegex()
+
+        onDataCallbackQuery(answerRegex) {
+            val values = answerRegex.find(it.data)!!.groupValues
+            val name = values[1]
+            val answerId = values[2].toInt()
+
+            when {
+                name.isEmpty() -> {
+                    this.handleAnswerCallback(it, answerId)
+                }
+
+                name == "delete" -> {
+                    this.handleAnswerDeleteCallback(it, answerId)
+                }
+            }
+        }
+
         val questionRegex = "question(?:_(.*))?_([^_]*)".toRegex()
+        val questionAcceptAnswerRegex = "accept_answer_(.*?)$".toRegex()
         val questionAnswerRegex = "answer_(.*?)$".toRegex()
 
         onDataCallbackQuery(questionRegex) {
@@ -207,16 +262,24 @@ suspend fun main() {
                 name == "answers" -> {
                     this.handleQuestionAnswerCallback(
                         it,
-                        questionId,
-                        -1
+                        -1,
+                        questionId
+                    )
+                }
+
+                questionAcceptAnswerRegex.matches(name) -> {
+                    this.handleQuestionAcceptAnswerCallback(
+                        it,
+                        questionAnswerRegex.find(name)!!.groupValues[1].toInt(),
+                        questionId
                     )
                 }
 
                 questionAnswerRegex.matches(name) -> {
                     this.handleQuestionAnswerCallback(
                         it,
-                        questionId,
-                        questionAnswerRegex.find(name)!!.groupValues[1].toInt()
+                        questionAnswerRegex.find(name)!!.groupValues[1].toInt(),
+                        questionId
                     )
                 }
             }

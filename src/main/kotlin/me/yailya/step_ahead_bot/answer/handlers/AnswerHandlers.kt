@@ -1,13 +1,19 @@
+@file:OptIn(RiskFeature::class)
+
 package me.yailya.step_ahead_bot.answer.handlers
 
 import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
+import dev.inmo.tgbotapi.extensions.api.deleteMessage
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
+import dev.inmo.tgbotapi.extensions.utils.extensions.raw.message
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
 import dev.inmo.tgbotapi.types.message.textsources.bold
 import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
+import dev.inmo.tgbotapi.utils.RiskFeature
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
+import me.yailya.step_ahead_bot.answer.AnswerEntity
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.replyOrEdit
@@ -47,22 +53,64 @@ suspend fun BehaviourContext.handleAnswerCallback(
         answerId == -1,
         query,
         buildEntities {
-            +bold("Ответ на вопрос #${answer.id}") +
+            +bold("Ваш ответ на вопрос #${answer.id}${if (answer.isAccepted) ". Помечен, как одобренный" else ""}") +
                     "\n" + answer.text
         },
         inlineKeyboard {
+            row {
+                dataButton("Удалить ответ", "answer_delete_${answer.id}")
+            }
             if (previousAnswerIndex != -1) {
                 row {
-                    dataButton("Предыдущий", "my_question_answer_${previousAnswerIndex}")
+                    dataButton("Предыдущий", "answer_${previousAnswerIndex}")
                 }
             }
             if (nextAnswerIndex != -1) {
                 row {
-                    dataButton("Следущий", "my_question_answer_${nextAnswerIndex}")
+                    dataButton("Следущий", "answer_${nextAnswerIndex}")
                 }
             }
         }
     )
+
+    answerCallbackQuery(query)
+}
+
+suspend fun BehaviourContext.handleAnswerDeleteCallback(
+    query: DataCallbackQuery,
+    answerId: Int
+) {
+    val otherBotUser = query.botUser()
+
+    databaseQuery {
+        val answer = AnswerEntity.findById(answerId)
+
+        if (answer == null) {
+            answerCallbackQuery(
+                query,
+                "Данного ответа на вопрос не существует"
+            )
+
+            return@databaseQuery
+        }
+
+        if (answer.botUser.id != otherBotUser.first.id) {
+            answerCallbackQuery(
+                query,
+                "Вы не можете удалить не ваш ответ на вопрос"
+            )
+
+            return@databaseQuery
+        }
+
+        answer.delete()
+        deleteMessage(query.message!!)
+
+        answerCallbackQuery(
+            query,
+            "Ваш ответ на вопрос #${answerId} был удален"
+        )
+    }
 
     answerCallbackQuery(query)
 }

@@ -14,7 +14,6 @@ import dev.inmo.tgbotapi.utils.EntitiesBuilder
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.expandableBlockquote
 import dev.inmo.tgbotapi.utils.row
-import me.yailya.step_ahead_bot.edit
 import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.replyOrEdit
@@ -145,46 +144,38 @@ suspend fun BehaviourContext.handleUniversityQuestionCallback(
     val previousQuestionId = questions.elementAtOrNull(questionIndex - 1).let { it?.id ?: -1 }
     val nextQuestionId = questions.elementAtOrNull(questionIndex + 1).let { it?.id ?: -1 }
 
-    val entities = buildEntities {
-        +bold("Вопрос #${question.id}") +
-                "\n" + question.text
-    }
-
-    val replyMarkup = inlineKeyboard {
-        row {
-            dataButton(
-                "Создать ответ на этот вопрос",
-                "university_create_question_answer_${question.id}_${university.id}"
-            )
-        }
-        row {
-            dataButton("Посмотреть ответы на этот вопрос", "question_answers_${question.id}")
-        }
-        if (previousQuestionId != -1) {
+    replyOrEdit(
+        questionId == -1,
+        query,
+        buildEntities {
+            +bold("Вопрос #${question.id}") +
+                    "\n" + question.text
+        },
+        inlineKeyboard {
             row {
-                dataButton("Предыдущий", "university_question_${previousQuestionId}_${university.id}")
+                dataButton(
+                    "Создать ответ на этот вопрос",
+                    "university_create_question_answer_${question.id}_${university.id}"
+                )
+            }
+            row {
+                dataButton(
+                    "Посмотреть ответы на этот вопрос",
+                    "university_question_answers_${question.id}_${university.id}"
+                )
+            }
+            if (previousQuestionId != -1) {
+                row {
+                    dataButton("Предыдущий", "university_question_${previousQuestionId}_${university.id}")
+                }
+            }
+            if (nextQuestionId != -1) {
+                row {
+                    dataButton("Следущий", "university_question_${nextQuestionId}_${university.id}")
+                }
             }
         }
-        if (nextQuestionId != -1) {
-            row {
-                dataButton("Следущий", "university_question_${nextQuestionId}_${university.id}")
-            }
-        }
-    }
-
-    if (questionId == -1) {
-        reply(
-            to = query,
-            entities = entities,
-            replyMarkup = replyMarkup
-        )
-    } else {
-        edit(
-            query = query,
-            entities = entities,
-            replyMarkup = replyMarkup
-        )
-    }
+    )
 
     answerCallbackQuery(query)
 }

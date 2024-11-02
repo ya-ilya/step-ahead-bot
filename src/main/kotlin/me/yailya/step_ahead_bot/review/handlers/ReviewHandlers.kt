@@ -94,7 +94,7 @@ suspend fun BehaviourContext.handleReviewDeleteCallback(
         if (review == null) {
             answerCallbackQuery(
                 query,
-                "Отзыва не существует"
+                "Данного отзыва не существует"
             )
 
             return@databaseQuery
@@ -117,6 +117,4 @@ suspend fun BehaviourContext.handleReviewDeleteCallback(
             "Ваш отзыв #${reviewId} был удален"
         )
     }
-
-    answerCallbackQuery(query)
 }
