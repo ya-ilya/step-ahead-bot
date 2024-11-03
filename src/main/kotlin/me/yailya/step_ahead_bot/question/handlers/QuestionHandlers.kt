@@ -3,8 +3,10 @@
 package me.yailya.step_ahead_bot.question.handlers
 
 import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
+import dev.inmo.tgbotapi.extensions.api.deleteMessage
 import dev.inmo.tgbotapi.extensions.api.send.send
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
+import dev.inmo.tgbotapi.extensions.utils.extensions.raw.message
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
 import dev.inmo.tgbotapi.types.ChatId
@@ -65,6 +67,9 @@ suspend fun BehaviourContext.handleQuestionCallback(
             row {
                 dataButton("Посмотреть ответы на этот вопрос", "question_answers_${question.id}")
             }
+            row {
+                dataButton("Удалить этот вопрос", "question_delete_${question.id}")
+            }
             if (previousQuestionId != -1) {
                 row {
                     dataButton("Предыдущий", "question_${previousQuestionId}")
@@ -79,6 +84,43 @@ suspend fun BehaviourContext.handleQuestionCallback(
     )
 
     answerCallbackQuery(query)
+}
+
+suspend fun BehaviourContext.handleQuestionDeleteCallback(
+    query: DataCallbackQuery,
+    questionId: Int
+) {
+    val otherBotUser = query.botUser()
+
+    databaseQuery {
+        val question = QuestionEntity.findById(questionId)
+
+        if (question == null) {
+            answerCallbackQuery(
+                query,
+                "Данного вопроса не существует"
+            )
+
+            return@databaseQuery
+        }
+
+        if (question.botUser.id != otherBotUser.first.id) {
+            answerCallbackQuery(
+                query,
+                "Вы не можете удалить не ваш вопрос"
+            )
+
+            return@databaseQuery
+        }
+
+        question.delete()
+        deleteMessage(query.message!!)
+
+        answerCallbackQuery(
+            query,
+            "Ваш вопрос #${questionId} был удален"
+        )
+    }
 }
 
 suspend fun BehaviourContext.handleQuestionAnswerCallback(
@@ -110,14 +152,14 @@ suspend fun BehaviourContext.handleQuestionAnswerCallback(
     }
 
     val answerIndex = answers.indexOf(answer)
-    val previousAnswerIndex = answers.elementAtOrNull(answerIndex - 1).let { it?.id ?: -1 }
-    val nextAnswerIndex = answers.elementAtOrNull(answerIndex + 1).let { it?.id ?: -1 }
+    val previousAnswerId = answers.elementAtOrNull(answerIndex - 1).let { it?.id ?: -1 }
+    val nextAnswerId = answers.elementAtOrNull(answerIndex + 1).let { it?.id ?: -1 }
 
     replyOrEdit(
         answerId == -1,
         query,
         buildEntities {
-            +bold("Ответ на вопрос #${answer.id}") +
+            +bold("Ответ на вопрос #${answer.id} о ${Universities[answer.question.universityId].shortName}") +
                     "\n" + answer.text
         },
         inlineKeyboard {
@@ -127,14 +169,14 @@ suspend fun BehaviourContext.handleQuestionAnswerCallback(
                     "question_accept_answer_${answer.id}_${questionId}"
                 )
             }
-            if (previousAnswerIndex != -1) {
+            if (previousAnswerId != -1) {
                 row {
-                    dataButton("Предыдущий", "question_answer_${previousAnswerIndex}_${questionId}")
+                    dataButton("Предыдущий", "question_answer_${previousAnswerId}_${questionId}")
                 }
             }
-            if (nextAnswerIndex != -1) {
+            if (nextAnswerId != -1) {
                 row {
-                    dataButton("Следущий", "question_answer_${nextAnswerIndex}_${questionId}")
+                    dataButton("Следущий", "question_answer_${nextAnswerId}_${questionId}")
                 }
             }
         }

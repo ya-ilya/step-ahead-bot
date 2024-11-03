@@ -46,8 +46,8 @@ suspend fun BehaviourContext.handleAnswerCallback(
     }
 
     val answerIndex = answers.indexOf(answer)
-    val previousAnswerIndex = answers.elementAtOrNull(answerIndex - 1).let { it?.id ?: -1 }
-    val nextAnswerIndex = answers.elementAtOrNull(answerIndex + 1).let { it?.id ?: -1 }
+    val previousAnswerId = answers.elementAtOrNull(answerIndex - 1).let { it?.id ?: -1 }
+    val nextAnswerId = answers.elementAtOrNull(answerIndex + 1).let { it?.id ?: -1 }
 
     replyOrEdit(
         answerId == -1,
@@ -60,14 +60,14 @@ suspend fun BehaviourContext.handleAnswerCallback(
             row {
                 dataButton("Удалить ответ", "answer_delete_${answer.id}")
             }
-            if (previousAnswerIndex != -1) {
+            if (previousAnswerId != -1) {
                 row {
-                    dataButton("Предыдущий", "answer_${previousAnswerIndex}")
+                    dataButton("Предыдущий", "answer_${previousAnswerId}")
                 }
             }
-            if (nextAnswerIndex != -1) {
+            if (nextAnswerId != -1) {
                 row {
-                    dataButton("Следущий", "answer_${nextAnswerIndex}")
+                    dataButton("Следущий", "answer_${nextAnswerId}")
                 }
             }
         }

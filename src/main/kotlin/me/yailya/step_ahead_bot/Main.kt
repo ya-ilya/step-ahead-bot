@@ -40,6 +40,7 @@ import me.yailya.step_ahead_bot.question.Questions
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionAcceptAnswerCallback
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionAnswerCallback
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionCallback
+import me.yailya.step_ahead_bot.question.handlers.handleQuestionDeleteCallback
 import me.yailya.step_ahead_bot.review.Reviews
 import me.yailya.step_ahead_bot.review.handlers.handleReviewCallback
 import me.yailya.step_ahead_bot.review.handlers.handleReviewDeleteCallback
@@ -259,6 +260,10 @@ suspend fun main() {
                     this.handleQuestionCallback(it, questionId)
                 }
 
+                name == "delete" -> {
+                    this.handleQuestionDeleteCallback(it, questionId)
+                }
+
                 name == "answers" -> {
                     this.handleQuestionAnswerCallback(
                         it,
@@ -306,6 +311,8 @@ suspend fun main() {
         val universityRegex = "university(?:_(.*))?_([^_]*)".toRegex()
         val universityReviewRegex = "review_(.*?)$".toRegex()
         val universityCreateQuestionAnswerRegex = "create_question_answer_(.*?)$".toRegex()
+        val universityQuestionAnswersRegex = "question_answers_(.*?)$".toRegex()
+        val universityQuestionAnswerRegex = "question_answer_(.*?)_(.*?)$".toRegex()
 
         onDataCallbackQuery(universityRegex) {
             val values = universityRegex.find(it.data)!!.groupValues
@@ -329,10 +336,29 @@ suspend fun main() {
                     this.handleUniversityReviewCallback(it, -1, university)
                 }
 
+                universityQuestionAnswersRegex.matches(name) -> {
+                    this.handleUniversityQuestionAnswerCallback(
+                        it,
+                        -1,
+                        universityQuestionAnswersRegex.find(name)!!.groupValues[1].toInt(),
+                        university
+                    )
+                }
+
                 universityReviewRegex.matches(name) -> {
                     this.handleUniversityReviewCallback(
                         it,
                         universityReviewRegex.find(name)!!.groupValues[1].toInt(),
+                        university
+                    )
+                }
+
+                universityQuestionAnswerRegex.matches(name) -> {
+                    val universityQuestionAnswerValues = universityQuestionAnswerRegex.find(name)!!.groupValues
+                    this.handleUniversityQuestionAnswerCallback(
+                        it,
+                        universityQuestionAnswerValues[1].toInt(),
+                        universityQuestionAnswerValues[2].toInt(),
                         university
                     )
                 }

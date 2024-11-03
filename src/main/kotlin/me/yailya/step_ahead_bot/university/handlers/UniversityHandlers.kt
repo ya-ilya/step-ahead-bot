@@ -14,6 +14,7 @@ import dev.inmo.tgbotapi.utils.EntitiesBuilder
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.expandableBlockquote
 import dev.inmo.tgbotapi.utils.row
+import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.replyOrEdit
@@ -172,6 +173,75 @@ suspend fun BehaviourContext.handleUniversityQuestionCallback(
             if (nextQuestionId != -1) {
                 row {
                     dataButton("Следущий", "university_question_${nextQuestionId}_${university.id}")
+                }
+            }
+        }
+    )
+
+    answerCallbackQuery(query)
+}
+
+suspend fun BehaviourContext.handleUniversityQuestionAnswerCallback(
+    query: DataCallbackQuery,
+    answerId: Int,
+    questionId: Int,
+    university: University
+) {
+    val answers = databaseQuery { QuestionEntity.findById(questionId)!!.answers.map { it.toModel() } }
+
+    if (answers.isEmpty()) {
+        answerCallbackQuery(
+            query,
+            "Ответов на этот вопрос нет"
+        )
+
+        return
+    }
+
+    val realAnswerId = if (answerId != -1) answerId else answers.first().id
+    val answer = answers.find { it.id == realAnswerId }
+
+    if (answer == null) {
+        answerCallbackQuery(
+            query,
+            "Данного ответа на вопрос не существует"
+        )
+
+        return
+    }
+
+    if (answer.question.universityId != university.id) {
+        answerCallbackQuery(
+            query,
+            "Данный вопрос был задан о другом ВУЗе"
+        )
+
+        return
+    }
+
+    val answerIndex = answers.indexOf(answer)
+    val previousAnswerId = answers.elementAtOrNull(answerIndex - 1).let { it?.id ?: -1 }
+    val nextAnswerId = answers.elementAtOrNull(answerIndex + 1).let { it?.id ?: -1 }
+
+    replyOrEdit(
+        answerId == -1,
+        query,
+        buildEntities {
+            +bold("Ответ на вопрос о ${university.shortName} #${answer.id}") +
+                    "\n" + answer.text
+        },
+        inlineKeyboard {
+            if (previousAnswerId != -1) {
+                row {
+                    dataButton(
+                        "Предыдущий",
+                        "university_question_answer_${previousAnswerId}_${questionId}_${university.id}"
+                    )
+                }
+            }
+            if (nextAnswerId != -1) {
+                row {
+                    dataButton("Следущий", "university_question_answer_${nextAnswerId}_${questionId}_${university.id}")
                 }
             }
         }
