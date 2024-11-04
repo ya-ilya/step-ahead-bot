@@ -52,6 +52,15 @@ suspend fun BehaviourContext.handleCreateQuestionAnswerCallback(
         return
     }
 
+    if (databaseQuery { questionEntity.botUser.id == botUserEntity.id }) {
+        answerCallbackQuery(
+            query,
+            "Вы не можете оставлять ответы на свой же вопрос"
+        )
+
+        return
+    }
+
     val textMessage = waitTextMessage(
         SendTextMessage(
             query.message!!.chat.id,
