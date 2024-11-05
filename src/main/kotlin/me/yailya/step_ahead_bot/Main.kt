@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import me.yailya.step_ahead_bot.answer.Answers
 import me.yailya.step_ahead_bot.answer.handlers.handleAnswerCallback
 import me.yailya.step_ahead_bot.answer.handlers.handleAnswerDeleteCallback
+import me.yailya.step_ahead_bot.answer.handlers.handleAnswerQuestionCallback
 import me.yailya.step_ahead_bot.bot_user.BotUserEntity
 import me.yailya.step_ahead_bot.commands.handleFaqCommand
 import me.yailya.step_ahead_bot.commands.handleModerateCommand
@@ -167,6 +168,7 @@ suspend fun main() {
             BotUserEntity.new {
                 this.userId = 1005465506
                 this.isModerator = true
+                this.isAdministrator = true
             }
         }
     }
@@ -238,6 +240,10 @@ suspend fun main() {
             when {
                 name.isEmpty() -> {
                     this.handleAnswerCallback(it, answerId)
+                }
+
+                name == "question" -> {
+                    this.handleAnswerQuestionCallback(it, answerId)
                 }
 
                 name == "delete" -> {

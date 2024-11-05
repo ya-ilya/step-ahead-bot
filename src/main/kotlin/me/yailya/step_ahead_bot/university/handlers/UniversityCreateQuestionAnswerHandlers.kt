@@ -23,6 +23,7 @@ import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.university.University
+import java.time.LocalDateTime
 
 suspend fun BehaviourContext.notifyUserAboutQuestionAnswerCreated(entity: AnswerEntity) {
     val university = Universities[entity.question.universityId]
@@ -40,7 +41,7 @@ suspend fun BehaviourContext.handleCreateQuestionAnswerCallback(
     questionId: Int,
     university: University
 ) {
-    val (botUserEntity) = query.botUser()
+    val (botUserEntity, botUser) = query.botUser()
     val questionEntity = databaseQuery { QuestionEntity.findById(questionId) }
 
     if (questionEntity == null) {
@@ -52,10 +53,23 @@ suspend fun BehaviourContext.handleCreateQuestionAnswerCallback(
         return
     }
 
-    if (databaseQuery { questionEntity.botUser.id == botUserEntity.id }) {
+    if (!botUser.isAdministrator) {
+        if (databaseQuery { questionEntity.botUser.id == botUserEntity.id }) {
+            answerCallbackQuery(
+                query,
+                "Вы не можете оставлять ответы на свой же вопрос"
+            )
+
+            return
+        }
+
+        // other non administrator stuff here
+    }
+
+    if (botUser.lastQuestionAnswerTime != null && LocalDateTime.now() < botUser.lastQuestionAnswerTime.plusMinutes(1)) {
         answerCallbackQuery(
             query,
-            "Вы не можете оставлять ответы на свой же вопрос"
+            "Вы должны подождать минуту, прежде чем оставить новый ответ вопрос"
         )
 
         return
@@ -73,6 +87,8 @@ suspend fun BehaviourContext.handleCreateQuestionAnswerCallback(
     ).first()
 
     val answer = databaseQuery {
+        botUserEntity.lastQuestionAnswerTime = LocalDateTime.now()
+
         AnswerEntity.new {
             this.botUser = botUserEntity
             this.question = questionEntity

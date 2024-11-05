@@ -16,7 +16,9 @@ import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.answer.AnswerEntity
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
+import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.replyOrEdit
+import me.yailya.step_ahead_bot.university.Universities
 
 suspend fun BehaviourContext.handleAnswerCallback(
     query: DataCallbackQuery,
@@ -58,6 +60,9 @@ suspend fun BehaviourContext.handleAnswerCallback(
         },
         inlineKeyboard {
             row {
+                dataButton("Посмотреть вопрос", "answer_question_${answer.id}")
+            }
+            row {
                 dataButton("Удалить ответ", "answer_delete_${answer.id}")
             }
             if (previousAnswerId != -1) {
@@ -76,11 +81,11 @@ suspend fun BehaviourContext.handleAnswerCallback(
     answerCallbackQuery(query)
 }
 
-suspend fun BehaviourContext.handleAnswerDeleteCallback(
+suspend fun BehaviourContext.handleAnswerQuestionCallback(
     query: DataCallbackQuery,
     answerId: Int
 ) {
-    val otherBotUser = query.botUser()
+    val (otherBotUser) = query.botUser()
 
     databaseQuery {
         val answer = AnswerEntity.findById(answerId)
@@ -94,7 +99,53 @@ suspend fun BehaviourContext.handleAnswerDeleteCallback(
             return@databaseQuery
         }
 
-        if (answer.botUser.id != otherBotUser.first.id) {
+        if (answer.botUser.id != otherBotUser.id) {
+            answerCallbackQuery(
+                query,
+                "Вы не можете посмотреть вопрос, ответ на который дали не вы"
+            )
+
+            return@databaseQuery
+        }
+
+        val question = answer.question
+
+        reply(
+            to = query,
+            entities = buildEntities {
+                +bold("Вопрос #${question.id} об ${Universities[question.universityId].shortName}") +
+                        "\n" + question.text
+            },
+            replyMarkup = inlineKeyboard {
+                row {
+                    dataButton("Посмотреть все ответы на этот вопрос", "question_answers_${question.id}")
+                }
+            }
+        )
+    }
+
+    answerCallbackQuery(query)
+}
+
+suspend fun BehaviourContext.handleAnswerDeleteCallback(
+    query: DataCallbackQuery,
+    answerId: Int
+) {
+    val (otherBotUser) = query.botUser()
+
+    databaseQuery {
+        val answer = AnswerEntity.findById(answerId)
+
+        if (answer == null) {
+            answerCallbackQuery(
+                query,
+                "Данного ответа на вопрос не существует"
+            )
+
+            return@databaseQuery
+        }
+
+        if (answer.botUser.id != otherBotUser.id) {
             answerCallbackQuery(
                 query,
                 "Вы не можете удалить не ваш ответ на вопрос"

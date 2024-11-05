@@ -128,6 +128,7 @@ suspend fun BehaviourContext.handleQuestionAnswerCallback(
     answerId: Int,
     questionId: Int
 ) {
+    val (botUserEntity) = query.botUser()
     val answers = databaseQuery { QuestionEntity.findById(questionId)!!.answers.map { it.toModel() } }
 
     if (answers.isEmpty()) {
@@ -164,10 +165,12 @@ suspend fun BehaviourContext.handleQuestionAnswerCallback(
         },
         inlineKeyboard {
             row {
-                dataButton(
-                    if (answer.isAccepted) "Отменить одобрение" else "Одобрить ответ",
-                    "question_accept_answer_${answer.id}_${questionId}"
-                )
+                if (databaseQuery { answer.question.botUser.id == botUserEntity.id.value }) {
+                    dataButton(
+                        if (answer.isAccepted) "Отменить одобрение" else "Одобрить ответ",
+                        "question_accept_answer_${answer.id}_${questionId}"
+                    )
+                }
             }
             if (previousAnswerId != -1) {
                 row {
@@ -199,6 +202,8 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
     answerId: Int,
     questionId: Int
 ) {
+    val (botUserEntity) = query.botUser()
+
     databaseQuery {
         val answer = AnswerEntity.findById(answerId)
 
@@ -217,6 +222,15 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
             answerCallbackQuery(
                 query,
                 "Данного вопроса не существует"
+            )
+
+            return@databaseQuery
+        }
+
+        if (question.botUser.id != botUserEntity.id) {
+            answerCallbackQuery(
+                query,
+                "Вы не можете одобрить ответ не на ваш вопрос"
             )
 
             return@databaseQuery

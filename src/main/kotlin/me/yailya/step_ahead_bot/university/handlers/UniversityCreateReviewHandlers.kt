@@ -23,12 +23,22 @@ import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.review.ReviewEntity
 import me.yailya.step_ahead_bot.university.University
+import java.time.LocalDateTime
 
 suspend fun BehaviourContext.handleCreateReviewCallback(
     query: DataCallbackQuery,
     university: University
 ) {
-    val (botUserEntity) = query.botUser()
+    val (botUserEntity, botUser) = query.botUser()
+
+    if (botUser.lastReviewTime != null && LocalDateTime.now() < botUser.lastReviewTime.plusMinutes(1)) {
+        answerCallbackQuery(
+            query,
+            "Вы должны подождать минуту, прежде чем оставить новый отзыв"
+        )
+
+        return
+    }
 
     val prosMessage = waitTextMessage(
         SendTextMessage(
@@ -80,6 +90,8 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
     val rating = ratingQuery.data.toInt()
 
     val review = databaseQuery {
+        botUserEntity.lastReviewTime = LocalDateTime.now()
+
         ReviewEntity.new {
             this.botUser = botUserEntity
             this.universityId = university.id

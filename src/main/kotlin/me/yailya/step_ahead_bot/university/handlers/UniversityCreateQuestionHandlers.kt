@@ -18,12 +18,22 @@ import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.university.University
+import java.time.LocalDateTime
 
 suspend fun BehaviourContext.handleCreateQuestionCallback(
     query: DataCallbackQuery,
     university: University
 ) {
-    val (botUserEntity) = query.botUser()
+    val (botUserEntity, botUser) = query.botUser()
+
+    if (botUser.lastQuestionTime != null && LocalDateTime.now() < botUser.lastQuestionTime.plusMinutes(1)) {
+        answerCallbackQuery(
+            query,
+            "Вы должны подождать минуту, прежде чем задать новый вопрос"
+        )
+
+        return
+    }
 
     val textMessage = waitTextMessage(
         SendTextMessage(
@@ -37,6 +47,8 @@ suspend fun BehaviourContext.handleCreateQuestionCallback(
     ).first()
 
     val question = databaseQuery {
+        botUserEntity.lastQuestionTime = LocalDateTime.now()
+
         QuestionEntity.new {
             this.botUser = botUserEntity
             this.universityId = university.id

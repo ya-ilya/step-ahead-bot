@@ -17,6 +17,11 @@ class BotUserEntity(id: EntityID<Int>) : IntEntity(id) {
 
     var userId by BotUsers.userId
     var isModerator by BotUsers.isModerator
+    var isAdministrator by BotUsers.isAdministrator
+    var lastQuestionTime by BotUsers.lastQuestionTime
+    var lastQuestionAnswerTime by BotUsers.lastQuestionAnswerTime
+    var lastReviewTime by BotUsers.lastReviewTime
+    var lastUpdateRequestTime by BotUsers.lastUpdateRequestTime
 
     val questions by QuestionEntity referrersOn Questions.botUser
     val answers by AnswerEntity referrersOn Answers.botUser
@@ -26,6 +31,11 @@ class BotUserEntity(id: EntityID<Int>) : IntEntity(id) {
     fun toModel() = BotUser(
         id.value,
         userId,
-        isModerator
+        isModerator,
+        isAdministrator,
+        lastQuestionTime,
+        lastQuestionAnswerTime,
+        lastReviewTime,
+        lastUpdateRequestTime
     )
 }
