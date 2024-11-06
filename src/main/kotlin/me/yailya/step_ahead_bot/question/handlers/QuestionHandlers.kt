@@ -118,7 +118,7 @@ suspend fun BehaviourContext.handleQuestionDeleteCallback(
 
         answerCallbackQuery(
             query,
-            "Ваш вопрос #${questionId} был удален"
+            "✅ Ваш вопрос #${questionId} был удален"
         )
     }
 }

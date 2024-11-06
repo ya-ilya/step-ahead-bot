@@ -58,7 +58,7 @@ suspend fun BehaviourContext.handleCreateQuestionCallback(
 
     reply(
         to = textMessage,
-        text = "Вопрос об ${university.shortName} был задан! Номер вопроса: #${question.id}"
+        text = "✅ Вопрос об ${university.shortName} был задан! Номер вопроса: #${question.id}"
     )
 
     answerCallbackQuery(query)

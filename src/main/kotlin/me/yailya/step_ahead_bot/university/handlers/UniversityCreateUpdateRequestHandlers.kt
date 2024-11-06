@@ -58,7 +58,7 @@ suspend fun BehaviourContext.handleCreateUpdateRequestCallback(
 
     reply(
         to = textMessage,
-        text = "Спасибо за ваше запрос на изменение информации о ${university.shortName}. В скором времени он будет рассмотрен модерацией. Номер запроса: #${updateRequest.id}"
+        text = "✅ Спасибо за ваше запрос на изменение информации о ${university.shortName}. В скором времени он будет рассмотрен модерацией. Номер запроса: #${updateRequest.id}"
     )
 
     answerCallbackQuery(query)

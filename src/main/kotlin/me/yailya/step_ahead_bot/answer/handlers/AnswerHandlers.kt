@@ -158,7 +158,7 @@ suspend fun BehaviourContext.handleAnswerDeleteCallback(
 
         answerCallbackQuery(
             query,
-            "Ваш ответ на вопрос #${answerId} был удален"
+            "✅ Ваш ответ на вопрос #${answerId} был удален"
         )
     }
 

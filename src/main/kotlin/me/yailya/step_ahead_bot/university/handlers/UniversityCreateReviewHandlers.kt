@@ -104,7 +104,7 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
 
     reply(
         to = prosMessage,
-        text = "Спасибо за ваш отзыв об ${university.shortName}! Номер отзыва: #${review.id}"
+        text = "✅ Спасибо за ваш отзыв об ${university.shortName}! Номер отзыва: #${review.id}"
     )
 
     answerCallbackQuery(query)
