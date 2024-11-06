@@ -29,7 +29,7 @@ suspend fun BehaviourContext.handleAnswerCallback(
     if (answers.isEmpty()) {
         answerCallbackQuery(
             query,
-            "Вы еще не оставляли ответы на вопросы"
+            "❌ Вы еще не оставляли ответы на вопросы"
         )
 
         return
@@ -41,7 +41,7 @@ suspend fun BehaviourContext.handleAnswerCallback(
     if (answer == null) {
         answerCallbackQuery(
             query,
-            "Данного ответа на вопрос не существует, либо же его создали не вы"
+            "❌ Данного ответа на вопрос не существует, либо же его создали не вы"
         )
 
         return
@@ -55,24 +55,22 @@ suspend fun BehaviourContext.handleAnswerCallback(
         answerId == -1,
         query,
         buildEntities {
-            +bold("Ваш ответ на вопрос #${answer.id}${if (answer.isAccepted) ". Помечен, как одобренный" else ""}") +
+            +bold("Ответ на вопрос #${answer.id}${if (answer.isAccepted) ". Помечен, как одобренный" else ""}") +
                     "\n" + answer.text
         },
         inlineKeyboard {
             row {
-                dataButton("Посмотреть вопрос", "answer_question_${answer.id}")
+                dataButton("❔ Посмотреть вопрос", "answer_question_${answer.id}")
             }
             row {
-                dataButton("Удалить ответ", "answer_delete_${answer.id}")
+                dataButton("\uD83D\uDDD1\uFE0F Удалить", "answer_delete_${answer.id}")
             }
-            if (previousAnswerId != -1) {
-                row {
-                    dataButton("Предыдущий", "answer_${previousAnswerId}")
+            row {
+                if (previousAnswerId != -1) {
+                    dataButton("⬅\uFE0F Предыдущий", "answer_${previousAnswerId}")
                 }
-            }
-            if (nextAnswerId != -1) {
-                row {
-                    dataButton("Следущий", "answer_${nextAnswerId}")
+                if (nextAnswerId != -1) {
+                    dataButton("Следущий ➡\uFE0F", "answer_${nextAnswerId}")
                 }
             }
         }
@@ -93,7 +91,7 @@ suspend fun BehaviourContext.handleAnswerQuestionCallback(
         if (answer == null) {
             answerCallbackQuery(
                 query,
-                "Данного ответа на вопрос не существует"
+                "❌ Данного ответа на вопрос не существует"
             )
 
             return@databaseQuery
@@ -102,18 +100,19 @@ suspend fun BehaviourContext.handleAnswerQuestionCallback(
         if (answer.botUser.id != otherBotUser.id) {
             answerCallbackQuery(
                 query,
-                "Вы не можете посмотреть вопрос, ответ на который дали не вы"
+                "❌ Вы не можете посмотреть вопрос, ответ на который дали не вы"
             )
 
             return@databaseQuery
         }
 
         val question = answer.question
+        val university = Universities[question.universityId]
 
         reply(
             to = query,
             entities = buildEntities {
-                +bold("Вопрос #${question.id} об ${Universities[question.universityId].shortName}") +
+                +bold("${university.shortName} -> Вопрос #${question.id}") +
                         "\n" + question.text
             },
             replyMarkup = inlineKeyboard {
@@ -139,7 +138,7 @@ suspend fun BehaviourContext.handleAnswerDeleteCallback(
         if (answer == null) {
             answerCallbackQuery(
                 query,
-                "Данного ответа на вопрос не существует"
+                "❌ Данного ответа на вопрос не существует"
             )
 
             return@databaseQuery
@@ -148,7 +147,7 @@ suspend fun BehaviourContext.handleAnswerDeleteCallback(
         if (answer.botUser.id != otherBotUser.id) {
             answerCallbackQuery(
                 query,
-                "Вы не можете удалить не ваш ответ на вопрос"
+                "❌ Вы не можете удалить не ваш ответ на вопрос"
             )
 
             return@databaseQuery

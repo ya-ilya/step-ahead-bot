@@ -47,7 +47,7 @@ suspend fun BehaviourContext.handleCreateQuestionAnswerCallback(
     if (questionEntity == null) {
         answerCallbackQuery(
             query,
-            "Данного вопроса не существует"
+            "❌ Данного вопроса не существует"
         )
 
         return
@@ -57,7 +57,7 @@ suspend fun BehaviourContext.handleCreateQuestionAnswerCallback(
         if (databaseQuery { questionEntity.botUser.id == botUserEntity.id }) {
             answerCallbackQuery(
                 query,
-                "Вы не можете оставлять ответы на свой же вопрос"
+                "❌ Вы не можете оставлять ответы на свой же вопрос"
             )
 
             return
@@ -69,7 +69,7 @@ suspend fun BehaviourContext.handleCreateQuestionAnswerCallback(
     if (botUser.lastQuestionAnswerTime != null && LocalDateTime.now() < botUser.lastQuestionAnswerTime.plusMinutes(1)) {
         answerCallbackQuery(
             query,
-            "Вы должны подождать минуту, прежде чем оставить новый ответ вопрос"
+            "⏳ Вы должны подождать минуту, прежде чем оставить новый ответ вопрос"
         )
 
         return
@@ -79,7 +79,7 @@ suspend fun BehaviourContext.handleCreateQuestionAnswerCallback(
         SendTextMessage(
             query.message!!.chat.id,
             buildEntities {
-                +bold("Создание ответа на вопрос (о ${university.shortName}) #${questionId}") +
+                +bold("${university.shortName} -> Вопрос #${questionId} -> Создание ответа на вопрос") +
                         "\n" + "Как вы хотите ответить на этот вопрос?"
             },
             replyParameters = ReplyParameters(metaInfo = query.message!!.metaInfo)

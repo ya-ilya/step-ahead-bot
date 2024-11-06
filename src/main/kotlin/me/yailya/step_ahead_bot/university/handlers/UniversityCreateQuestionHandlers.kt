@@ -29,7 +29,7 @@ suspend fun BehaviourContext.handleCreateQuestionCallback(
     if (botUser.lastQuestionTime != null && LocalDateTime.now() < botUser.lastQuestionTime.plusMinutes(1)) {
         answerCallbackQuery(
             query,
-            "Вы должны подождать минуту, прежде чем задать новый вопрос"
+            "⏳ Вы должны подождать минуту, прежде чем задать новый вопрос"
         )
 
         return
@@ -39,7 +39,7 @@ suspend fun BehaviourContext.handleCreateQuestionCallback(
         SendTextMessage(
             query.message!!.chat.id,
             buildEntities {
-                +bold("Создание вопроса о ${university.shortName}") +
+                +bold("${university.shortName} -> Задание вопроса") +
                         "\n" + "Что вам хотелось бы узнать о данном ВУЗе?"
             },
             replyParameters = ReplyParameters(metaInfo = query.message!!.metaInfo)

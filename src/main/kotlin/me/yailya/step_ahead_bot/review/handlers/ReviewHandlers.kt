@@ -18,6 +18,7 @@ import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.replyOrEdit
 import me.yailya.step_ahead_bot.review.ReviewEntity
+import me.yailya.step_ahead_bot.university.Universities
 
 suspend fun BehaviourContext.handleReviewCallback(
     query: DataCallbackQuery,
@@ -28,7 +29,7 @@ suspend fun BehaviourContext.handleReviewCallback(
     if (reviews.isEmpty()) {
         answerCallbackQuery(
             query,
-            "Вы еще не создавали отзывов"
+            "❌ Вы еще не создавали отзывов"
         )
 
         return
@@ -40,7 +41,7 @@ suspend fun BehaviourContext.handleReviewCallback(
     if (review == null) {
         answerCallbackQuery(
             query,
-            "Данный отзыв (#${reviewId}) не существует, либо же его создали не вы"
+            "❌ Данный отзыв (#${reviewId}) не существует, либо же его создали не вы"
         )
 
         return
@@ -49,12 +50,13 @@ suspend fun BehaviourContext.handleReviewCallback(
     val reviewIndex = reviews.indexOf(review)
     val previousReviewId = reviews.elementAtOrNull(reviewIndex - 1).let { it?.id ?: -1 }
     val nextReviewId = reviews.elementAtOrNull(reviewIndex + 1).let { it?.id ?: -1 }
+    val university = Universities[review.universityId]
 
     replyOrEdit(
         reviewId == -1,
         query,
         buildEntities {
-            +bold("Отзыв #${review.id}. ${review.rating}/5") +
+            +bold("${university.shortName} -> Отзыв #${review.id}. ${review.rating}/5") +
                     "\n" + "Положительные стороны:" +
                     "\n" + blockquote(review.pros) +
                     "\n" + "Отрицательные стороны:" +
@@ -64,16 +66,14 @@ suspend fun BehaviourContext.handleReviewCallback(
         },
         inlineKeyboard {
             row {
-                dataButton("Удалить отзыв", "review_delete_${review.id}")
+                dataButton("\uD83D\uDDD1\uFE0F Удалить", "review_delete_${review.id}")
             }
-            if (previousReviewId != -1) {
-                row {
-                    dataButton("Предыдущий", "review_${previousReviewId}")
+            row {
+                if (previousReviewId != -1) {
+                    dataButton("⬅\uFE0F Предыдущий", "review_${previousReviewId}")
                 }
-            }
-            if (nextReviewId != -1) {
-                row {
-                    dataButton("Следущий", "review_${nextReviewId}")
+                if (nextReviewId != -1) {
+                    dataButton("➡\uFE0F Следущий", "review_${nextReviewId}")
                 }
             }
         }
@@ -94,7 +94,7 @@ suspend fun BehaviourContext.handleReviewDeleteCallback(
         if (review == null) {
             answerCallbackQuery(
                 query,
-                "Данного отзыва не существует"
+                "❌ Данного отзыва не существует"
             )
 
             return@databaseQuery
@@ -103,7 +103,7 @@ suspend fun BehaviourContext.handleReviewDeleteCallback(
         if (review.botUser.id != otherBotUser.first.id) {
             answerCallbackQuery(
                 query,
-                "Вы не можете удалить не ваш отзыв"
+                "❌ Вы не можете удалить не ваш отзыв"
             )
 
             return@databaseQuery
@@ -114,7 +114,7 @@ suspend fun BehaviourContext.handleReviewDeleteCallback(
 
         answerCallbackQuery(
             query,
-            "Ваш отзыв #${reviewId} был удален"
+            "✅ Ваш отзыв #${reviewId} был удален"
         )
     }
 }

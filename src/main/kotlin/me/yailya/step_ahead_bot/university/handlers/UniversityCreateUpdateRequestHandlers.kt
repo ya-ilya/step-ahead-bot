@@ -29,7 +29,7 @@ suspend fun BehaviourContext.handleCreateUpdateRequestCallback(
     if (botUser.lastUpdateRequestTime != null && LocalDateTime.now() < botUser.lastUpdateRequestTime.plusMinutes(1)) {
         answerCallbackQuery(
             query,
-            "Вы должны подождать минуту, прежде чем создать новый запрос на изменение информации"
+            "⏳ Вы должны подождать минуту, прежде чем создать новый запрос на изменение информации"
         )
 
         return
@@ -39,7 +39,7 @@ suspend fun BehaviourContext.handleCreateUpdateRequestCallback(
         SendTextMessage(
             query.message!!.chat.id,
             buildEntities {
-                +bold("Создание запроса на изменение информации о ${university.shortName}") +
+                +bold("${university.shortName} -> Создание запроса на изменение информации") +
                         "\n" + "Какую информацию, по вашему мнению, нужно изменить?"
             }
         )

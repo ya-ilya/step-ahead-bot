@@ -69,25 +69,28 @@ suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, 
         linkPreviewOptions = LinkPreviewOptions.Disabled,
         replyMarkup = inlineKeyboard {
             row {
-                dataButton("Специальности", "university_specialities_${university.id}")
-                dataButton("Вопросы", "university_questions_${university.id}")
-                dataButton("Отзывы", "university_reviews_${university.id}")
+                dataButton("\uD83C\uDF93 Специальности", "university_specialities_${university.id}")
             }
 
             row {
+                dataButton("❔ Вопросы", "university_questions_${university.id}")
                 dataButton(
-                    "Задать вопрос",
+                    "✍\uD83C\uDFFB Задать вопрос",
                     "university_create_question_${university.id}"
                 )
+            }
+
+            row {
+                dataButton("⭐ Отзывы", "university_reviews_${university.id}")
                 dataButton(
-                    "Создать отзыв",
+                    "✍\uD83C\uDFFB Создать отзыв",
                     "university_create_review_${university.id}"
                 )
             }
 
             row {
                 dataButton(
-                    "Создать запрос на изменение информации",
+                    "✍\uD83C\uDFFB Создать запрос на изменение информации",
                     "university_create_update_request_${university.id}"
                 )
             }
@@ -123,7 +126,7 @@ suspend fun BehaviourContext.handleUniversityQuestionCallback(
     if (questions.isEmpty()) {
         answerCallbackQuery(
             query,
-            "Вопросов о ${university.shortName} не найдено"
+            "❌ Вопросов о ${university.shortName} не найдено"
         )
 
         return
@@ -135,7 +138,7 @@ suspend fun BehaviourContext.handleUniversityQuestionCallback(
     if (question == null) {
         answerCallbackQuery(
             query,
-            "Данного вопроса (#${questionId}) не существует"
+            "❌ Данного вопроса (#${questionId}) не существует"
         )
 
         return
@@ -155,24 +158,22 @@ suspend fun BehaviourContext.handleUniversityQuestionCallback(
         inlineKeyboard {
             row {
                 dataButton(
-                    "Создать ответ на этот вопрос",
+                    "✍\uD83C\uDFFB Оставить ответ",
                     "university_create_question_answer_${question.id}_${university.id}"
                 )
             }
             row {
                 dataButton(
-                    "Посмотреть ответы на этот вопрос",
+                    "\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Посмотреть ответы",
                     "university_question_answers_${question.id}_${university.id}"
                 )
             }
-            if (previousQuestionId != -1) {
-                row {
-                    dataButton("Предыдущий", "university_question_${previousQuestionId}_${university.id}")
+            row {
+                if (previousQuestionId != -1) {
+                    dataButton("⬅\uFE0F Предыдущий", "university_question_${previousQuestionId}_${university.id}")
                 }
-            }
-            if (nextQuestionId != -1) {
-                row {
-                    dataButton("Следущий", "university_question_${nextQuestionId}_${university.id}")
+                if (nextQuestionId != -1) {
+                    dataButton("Следущий ➡\uFE0F", "university_question_${nextQuestionId}_${university.id}")
                 }
             }
         }
@@ -192,7 +193,7 @@ suspend fun BehaviourContext.handleUniversityQuestionAnswerCallback(
     if (answers.isEmpty()) {
         answerCallbackQuery(
             query,
-            "Ответов на этот вопрос нет"
+            "❌ Ответов на этот вопрос нет"
         )
 
         return
@@ -204,7 +205,7 @@ suspend fun BehaviourContext.handleUniversityQuestionAnswerCallback(
     if (answer == null) {
         answerCallbackQuery(
             query,
-            "Данного ответа на вопрос не существует"
+            "❌ Данного ответа на вопрос не существует"
         )
 
         return
@@ -213,7 +214,7 @@ suspend fun BehaviourContext.handleUniversityQuestionAnswerCallback(
     if (answer.question.universityId != university.id) {
         answerCallbackQuery(
             query,
-            "Данный вопрос был задан о другом ВУЗе"
+            "❌ Данный вопрос был задан о другом ВУЗе"
         )
 
         return
@@ -231,17 +232,18 @@ suspend fun BehaviourContext.handleUniversityQuestionAnswerCallback(
                     "\n" + answer.text
         },
         inlineKeyboard {
-            if (previousAnswerId != -1) {
-                row {
+            row {
+                if (previousAnswerId != -1) {
                     dataButton(
-                        "Предыдущий",
+                        "⬅\uFE0F Предыдущий",
                         "university_question_answer_${previousAnswerId}_${questionId}_${university.id}"
                     )
                 }
-            }
-            if (nextAnswerId != -1) {
-                row {
-                    dataButton("Следущий", "university_question_answer_${nextAnswerId}_${questionId}_${university.id}")
+                if (nextAnswerId != -1) {
+                    dataButton(
+                        "Следущий ➡\uFE0F",
+                        "university_question_answer_${nextAnswerId}_${questionId}_${university.id}"
+                    )
                 }
             }
         }
@@ -260,7 +262,7 @@ suspend fun BehaviourContext.handleUniversityReviewCallback(
     if (reviews.isEmpty()) {
         answerCallbackQuery(
             query,
-            "Отзывов о ${university.shortName} не найдено"
+            "❌ Отзывов о ${university.shortName} не найдено"
         )
 
         return
@@ -272,7 +274,7 @@ suspend fun BehaviourContext.handleUniversityReviewCallback(
     if (review == null) {
         answerCallbackQuery(
             query,
-            "Данного отзыва (#${reviewId}) не существует, либо же он принадлежит другому ВУЗу"
+            "❌ Данного отзыва (#${reviewId}) не существует, либо же он принадлежит другому ВУЗу"
         )
 
         return
@@ -295,14 +297,12 @@ suspend fun BehaviourContext.handleUniversityReviewCallback(
                     "\n" + blockquote(review.comment)
         },
         inlineKeyboard {
-            if (previousReviewId != -1) {
-                row {
-                    dataButton("Предыдущий", "university_review_${previousReviewId}_${university.id}")
+            row {
+                if (previousReviewId != -1) {
+                    dataButton("⬅\uFE0F Предыдущий", "university_review_${previousReviewId}_${university.id}")
                 }
-            }
-            if (nextReviewId != -1) {
-                row {
-                    dataButton("Следущий", "university_review_${nextReviewId}_${university.id}")
+                if (nextReviewId != -1) {
+                    dataButton("Следущий ➡\uFE0F", "university_review_${nextReviewId}_${university.id}")
                 }
             }
         }

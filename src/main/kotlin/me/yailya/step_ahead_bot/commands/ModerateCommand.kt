@@ -21,7 +21,7 @@ suspend fun BehaviourContext.handleModerateCommand(message: TextMessage) {
         text = "Здраствуйте, модератор #${botUser.id}. Выберете нужную вам опцию:",
         replyMarkup = inlineKeyboard {
             row {
-                dataButton("Рассмотреть открытые запросы на изменение", "moderate_update_requests")
+                dataButton("\uD83D\uDD0D Рассмотреть открытые запросы на изменение", "moderate_update_requests")
             }
         }
     )

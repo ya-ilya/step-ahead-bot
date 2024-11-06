@@ -37,7 +37,7 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
     if (updateRequests.isEmpty()) {
         answerCallbackQuery(
             query,
-            "Открытых запросов на изменение не найдено"
+            "❌ Открытых запросов на изменение не найдено"
         )
 
         return
@@ -49,31 +49,31 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
     val previousUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex - 1).let { it?.id ?: -1 }
     val nextUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex + 1).let { it?.id ?: -1 }
 
+    val university = Universities[updateRequest.universityId]
+
     replyOrEdit(
         updateRequestId == -1,
         query,
         buildEntities {
-            +"[Запрос #${updateRequest.id}]\n- Университет: ${Universities[updateRequest.universityId].name}\n- Статус: ${updateRequest.status.text}" +
+            +"${university.shortName} -> Запрос на изменение информации #${updateRequest.id}]\n- Статус: ${updateRequest.status.text}" +
                     "\nИнформация, которую пользователь бы хотел поменять: " + blockquote(updateRequest.text)
         },
         inlineKeyboard {
             row {
                 dataButton(
-                    "Закрыть запрос, и пометить как выполненое",
+                    "❌ Закрыть, и пометить как выполненый",
                     "moderate_update_request_close_done_${updateRequest.id}"
                 )
             }
             row {
-                dataButton("Закрыть запрос без его выполнения", "moderate_update_request_close_${updateRequest.id}")
+                dataButton("❌ Закрыть без выполнения", "moderate_update_request_close_${updateRequest.id}")
             }
-            if (previousUpdateRequestId != -1) {
-                row {
-                    dataButton("Предыдущий", "moderate_update_request_${previousUpdateRequestId}")
+            row {
+                if (previousUpdateRequestId != -1) {
+                    dataButton("⬅\uFE0F Предыдущий", "moderate_update_request_${previousUpdateRequestId}")
                 }
-            }
-            if (nextUpdateRequestId != -1) {
-                row {
-                    dataButton("Следущий", "moderate_update_request_${nextUpdateRequestId}")
+                if (nextUpdateRequestId != -1) {
+                    dataButton("Следущий➡\uFE0F", "moderate_update_request_${nextUpdateRequestId}")
                 }
             }
         }
@@ -105,7 +105,7 @@ suspend fun BehaviourContext.checkUpdateRequestNotClosed(
     if (updateRequestEntity == null) {
         answerCallbackQuery(
             query,
-            "Этого запроса не существует"
+            "❌ Этого запроса не существует"
         )
 
         return false to null
@@ -114,7 +114,7 @@ suspend fun BehaviourContext.checkUpdateRequestNotClosed(
     if (databaseQuery { updateRequestEntity.status } != UpdateRequestStatus.Open) {
         answerCallbackQuery(
             query,
-            "Этот запрос уже был закрыт"
+            "❌ Этот запрос уже был закрыт"
         )
 
         return false to updateRequestEntity

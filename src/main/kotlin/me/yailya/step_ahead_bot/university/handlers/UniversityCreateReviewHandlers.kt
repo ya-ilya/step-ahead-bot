@@ -34,7 +34,7 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
     if (botUser.lastReviewTime != null && LocalDateTime.now() < botUser.lastReviewTime.plusMinutes(1)) {
         answerCallbackQuery(
             query,
-            "Вы должны подождать минуту, прежде чем оставить новый отзыв"
+            "⏳ Вы должны подождать минуту, прежде чем оставить новый отзыв"
         )
 
         return
@@ -44,7 +44,7 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
         SendTextMessage(
             query.message!!.chat.id,
             buildEntities {
-                +bold("Оставление отзыва о ${university.shortName}") +
+                +bold("${university.shortName} -> Создание отзыва") +
                         "\n" + "Что вам понравилось в данном ВУЗе?"
             },
             replyParameters = ReplyParameters(metaInfo = query.message!!.metaInfo)
@@ -71,15 +71,15 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
             "Поставьте оценку данному ВУЗу",
             replyMarkup = inlineKeyboard {
                 row {
-                    dataButton("1", "1")
-                    dataButton("2", "2")
+                    dataButton("1\uFE0F⃣", "1")
+                    dataButton("2\uFE0F⃣", "2")
                 }
                 row {
-                    dataButton("3", "3")
-                    dataButton("4", "4")
+                    dataButton("3\uFE0F⃣", "3")
+                    dataButton("4\uFE0F⃣", "4")
                 }
                 row {
-                    dataButton("5", "5")
+                    dataButton("5\uFE0F⃣", "5")
                 }
             }
         )

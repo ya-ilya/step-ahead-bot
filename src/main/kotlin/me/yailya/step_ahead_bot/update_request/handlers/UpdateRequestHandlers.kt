@@ -25,7 +25,7 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
     if (updateRequests.isEmpty()) {
         answerCallbackQuery(
             query,
-            "Вы еще не создавали запросы на изменение информации"
+            "❌ Вы еще не создавали запросы на изменение информации"
         )
 
         return
@@ -37,7 +37,7 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
     if (updateRequest == null) {
         answerCallbackQuery(
             query,
-            "Данный запрос на изменение не существует, либо же его создали не вы"
+            "❌ Данный запрос на изменение не существует, либо же его создали не вы"
         )
 
         return
@@ -47,13 +47,13 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
     val previousUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex - 1).let { it?.id ?: -1 }
     val nextUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex + 1).let { it?.id ?: -1 }
 
+    val university = Universities[updateRequest.universityId]
+
     replyOrEdit(
         updateRequestId == -1,
         query,
         buildEntities {
-            val university = Universities[updateRequest.universityId]
-
-            +"\n" + "[Запрос #${updateRequest.id}]\n- Университет: ${university.name}\n- Статус: ${updateRequest.status.text}"
+            +"\n" + "${university.shortName} -> Запрос на изменение информации #${updateRequest.id}\n- Статус: ${updateRequest.status.text}"
 
             if (updateRequest.moderator != null && updateRequest.commentFromModeration != null) {
                 +"\n- Комментарий от модератора #${updateRequest.moderator.id}: " + blockquote(updateRequest.commentFromModeration)
@@ -64,17 +64,16 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
         inlineKeyboard {
             if (updateRequest.status == UpdateRequestStatus.Open) {
                 row {
-                    dataButton("Закрыть запрос", "update_request_close_${updateRequest.id}")
+                    dataButton("❌ Закрыть", "update_request_close_${updateRequest.id}")
                 }
             }
-            if (previousUpdateRequestId != -1) {
-                row {
-                    dataButton("Предыдущий", "update_request_${previousUpdateRequestId}")
+            row {
+                if (previousUpdateRequestId != -1) {
+                    dataButton("⬅\uFE0F Предыдущий", "update_request_${previousUpdateRequestId}")
+
                 }
-            }
-            if (nextUpdateRequestId != -1) {
-                row {
-                    dataButton("Следущий", "update_request_${nextUpdateRequestId}")
+                if (nextUpdateRequestId != -1) {
+                    dataButton("Следущий ➡\uFE0F", "update_request_${nextUpdateRequestId}")
                 }
             }
         }
