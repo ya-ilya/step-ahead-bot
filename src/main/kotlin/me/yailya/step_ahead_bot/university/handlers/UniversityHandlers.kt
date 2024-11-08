@@ -23,7 +23,7 @@ import me.yailya.step_ahead_bot.university.University
 import me.yailya.step_ahead_bot.university.ranking.EduRankRanking
 
 suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, university: University) {
-    val universityRankData = EduRankRanking.ranking[university.name_en]!!
+    val universityRankData = EduRankRanking.ranking[university.nameEn]!!
 
     reply(
         to = query,
@@ -211,7 +211,7 @@ suspend fun BehaviourContext.handleUniversityQuestionAnswerCallback(
         return
     }
 
-    if (answer.question.universityId != university.id) {
+    if (answer.question.university.id != university.id) {
         answerCallbackQuery(
             query,
             "❌ Данный вопрос был задан о другом ВУЗе"

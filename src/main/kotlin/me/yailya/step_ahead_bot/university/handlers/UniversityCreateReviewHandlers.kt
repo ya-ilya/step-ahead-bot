@@ -23,6 +23,7 @@ import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.review.ReviewEntity
 import me.yailya.step_ahead_bot.university.University
+import me.yailya.step_ahead_bot.university.UniversityEntity
 import java.time.LocalDateTime
 
 suspend fun BehaviourContext.handleCreateReviewCallback(
@@ -94,7 +95,7 @@ suspend fun BehaviourContext.handleCreateReviewCallback(
 
         ReviewEntity.new {
             this.botUser = botUserEntity
-            this.universityId = university.id
+            this.university = UniversityEntity.findById(university.id)!!
             this.pros = prosMessage.content.text
             this.cons = cons
             this.comment = comment

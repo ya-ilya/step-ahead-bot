@@ -2,6 +2,7 @@ package me.yailya.step_ahead_bot.update_request
 
 import me.yailya.step_ahead_bot.bot_user.BotUserEntity
 import me.yailya.step_ahead_bot.databaseQuery
+import me.yailya.step_ahead_bot.university.UniversityEntity
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -14,7 +15,7 @@ class UpdateRequestEntity(id: EntityID<Int>) : IntEntity(id) {
     }
 
     var botUser by BotUserEntity referencedOn UpdateRequests.botUser
-    var universityId by UpdateRequests.universityId
+    var university by UniversityEntity referencedOn UpdateRequests.university
     var text by UpdateRequests.text
     var moderator by BotUserEntity optionalReferencedOn UpdateRequests.moderator
     var commentFromModeration by UpdateRequests.commentFromModeration
@@ -23,7 +24,7 @@ class UpdateRequestEntity(id: EntityID<Int>) : IntEntity(id) {
     fun toModel() = UpdateRequest(
         id.value,
         botUser.toModel(),
-        universityId,
+        university.toModel(),
         text,
         moderator?.toModel(),
         commentFromModeration,

@@ -21,12 +21,11 @@ import me.yailya.step_ahead_bot.answer.AnswerEntity
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.question.QuestionEntity
-import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.university.University
 import java.time.LocalDateTime
 
 suspend fun BehaviourContext.notifyUserAboutQuestionAnswerCreated(entity: AnswerEntity) {
-    val university = Universities[entity.question.universityId]
+    val university = entity.question.university
     send(
         ChatId(RawChatId(entity.question.botUser.userId)),
         buildEntities {

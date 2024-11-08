@@ -42,5 +42,6 @@ bin/
 ### Mac OS ###
 .DS_Store
 
+.env
 .kotlin
-/*.db
+mysql_data

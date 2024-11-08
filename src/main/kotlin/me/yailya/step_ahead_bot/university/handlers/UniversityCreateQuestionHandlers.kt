@@ -18,6 +18,7 @@ import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.university.University
+import me.yailya.step_ahead_bot.university.UniversityEntity
 import java.time.LocalDateTime
 
 suspend fun BehaviourContext.handleCreateQuestionCallback(
@@ -51,7 +52,7 @@ suspend fun BehaviourContext.handleCreateQuestionCallback(
 
         QuestionEntity.new {
             this.botUser = botUserEntity
-            this.universityId = university.id
+            this.university = UniversityEntity.findById(university.id)!!
             this.text = textMessage.content.text
         }.toModel()
     }

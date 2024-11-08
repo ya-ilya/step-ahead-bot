@@ -23,7 +23,6 @@ import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.editInlineButton
 import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.replyOrEdit
-import me.yailya.step_ahead_bot.university.Universities
 
 suspend fun BehaviourContext.handleQuestionCallback(
     query: DataCallbackQuery,
@@ -56,7 +55,7 @@ suspend fun BehaviourContext.handleQuestionCallback(
     val previousQuestionId = questions.elementAtOrNull(questionIndex - 1).let { it?.id ?: -1 }
     val nextQuestionId = questions.elementAtOrNull(questionIndex + 1).let { it?.id ?: -1 }
 
-    val university = Universities[question.universityId]
+    val university = question.university
 
     replyOrEdit(
         questionId == -1,
@@ -160,7 +159,7 @@ suspend fun BehaviourContext.handleQuestionAnswerCallback(
         answerId == -1,
         query,
         buildEntities {
-            +bold("Ответ на вопрос #${answer.id} о ${Universities[answer.question.universityId].shortName}") +
+            +bold("Ответ на вопрос #${answer.id} о ${answer.question.university.shortName}") +
                     "\n" + answer.text
         },
         inlineKeyboard {

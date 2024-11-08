@@ -12,7 +12,6 @@ import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.replyOrEdit
-import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
 import me.yailya.step_ahead_bot.update_request.UpdateRequestStatus
 
@@ -47,7 +46,7 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
     val previousUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex - 1).let { it?.id ?: -1 }
     val nextUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex + 1).let { it?.id ?: -1 }
 
-    val university = Universities[updateRequest.universityId]
+    val university = updateRequest.university
 
     replyOrEdit(
         updateRequestId == -1,

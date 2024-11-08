@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.first
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.replyOrEdit
-import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
 import me.yailya.step_ahead_bot.update_request.UpdateRequestStatus
 
@@ -49,7 +48,7 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
     val previousUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex - 1).let { it?.id ?: -1 }
     val nextUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex + 1).let { it?.id ?: -1 }
 
-    val university = Universities[updateRequest.universityId]
+    val university = updateRequest.university
 
     replyOrEdit(
         updateRequestId == -1,
@@ -86,7 +85,7 @@ suspend fun BehaviourContext.notifyUserAboutUpdateRequestClosed(entity: UpdateRe
     send(
         ChatId(RawChatId(entity.botUser.userId)),
         buildEntities {
-            +bold("Изменение статуса запроса #${entity.id.value} о ${Universities[entity.universityId].shortName}") +
+            +bold("Изменение статуса запроса #${entity.id.value} о ${entity.university.shortName}") +
                     "\n" + "- Статус изменен с ${UpdateRequestStatus.Open.text} на ${entity.status.text}"
 
             if (entity.moderator != null && entity.commentFromModeration != null) {

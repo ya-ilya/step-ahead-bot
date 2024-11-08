@@ -18,7 +18,6 @@ import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.replyOrEdit
 import me.yailya.step_ahead_bot.review.ReviewEntity
-import me.yailya.step_ahead_bot.university.Universities
 
 suspend fun BehaviourContext.handleReviewCallback(
     query: DataCallbackQuery,
@@ -50,7 +49,7 @@ suspend fun BehaviourContext.handleReviewCallback(
     val reviewIndex = reviews.indexOf(review)
     val previousReviewId = reviews.elementAtOrNull(reviewIndex - 1).let { it?.id ?: -1 }
     val nextReviewId = reviews.elementAtOrNull(reviewIndex + 1).let { it?.id ?: -1 }
-    val university = Universities[review.universityId]
+    val university = review.university
 
     replyOrEdit(
         reviewId == -1,

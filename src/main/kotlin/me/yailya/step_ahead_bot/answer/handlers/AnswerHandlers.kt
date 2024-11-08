@@ -18,7 +18,6 @@ import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.replyOrEdit
-import me.yailya.step_ahead_bot.university.Universities
 
 suspend fun BehaviourContext.handleAnswerCallback(
     query: DataCallbackQuery,
@@ -107,12 +106,11 @@ suspend fun BehaviourContext.handleAnswerQuestionCallback(
         }
 
         val question = answer.question
-        val university = Universities[question.universityId]
 
         reply(
             to = query,
             entities = buildEntities {
-                +bold("${university.shortName} -> Вопрос #${question.id}") +
+                +bold("${question.university.shortName} -> Вопрос #${question.id}") +
                         "\n" + question.text
             },
             replyMarkup = inlineKeyboard {

@@ -1,0 +1,29 @@
+services:
+  database:
+    image: mysql
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root_secret
+      MYSQL_DATABASE: database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user_secret
+      LANG: C.UTF-8
+    ports:
+      - 33061:3306
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+    networks:
+      - database
+    command: [ 'mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci' ]
+  bot:
+    env_file: ".env"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - database
+volumes:
+  mysql_data:
+networks:
+  database:

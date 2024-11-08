@@ -46,6 +46,7 @@ import me.yailya.step_ahead_bot.review.Reviews
 import me.yailya.step_ahead_bot.review.handlers.handleReviewCallback
 import me.yailya.step_ahead_bot.review.handlers.handleReviewDeleteCallback
 import me.yailya.step_ahead_bot.university.Universities
+import me.yailya.step_ahead_bot.university.UniversityEntity
 import me.yailya.step_ahead_bot.university.handlers.*
 import me.yailya.step_ahead_bot.university.ranking.EduRankRanking
 import me.yailya.step_ahead_bot.update_request.UpdateRequests
@@ -53,8 +54,6 @@ import me.yailya.step_ahead_bot.update_request.handlers.handleUpdateRequestCallb
 import me.yailya.step_ahead_bot.update_request.handlers.handleUpdateRequestCloseCallback
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.StdOutSqlLogger
-import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -153,14 +152,12 @@ suspend fun BehaviourContext.editInlineButton(
 suspend fun main() {
     println("Loaded EduRank ranking. ${EduRankRanking.ranking.size} entries")
 
-    val driverClassName = "org.h2.Driver"
-    val jdbcURL = "jdbc:h2:file:./database"
-    val database = Database.connect(jdbcURL, driverClassName)
+    val driverClassName = "com.mysql.cj.jdbc.Driver"
+    val jdbcURL = "jdbc:mysql://database:3306/database"
+    val database = Database.connect(jdbcURL, driverClassName, "user", "user_secret")
 
     transaction(database) {
-        SchemaUtils.create(Reviews, UpdateRequests, Questions, Answers)
-
-        addLogger(StdOutSqlLogger)
+        SchemaUtils.create(Reviews, UpdateRequests, Questions, Answers, Universities)
     }
 
     databaseQuery {
@@ -323,7 +320,7 @@ suspend fun main() {
         onDataCallbackQuery(universityRegex) {
             val values = universityRegex.find(it.data)!!.groupValues
             val name = values[1]
-            val university = Universities[values[2].toInt()]
+            val university = databaseQuery { UniversityEntity.findById(values[2].toInt())!!.toModel() }
 
             when {
                 name.isEmpty() -> {

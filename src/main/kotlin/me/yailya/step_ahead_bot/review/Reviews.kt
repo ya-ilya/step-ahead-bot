@@ -1,11 +1,12 @@
 package me.yailya.step_ahead_bot.review
 
 import me.yailya.step_ahead_bot.bot_user.BotUsers
+import me.yailya.step_ahead_bot.university.Universities
 import org.jetbrains.exposed.dao.id.IntIdTable
 
 object Reviews : IntIdTable() {
     val botUser = reference("botUser", BotUsers)
-    val universityId = integer("universityId")
+    val university = reference("university", Universities)
     val pros = text("pros")
     val cons = text("cons")
     val comment = text("comment")

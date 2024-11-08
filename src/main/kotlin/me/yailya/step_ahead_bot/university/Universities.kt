@@ -1,60 +1,23 @@
 package me.yailya.step_ahead_bot.university
 
 import kotlinx.serialization.json.Json
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.nio.charset.Charset
+import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.json.json
 
-@Suppress("SameParameterValue")
-object Universities {
-    private val universities = run {
-        val result = mutableMapOf<Int, University>()
-
-        for (resource in getResourceFiles("universities")) {
-            if (resource.endsWith(".json")) {
-                val university = Json.decodeFromString<University>(
-                    getResourceAsStream("universities/${resource}").readAllBytes().toString(
-                        Charset.defaultCharset()
-                    )
-                )
-
-                result[university.id] = university
-            }
-        }
-
-        result
-    }
-
-    operator fun get(universityId: Int): University {
-        return universities[universityId]!!
-    }
-
-    operator fun iterator() = universities.iterator()
-
-    @Throws(IOException::class)
-    private fun getResourceFiles(path: String): List<String> {
-        val filenames: MutableList<String> = ArrayList()
-
-        getResourceAsStream(path).use { `in` ->
-            BufferedReader(InputStreamReader(`in`)).use { br ->
-                var resource: String
-                while ((br.readLine().also { resource = it }) != null) {
-                    filenames.add(resource)
-                }
-            }
-        }
-        return filenames
-    }
-
-    private fun getResourceAsStream(resource: String): InputStream {
-        val `in` = getContextClassLoader().getResourceAsStream(resource)
-
-        return `in` ?: javaClass.getResourceAsStream(resource)!!
-    }
-
-    private fun getContextClassLoader(): ClassLoader {
-        return Thread.currentThread().contextClassLoader
-    }
+object Universities : IntIdTable() {
+    val shortName = varchar("shortName", 1024)
+    val name = varchar("name", 1024)
+    val nameEn = varchar("nameEn", 1024)
+    val description = varchar("description", 8192)
+    val website = varchar("website", 1024)
+    val location = varchar("location", 1024)
+    val facilities = json<List<University.UniversityFacility>>("facilities", Json)
+    val budgetInfo = json<University.UniversityBudgetInfo>("budgetInfo", Json)
+    val paidInfo = json<University.UniversityPaidInfo>("paidInfo", Json)
+    val extraPoints = json<Map<University.ExtraPointsReason, Int>>("extraPoints", Json)
+    val inNumbers = json<University.UniversityInNumbers>("inNumbers", Json)
+    val contacts = json<University.UniversityContacts>("contacts", Json)
+    val socialNetworks = json<University.UniversitySocialNetworks>("socialNetworks", Json)
+    val listOfApplication = varchar("listOfApplicants", 1024)
+    val specialities = json<List<String>>("specialities", Json)
 }

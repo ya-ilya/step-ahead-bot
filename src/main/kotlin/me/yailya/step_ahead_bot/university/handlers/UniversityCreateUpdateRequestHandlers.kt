@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.first
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.university.University
+import me.yailya.step_ahead_bot.university.UniversityEntity
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
 import me.yailya.step_ahead_bot.update_request.UpdateRequestStatus
 import java.time.LocalDateTime
@@ -50,7 +51,7 @@ suspend fun BehaviourContext.handleCreateUpdateRequestCallback(
 
         UpdateRequestEntity.new {
             this.botUser = botUserEntity
-            this.universityId = university.id
+            this.university = UniversityEntity.findById(university.id)!!
             this.text = textMessage.content.text
             this.status = UpdateRequestStatus.Open
         }.toModel()
