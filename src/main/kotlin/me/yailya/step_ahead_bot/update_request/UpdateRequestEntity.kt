@@ -1,18 +1,13 @@
 package me.yailya.step_ahead_bot.update_request
 
 import me.yailya.step_ahead_bot.bot_user.BotUserEntity
-import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.university.UniversityEntity
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
 class UpdateRequestEntity(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<UpdateRequestEntity>(UpdateRequests) {
-        suspend fun getModelsByStatus(status: UpdateRequestStatus) = databaseQuery {
-            find { UpdateRequests.status eq status }.map { it.toModel() }
-        }
-    }
+    companion object : IntEntityClass<UpdateRequestEntity>(UpdateRequests)
 
     var botUser by BotUserEntity referencedOn UpdateRequests.botUser
     var university by UniversityEntity referencedOn UpdateRequests.university

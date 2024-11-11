@@ -12,39 +12,60 @@ import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.replyOrEdit
+import me.yailya.step_ahead_bot.update_request.UpdateRequest
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
 import me.yailya.step_ahead_bot.update_request.UpdateRequestStatus
+import me.yailya.step_ahead_bot.update_request.UpdateRequests
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+
+private suspend fun updateRequestForKeyboard(
+    query: DataCallbackQuery,
+    id: Int
+): Triple<UpdateRequest?, UpdateRequest, UpdateRequest?> = databaseQuery {
+    val (botUserEntity) = query.botUser()
+    val condition = UpdateRequests.botUser eq botUserEntity.id
+    val updateRequests = botUserEntity.updateRequests
+
+    if (updateRequests.empty()) {
+        throw RuntimeException("❌ Вы еще не создавали запросы на изменение информации")
+    }
+
+    val current = if (id == -1) {
+        updateRequests.first()
+    } else {
+        UpdateRequestEntity.findById(id)
+            ?: throw RuntimeException("❌ Данный запрос на изменение не существует")
+    }
+
+    if (current.botUser.id != botUserEntity.id) {
+        throw RuntimeException("❌ Данный запрос на изменение создали не вы")
+    }
+
+    val previous = UpdateRequestEntity
+        .find { condition and (UpdateRequests.id less current.id) }
+        .lastOrNull()
+    val next = UpdateRequestEntity
+        .find { condition and (UpdateRequests.id greater current.id) }
+        .firstOrNull()
+
+    return@databaseQuery Triple(
+        previous?.toModel(),
+        current.toModel(),
+        next?.toModel()
+    )
+}
 
 suspend fun BehaviourContext.handleUpdateRequestCallback(
     query: DataCallbackQuery,
     updateRequestId: Int
 ) {
-    val updateRequests = databaseQuery { query.botUser().first.updateRequests.map { it.toModel() } }
-
-    if (updateRequests.isEmpty()) {
-        answerCallbackQuery(
-            query,
-            "❌ Вы еще не создавали запросы на изменение информации"
-        )
-
+    val (previous, updateRequest, next) = try {
+        updateRequestForKeyboard(query, updateRequestId)
+    } catch (ex: RuntimeException) {
+        answerCallbackQuery(query, ex.message)
         return
     }
-
-    val realUpdateRequestId = if (updateRequestId == -1) updateRequests.first().id else updateRequestId
-    val updateRequest = updateRequests.find { it.id == realUpdateRequestId }
-
-    if (updateRequest == null) {
-        answerCallbackQuery(
-            query,
-            "❌ Данный запрос на изменение не существует, либо же его создали не вы"
-        )
-
-        return
-    }
-
-    val updateRequestIndex = updateRequests.indexOf(updateRequest)
-    val previousUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex - 1).let { it?.id ?: -1 }
-    val nextUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex + 1).let { it?.id ?: -1 }
 
     val university = updateRequest.university
 
@@ -67,12 +88,12 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
                 }
             }
             row {
-                if (previousUpdateRequestId != -1) {
-                    dataButton("⬅\uFE0F Предыдущий", "update_request_${previousUpdateRequestId}")
+                if (previous != null) {
+                    dataButton("⬅\uFE0F Предыдущий", "update_request_${previous.id}")
 
                 }
-                if (nextUpdateRequestId != -1) {
-                    dataButton("Следущий ➡\uFE0F", "update_request_${nextUpdateRequestId}")
+                if (next != null) {
+                    dataButton("Следущий ➡\uFE0F", "update_request_${next.id}")
                 }
             }
         }

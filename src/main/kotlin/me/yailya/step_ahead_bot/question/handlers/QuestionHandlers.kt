@@ -17,43 +17,66 @@ import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
 import dev.inmo.tgbotapi.utils.RiskFeature
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
+import me.yailya.step_ahead_bot.answer.Answer
 import me.yailya.step_ahead_bot.answer.AnswerEntity
+import me.yailya.step_ahead_bot.answer.Answers
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.editInlineButton
+import me.yailya.step_ahead_bot.question.Question
 import me.yailya.step_ahead_bot.question.QuestionEntity
+import me.yailya.step_ahead_bot.question.Questions
 import me.yailya.step_ahead_bot.replyOrEdit
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+
+private suspend fun questionForKeyboard(
+    query: DataCallbackQuery,
+    id: Int
+): Triple<Question?, Question, Question?> = databaseQuery {
+    val (botUserEntity) = query.botUser()
+    val condition = Questions.botUser eq botUserEntity.id
+    val questions = botUserEntity.questions
+
+    if (questions.empty()) {
+        throw RuntimeException("❌ Вы еще не задавали вопросов о ВУЗах")
+    }
+
+    val current = if (id == -1) {
+        questions.first()
+    } else {
+        QuestionEntity.findById(id) ?:
+        throw RuntimeException("❌ Данного вопроса не существует")
+    }
+
+    if (current.botUser.id != botUserEntity.id) {
+        throw RuntimeException("❌ Данный вопрос задали не вы")
+    }
+
+    val previous = QuestionEntity
+        .find { condition and (Questions.id less current.id) }
+        .lastOrNull()
+    val next = QuestionEntity
+        .find { condition and (Questions.id greater current.id) }
+        .firstOrNull()
+
+    return@databaseQuery Triple(
+        previous?.toModel(),
+        current.toModel(),
+        next?.toModel()
+    )
+}
 
 suspend fun BehaviourContext.handleQuestionCallback(
     query: DataCallbackQuery,
     questionId: Int
 ) {
-    val questions = databaseQuery { query.botUser().first.questions.map { it.toModel() } }
-
-    if (questions.isEmpty()) {
-        answerCallbackQuery(
-            query,
-            "❌ Вы еще не задавали вопросов о ВУЗах"
-        )
-
+    val (previous, question, next) = try {
+        questionForKeyboard(query, questionId)
+    } catch (ex: RuntimeException) {
+        answerCallbackQuery(query, ex.message)
         return
     }
-
-    val realQuestionId = if (questionId == -1) questions.first().id else questionId
-    val question = questions.find { it.id == realQuestionId }
-
-    if (question == null) {
-        answerCallbackQuery(
-            query,
-            "❌ Данного вопроса не существует"
-        )
-
-        return
-    }
-
-    val questionIndex = questions.indexOf(question)
-    val previousQuestionId = questions.elementAtOrNull(questionIndex - 1).let { it?.id ?: -1 }
-    val nextQuestionId = questions.elementAtOrNull(questionIndex + 1).let { it?.id ?: -1 }
 
     val university = question.university
 
@@ -72,11 +95,11 @@ suspend fun BehaviourContext.handleQuestionCallback(
                 dataButton("\uD83D\uDDD1\uFE0F Удалить", "question_delete_${question.id}")
             }
             row {
-                if (previousQuestionId != -1) {
-                    dataButton("⬅\uFE0F Предыдущий", "question_${previousQuestionId}")
+                if (previous != null) {
+                    dataButton("⬅\uFE0F Предыдущий", "question_${previous.id}")
                 }
-                if (nextQuestionId != -1) {
-                    dataButton("Следущий ➡\uFE0F", "question_${nextQuestionId}")
+                if (next != null) {
+                    dataButton("Следущий ➡\uFE0F", "question_${next.id}")
                 }
             }
         }
@@ -122,38 +145,51 @@ suspend fun BehaviourContext.handleQuestionDeleteCallback(
     }
 }
 
+private suspend fun answerForKeyboard(
+    id: Int,
+    questionId: Int
+): Triple<Answer?, Answer, Answer?> = databaseQuery {
+    val condition = Answers.question eq questionId
+    val question = QuestionEntity.findById(questionId) ?: throw RuntimeException("❌ Данный вопрос не существует")
+    val answers = question.answers
+
+    if (answers.empty()) {
+        throw RuntimeException("❌ Ответов на этот вопрос нет")
+    }
+
+    val current = if (id == -1) {
+        answers.first()
+    } else {
+        AnswerEntity.findById(id) ?:
+            throw RuntimeException("❌ Данного ответа на вопрос не существует")
+    }
+
+    val previous = AnswerEntity
+        .find { condition and (Answers.id less current.id) }
+        .lastOrNull()
+    val next = AnswerEntity
+        .find { condition and (Answers.id greater current.id) }
+        .firstOrNull()
+
+    return@databaseQuery Triple(
+        previous?.toModel(),
+        current.toModel(),
+        next?.toModel()
+    )
+}
+
 suspend fun BehaviourContext.handleQuestionAnswerCallback(
     query: DataCallbackQuery,
     answerId: Int,
     questionId: Int
 ) {
-    val (botUserEntity) = query.botUser()
-    val answers = databaseQuery { QuestionEntity.findById(questionId)!!.answers.map { it.toModel() } }
-
-    if (answers.isEmpty()) {
-        answerCallbackQuery(
-            query,
-            "❌ Ответов на этот вопрос нет"
-        )
-
+    val (_, botUser) = query.botUser()
+    val (previous, answer, next) = try {
+        answerForKeyboard(answerId, questionId)
+    } catch (ex: RuntimeException) {
+        answerCallbackQuery(query, ex.message)
         return
     }
-
-    val realAnswerId = if (answerId != -1) answerId else answers.first().id
-    val answer = answers.find { it.id == realAnswerId }
-
-    if (answer == null) {
-        answerCallbackQuery(
-            query,
-            "❌ Данного ответа на вопрос не существует"
-        )
-
-        return
-    }
-
-    val answerIndex = answers.indexOf(answer)
-    val previousAnswerId = answers.elementAtOrNull(answerIndex - 1).let { it?.id ?: -1 }
-    val nextAnswerId = answers.elementAtOrNull(answerIndex + 1).let { it?.id ?: -1 }
 
     replyOrEdit(
         answerId == -1,
@@ -164,7 +200,7 @@ suspend fun BehaviourContext.handleQuestionAnswerCallback(
         },
         inlineKeyboard {
             row {
-                if (databaseQuery { answer.question.botUser.id == botUserEntity.id.value }) {
+                if (answer.question.botUser.id == botUser.id) {
                     dataButton(
                         if (answer.isAccepted) "❌ Отменить одобрение" else "✅ Одобрить ответ",
                         "question_accept_answer_${answer.id}_${questionId}"
@@ -172,11 +208,11 @@ suspend fun BehaviourContext.handleQuestionAnswerCallback(
                 }
             }
             row {
-                if (previousAnswerId != -1) {
-                    dataButton("⬅\uFE0F Предыдущий", "question_answer_${previousAnswerId}_${questionId}")
+                if (previous != null) {
+                    dataButton("⬅\uFE0F Предыдущий", "question_answer_${previous.id}_${questionId}")
                 }
-                if (nextAnswerId != -1) {
-                    dataButton("Следущий ➡\uFE0F", "question_answer_${nextAnswerId}_${questionId}")
+                if (next != null) {
+                    dataButton("Следущий ➡\uFE0F", "question_answer_${next.id}_${questionId}")
                 }
             }
         }

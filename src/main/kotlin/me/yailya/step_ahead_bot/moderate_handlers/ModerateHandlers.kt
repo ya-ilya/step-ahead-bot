@@ -24,29 +24,52 @@ import kotlinx.coroutines.flow.first
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.replyOrEdit
+import me.yailya.step_ahead_bot.update_request.UpdateRequest
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
 import me.yailya.step_ahead_bot.update_request.UpdateRequestStatus
+import me.yailya.step_ahead_bot.update_request.UpdateRequests
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+
+private suspend fun updateRequestForKeyboard(id: Int): Triple<UpdateRequest?, UpdateRequest, UpdateRequest?> = databaseQuery {
+    val condition = UpdateRequests.status eq UpdateRequestStatus.Open
+    val updateRequests = UpdateRequestEntity.find(condition)
+
+    if (updateRequests.empty()) {
+        throw RuntimeException("❌ Открытых запросов на изменение не найдено")
+    }
+
+    val current = if (id == -1) {
+        updateRequests.first()
+    } else {
+        UpdateRequestEntity.findById(id)
+            ?: throw RuntimeException("❌ Данный запрос на изменение не существует")
+    }
+
+    val previous = UpdateRequestEntity
+        .find { condition and (UpdateRequests.id less current.id) }
+        .lastOrNull()
+    val next = UpdateRequestEntity
+        .find { condition and (UpdateRequests.id greater current.id) }
+        .firstOrNull()
+
+    return@databaseQuery Triple(
+        previous?.toModel(),
+        current.toModel(),
+        next?.toModel()
+    )
+}
 
 suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
     query: DataCallbackQuery,
     updateRequestId: Int
 ) {
-    val updateRequests = UpdateRequestEntity.getModelsByStatus(UpdateRequestStatus.Open)
-
-    if (updateRequests.isEmpty()) {
-        answerCallbackQuery(
-            query,
-            "❌ Открытых запросов на изменение не найдено"
-        )
-
+    val (previous, updateRequest, next) = try {
+        updateRequestForKeyboard(updateRequestId)
+    } catch (ex: RuntimeException) {
+        answerCallbackQuery(query, ex.message)
         return
     }
-
-    val realUpdateRequestId = if (updateRequestId == -1) updateRequests.first().id else updateRequestId
-    val updateRequest = updateRequests.find { it.id == realUpdateRequestId }!!
-    val updateRequestIndex = updateRequests.indexOf(updateRequest)
-    val previousUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex - 1).let { it?.id ?: -1 }
-    val nextUpdateRequestId = updateRequests.elementAtOrNull(updateRequestIndex + 1).let { it?.id ?: -1 }
 
     val university = updateRequest.university
 
@@ -68,11 +91,11 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
                 dataButton("❌ Закрыть без выполнения", "moderate_update_request_close_${updateRequest.id}")
             }
             row {
-                if (previousUpdateRequestId != -1) {
-                    dataButton("⬅\uFE0F Предыдущий", "moderate_update_request_${previousUpdateRequestId}")
+                if (previous != null) {
+                    dataButton("⬅\uFE0F Предыдущий", "moderate_update_request_${previous.id}")
                 }
-                if (nextUpdateRequestId != -1) {
-                    dataButton("Следущий➡\uFE0F", "moderate_update_request_${nextUpdateRequestId}")
+                if (next != null) {
+                    dataButton("Следущий➡\uFE0F", "moderate_update_request_${next.id}")
                 }
             }
         }

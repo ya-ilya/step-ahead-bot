@@ -1,19 +1,13 @@
 package me.yailya.step_ahead_bot.review
 
 import me.yailya.step_ahead_bot.bot_user.BotUserEntity
-import me.yailya.step_ahead_bot.databaseQuery
-import me.yailya.step_ahead_bot.university.University
 import me.yailya.step_ahead_bot.university.UniversityEntity
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
 class ReviewEntity(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<ReviewEntity>(Reviews) {
-        suspend fun getModelsByUniversity(university: University) = databaseQuery {
-            find { Reviews.university eq university.id }.map { it.toModel() }
-        }
-    }
+    companion object : IntEntityClass<ReviewEntity>(Reviews)
 
     var botUser by BotUserEntity referencedOn Reviews.botUser
     var university by UniversityEntity referencedOn Reviews.university

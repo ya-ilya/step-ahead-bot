@@ -17,38 +17,60 @@ import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.replyOrEdit
+import me.yailya.step_ahead_bot.review.Review
 import me.yailya.step_ahead_bot.review.ReviewEntity
+import me.yailya.step_ahead_bot.review.Reviews
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+
+private suspend fun reviewForKeyboard(
+    query: DataCallbackQuery,
+    id: Int
+): Triple<Review?, Review, Review?> = databaseQuery {
+    val (botUserEntity) = query.botUser()
+    val condition = Reviews.botUser eq botUserEntity.id
+    val reviews = botUserEntity.reviews
+
+    if (reviews.empty()) {
+        throw RuntimeException("❌ Вы еще не создавали отзывов")
+    }
+
+    val current = if (id == -1) {
+        reviews.first()
+    } else {
+        ReviewEntity.findById(id) ?:
+        throw RuntimeException("❌ Данный отзыв не существует")
+    }
+
+    if (current.botUser.id != botUserEntity.id) {
+        throw RuntimeException("❌ Данный отзыв создали не вы")
+    }
+
+    val previous = ReviewEntity
+        .find { condition and (Reviews.id less current.id) }
+        .lastOrNull()
+    val next = ReviewEntity
+        .find { condition and (Reviews.id greater current.id) }
+        .firstOrNull()
+
+    return@databaseQuery Triple(
+        previous?.toModel(),
+        current.toModel(),
+        next?.toModel()
+    )
+}
 
 suspend fun BehaviourContext.handleReviewCallback(
     query: DataCallbackQuery,
     reviewId: Int
 ) {
-    val reviews = databaseQuery { query.botUser().first.reviews.map { it.toModel() } }
-
-    if (reviews.isEmpty()) {
-        answerCallbackQuery(
-            query,
-            "❌ Вы еще не создавали отзывов"
-        )
-
+    val (previous, review, next) = try {
+        reviewForKeyboard(query, reviewId)
+    } catch (ex: RuntimeException) {
+        answerCallbackQuery(query, ex.message)
         return
     }
 
-    val realReviewId = if (reviewId == -1) reviews.first().id else reviewId
-    val review = reviews.find { it.id == realReviewId }
-
-    if (review == null) {
-        answerCallbackQuery(
-            query,
-            "❌ Данный отзыв (#${reviewId}) не существует, либо же его создали не вы"
-        )
-
-        return
-    }
-
-    val reviewIndex = reviews.indexOf(review)
-    val previousReviewId = reviews.elementAtOrNull(reviewIndex - 1).let { it?.id ?: -1 }
-    val nextReviewId = reviews.elementAtOrNull(reviewIndex + 1).let { it?.id ?: -1 }
     val university = review.university
 
     replyOrEdit(
@@ -68,11 +90,11 @@ suspend fun BehaviourContext.handleReviewCallback(
                 dataButton("\uD83D\uDDD1\uFE0F Удалить", "review_delete_${review.id}")
             }
             row {
-                if (previousReviewId != -1) {
-                    dataButton("⬅\uFE0F Предыдущий", "review_${previousReviewId}")
+                if (previous != null) {
+                    dataButton("⬅\uFE0F Предыдущий", "review_${previous.id}")
                 }
-                if (nextReviewId != -1) {
-                    dataButton("➡\uFE0F Следущий", "review_${nextReviewId}")
+                if (next != null) {
+                    dataButton("➡\uFE0F Следущий", "review_${next.id}")
                 }
             }
         }
