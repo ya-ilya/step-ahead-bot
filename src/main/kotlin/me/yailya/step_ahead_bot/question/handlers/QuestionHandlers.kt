@@ -45,8 +45,7 @@ private suspend fun questionForKeyboard(
     val current = if (id == -1) {
         questions.first()
     } else {
-        QuestionEntity.findById(id) ?:
-        throw RuntimeException("❌ Данного вопроса не существует")
+        QuestionEntity.findById(id) ?: throw RuntimeException("❌ Данного вопроса не существует")
     }
 
     if (current.botUser.id != botUserEntity.id) {
@@ -160,8 +159,7 @@ private suspend fun answerForKeyboard(
     val current = if (id == -1) {
         answers.first()
     } else {
-        AnswerEntity.findById(id) ?:
-            throw RuntimeException("❌ Данного ответа на вопрос не существует")
+        AnswerEntity.findById(id) ?: throw RuntimeException("❌ Данного ответа на вопрос не существует")
     }
 
     val previous = AnswerEntity

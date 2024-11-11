@@ -38,8 +38,7 @@ private suspend fun reviewForKeyboard(
     val current = if (id == -1) {
         reviews.first()
     } else {
-        ReviewEntity.findById(id) ?:
-        throw RuntimeException("❌ Данный отзыв не существует")
+        ReviewEntity.findById(id) ?: throw RuntimeException("❌ Данный отзыв не существует")
     }
 
     if (current.botUser.id != botUserEntity.id) {

@@ -139,8 +139,7 @@ private suspend fun questionForKeyboard(
     val current = if (id == -1) {
         questions.first()
     } else {
-        QuestionEntity.findById(id) ?:
-        throw RuntimeException("❌ Данного вопроса не существует")
+        QuestionEntity.findById(id) ?: throw RuntimeException("❌ Данного вопроса не существует")
     }
 
     val previous = QuestionEntity
@@ -224,8 +223,7 @@ private suspend fun answerForKeyboard(
     val current = if (id == -1) {
         answers.first()
     } else {
-        AnswerEntity.findById(id) ?:
-        throw RuntimeException("❌ Данного ответа на вопрос не существует")
+        AnswerEntity.findById(id) ?: throw RuntimeException("❌ Данного ответа на вопрос не существует")
     }
 
     val previous = AnswerEntity
@@ -297,8 +295,8 @@ private suspend fun reviewForKeyboard(
     val current = if (id == -1) {
         reviews.first()
     } else {
-        ReviewEntity.findById(id) ?:
-        throw RuntimeException("❌ Данного отзыва не существует, либо же он был оставлен о другом ВУЗе")
+        ReviewEntity.findById(id)
+            ?: throw RuntimeException("❌ Данного отзыва не существует, либо же он был оставлен о другом ВУЗе")
     }
 
     val previous = ReviewEntity

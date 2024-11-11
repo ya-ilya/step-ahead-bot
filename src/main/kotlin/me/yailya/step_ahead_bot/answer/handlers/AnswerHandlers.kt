@@ -38,8 +38,7 @@ private suspend fun answerForKeyboard(
     val current = if (id == -1) {
         answers.first()
     } else {
-        AnswerEntity.findById(id) ?:
-            throw RuntimeException("❌ Данного ответа на вопрос не существует")
+        AnswerEntity.findById(id) ?: throw RuntimeException("❌ Данного ответа на вопрос не существует")
     }
 
     if (current.botUser.id != botUserEntity.id) {

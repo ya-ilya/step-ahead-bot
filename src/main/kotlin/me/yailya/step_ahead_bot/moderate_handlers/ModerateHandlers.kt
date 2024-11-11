@@ -31,34 +31,35 @@ import me.yailya.step_ahead_bot.update_request.UpdateRequests
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 
-private suspend fun updateRequestForKeyboard(id: Int): Triple<UpdateRequest?, UpdateRequest, UpdateRequest?> = databaseQuery {
-    val condition = UpdateRequests.status eq UpdateRequestStatus.Open
-    val updateRequests = UpdateRequestEntity.find(condition)
+private suspend fun updateRequestForKeyboard(id: Int): Triple<UpdateRequest?, UpdateRequest, UpdateRequest?> =
+    databaseQuery {
+        val condition = UpdateRequests.status eq UpdateRequestStatus.Open
+        val updateRequests = UpdateRequestEntity.find(condition)
 
-    if (updateRequests.empty()) {
-        throw RuntimeException("❌ Открытых запросов на изменение не найдено")
+        if (updateRequests.empty()) {
+            throw RuntimeException("❌ Открытых запросов на изменение не найдено")
+        }
+
+        val current = if (id == -1) {
+            updateRequests.first()
+        } else {
+            UpdateRequestEntity.findById(id)
+                ?: throw RuntimeException("❌ Данный запрос на изменение не существует")
+        }
+
+        val previous = UpdateRequestEntity
+            .find { condition and (UpdateRequests.id less current.id) }
+            .lastOrNull()
+        val next = UpdateRequestEntity
+            .find { condition and (UpdateRequests.id greater current.id) }
+            .firstOrNull()
+
+        return@databaseQuery Triple(
+            previous?.toModel(),
+            current.toModel(),
+            next?.toModel()
+        )
     }
-
-    val current = if (id == -1) {
-        updateRequests.first()
-    } else {
-        UpdateRequestEntity.findById(id)
-            ?: throw RuntimeException("❌ Данный запрос на изменение не существует")
-    }
-
-    val previous = UpdateRequestEntity
-        .find { condition and (UpdateRequests.id less current.id) }
-        .lastOrNull()
-    val next = UpdateRequestEntity
-        .find { condition and (UpdateRequests.id greater current.id) }
-        .firstOrNull()
-
-    return@databaseQuery Triple(
-        previous?.toModel(),
-        current.toModel(),
-        next?.toModel()
-    )
-}
 
 suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
     query: DataCallbackQuery,
