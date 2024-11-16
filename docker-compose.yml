@@ -1,5 +1,6 @@
 services:
   database:
+    container_name: database
     image: mysql
     environment:
       MYSQL_ROOT_USER: root
@@ -14,16 +15,60 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - mysql_data:/var/lib/mysql
     networks:
-      - database
+      - net
     command: [ 'mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci' ]
+  ollama:
+    container_name: ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    pull_policy: always
+    tty: true
+    restart: unless-stopped
+    image: ollama/ollama:latest
+    ports:
+      - 7869:11434
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+    networks:
+      - net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+  chromadb:
+    container_name: chromadb
+    image: chromadb/chroma:latest
+    volumes:
+      - chromadb_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+      - ANONYMIZED_TELEMETRY=${ANONYMIZED_TELEMETRY:-FALSE}
+    ports:
+      - 8000:8000
+    networks:
+      - net
   bot:
+    container_name: bot
     env_file: ".env"
     build:
       context: .
       dockerfile: Dockerfile
     networks:
-      - database
+      - net
+    depends_on:
+      ollama:
+        condition: service_started
+      database:
+        condition: service_started
+      chromadb:
+        condition: service_started
 volumes:
   mysql_data:
+  chromadb_data:
+  ollama_data:
 networks:
-  database:
+  net:

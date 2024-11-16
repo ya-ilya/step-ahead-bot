@@ -23,6 +23,10 @@ dependencies {
     implementation("mysql:mysql-connector-java:8.0.33")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("dev.inmo:tgbotapi:18.2.2")
+    implementation("dev.langchain4j:langchain4j:0.36.0")
+    implementation("dev.langchain4j:langchain4j-ollama:0.36.0")
+    implementation("dev.langchain4j:langchain4j-chroma:0.36.0")
+    implementation("dev.langchain4j:langchain4j-embeddings:0.36.0")
 }
 
 kotlin {

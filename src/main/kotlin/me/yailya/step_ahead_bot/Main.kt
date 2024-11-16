@@ -29,11 +29,9 @@ import me.yailya.step_ahead_bot.answer.Answers
 import me.yailya.step_ahead_bot.answer.handlers.handleAnswerCallback
 import me.yailya.step_ahead_bot.answer.handlers.handleAnswerDeleteCallback
 import me.yailya.step_ahead_bot.answer.handlers.handleAnswerQuestionCallback
+import me.yailya.step_ahead_bot.assistant.Assistant
 import me.yailya.step_ahead_bot.bot_user.BotUserEntity
-import me.yailya.step_ahead_bot.commands.handleFaqCommand
-import me.yailya.step_ahead_bot.commands.handleModerateCommand
-import me.yailya.step_ahead_bot.commands.handleStartCommand
-import me.yailya.step_ahead_bot.commands.handleUniversitiesCommand
+import me.yailya.step_ahead_bot.commands.*
 import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCallback
 import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCloseCallback
 import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCloseDoneCallback
@@ -152,8 +150,10 @@ suspend fun BehaviourContext.editInlineButton(
 suspend fun main() {
     println("Loaded EduRank ranking. ${EduRankRanking.ranking.size} entries")
 
+    Assistant
+
     val driverClassName = "com.mysql.cj.jdbc.Driver"
-    val jdbcURL = "jdbc:mysql://database:3306/database"
+    val jdbcURL = "jdbc:mysql://database/database"
     val database = Database.connect(jdbcURL, driverClassName, "user", "user_secret")
 
     transaction(database) {
@@ -173,6 +173,10 @@ suspend fun main() {
     val bot = telegramBot(System.getenv("TELEGRAM_BOT_TOKEN"))
 
     bot.buildBehaviourWithLongPolling {
+        onCommand("assistant") {
+            this.handleAssistantCommand(it)
+        }
+
         onCommand("start") {
             this.handleStartCommand(it)
         }
