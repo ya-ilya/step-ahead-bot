@@ -1,5 +1,9 @@
 val exposedVersion: String by project
 val h2Version: String by project
+val langchainVersion: String by project
+val serializationVersion: String by project
+val tgbotapiVersion: String by project
+val mysqlVersion: String by project
 
 plugins {
     kotlin("jvm") version "2.0.20"
@@ -20,13 +24,15 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-json:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-    implementation("mysql:mysql-connector-java:8.0.33")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    implementation("dev.inmo:tgbotapi:18.2.2")
-    implementation("dev.langchain4j:langchain4j:0.36.0")
-    implementation("dev.langchain4j:langchain4j-ollama:0.36.0")
-    implementation("dev.langchain4j:langchain4j-chroma:0.36.0")
-    implementation("dev.langchain4j:langchain4j-embeddings:0.36.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
+
+    implementation("dev.langchain4j:langchain4j:$langchainVersion")
+    implementation("dev.langchain4j:langchain4j-ollama:$langchainVersion")
+    implementation("dev.langchain4j:langchain4j-chroma:$langchainVersion")
+    implementation("dev.langchain4j:langchain4j-embeddings:$langchainVersion")
+    implementation("dev.inmo:tgbotapi:$tgbotapiVersion")
+
+    implementation("com.mysql:mysql-connector-j:$mysqlVersion")
 }
 
 kotlin {
