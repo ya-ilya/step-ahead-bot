@@ -96,7 +96,7 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
                     dataButton("⬅\uFE0F Предыдущий", "moderate_update_request_${previous.id}")
                 }
                 if (next != null) {
-                    dataButton("Следущий➡\uFE0F", "moderate_update_request_${next.id}")
+                    dataButton("Следующий➡\uFE0F", "moderate_update_request_${next.id}")
                 }
             }
         }

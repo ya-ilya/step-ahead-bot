@@ -150,7 +150,11 @@ suspend fun BehaviourContext.editInlineButton(
 suspend fun main() {
     println("Loaded EduRank ranking. ${EduRankRanking.ranking.size} entries")
 
-    Assistant
+    try {
+        Assistant
+    } catch (ex: Exception) {
+        println("Failed to load assistant: ${ex.message}")
+    }
 
     val driverClassName = "com.mysql.cj.jdbc.Driver"
     val jdbcURL = "jdbc:mysql://database/database"

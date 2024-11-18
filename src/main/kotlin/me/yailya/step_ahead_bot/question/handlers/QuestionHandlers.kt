@@ -7,6 +7,7 @@ import dev.inmo.tgbotapi.extensions.api.deleteMessage
 import dev.inmo.tgbotapi.extensions.api.send.send
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
 import dev.inmo.tgbotapi.extensions.utils.extensions.raw.message
+import dev.inmo.tgbotapi.extensions.utils.extensions.raw.reply_markup
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
 import dev.inmo.tgbotapi.types.ChatId
@@ -22,6 +23,7 @@ import me.yailya.step_ahead_bot.answer.AnswerEntity
 import me.yailya.step_ahead_bot.answer.Answers
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
+import me.yailya.step_ahead_bot.edit
 import me.yailya.step_ahead_bot.editInlineButton
 import me.yailya.step_ahead_bot.question.Question
 import me.yailya.step_ahead_bot.question.QuestionEntity
@@ -98,7 +100,7 @@ suspend fun BehaviourContext.handleQuestionCallback(
                     dataButton("⬅\uFE0F Предыдущий", "question_${previous.id}")
                 }
                 if (next != null) {
-                    dataButton("Следущий ➡\uFE0F", "question_${next.id}")
+                    dataButton("Следующий ➡\uFE0F", "question_${next.id}")
                 }
             }
         }
@@ -134,8 +136,54 @@ suspend fun BehaviourContext.handleQuestionDeleteCallback(
             return@databaseQuery
         }
 
-        question.delete()
-        deleteMessage(query.message!!)
+        databaseQuery {
+            question.delete()
+        }
+
+        try {
+            val row = query
+                .message!!
+                .reply_markup!!
+                .keyboard[2]
+
+            val data = row
+                .filterIsInstance<CallbackDataInlineKeyboardButton>()
+                .first { it.text.contains("Следующий") || it.text.contains("Предыдущий") }
+                .callbackData
+
+            val otherId = data
+                .split("_")
+                .last()
+                .toInt()
+
+            val (previous, other, next) =  questionForKeyboard(query, otherId)
+
+            edit(
+                query = query,
+                entities = buildEntities {
+                    +bold("${other.university.shortName} -> Вопрос #${other.id}") +
+                            "\n" + other.text
+                },
+                replyMarkup = inlineKeyboard {
+                    row {
+                        dataButton("\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Посмотреть ответы", "question_answers_${question.id}")
+                    }
+                    row {
+                        dataButton("\uD83D\uDDD1\uFE0F Удалить", "question_delete_${other.id}")
+                    }
+                    row {
+                        if (previous != null) {
+                            dataButton("⬅\uFE0F Предыдущий", "question_${other.id}")
+                        }
+                        if (next != null) {
+                            dataButton("Следующий ➡\uFE0F", "question_${other.id}")
+                        }
+                    }
+                }
+            )
+        } catch (ex: Exception) {
+            deleteMessage(query.message!!)
+        }
 
         answerCallbackQuery(
             query,
@@ -210,7 +258,7 @@ suspend fun BehaviourContext.handleQuestionAnswerCallback(
                     dataButton("⬅\uFE0F Предыдущий", "question_answer_${previous.id}_${questionId}")
                 }
                 if (next != null) {
-                    dataButton("Следущий ➡\uFE0F", "question_answer_${next.id}_${questionId}")
+                    dataButton("Следующий ➡\uFE0F", "question_answer_${next.id}_${questionId}")
                 }
             }
         }

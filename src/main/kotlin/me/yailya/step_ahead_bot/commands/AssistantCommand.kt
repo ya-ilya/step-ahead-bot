@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.first
 import me.yailya.step_ahead_bot.assistant.Assistant
 
 suspend fun BehaviourContext.handleAssistantCommand(message: TextMessage) {
+    if (!Assistant.isLoaded) {
+        return
+    }
+
     val messages = mutableListOf<ChatMessage>(
         SystemMessage.from(
             """Ты являешься ai-ассистентом, который помогает абитуриентам с поступлением в ВУЗ.

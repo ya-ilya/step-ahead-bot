@@ -10,6 +10,8 @@ import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore
 import java.io.File
 
 object Assistant {
+    var isLoaded: Boolean = false
+
     private val embeddingStore = ChromaEmbeddingStore
         .builder()
         .baseUrl("http://chromadb:8000")
@@ -29,10 +31,17 @@ object Assistant {
         .build()
 
     init {
-        for (file in File("/app/documents/").listFiles()!!) {
-            val segment = TextSegment.from(file.readText())
-            val embedding = embeddingModel.embed(segment).content()
-            embeddingStore.add(embedding, segment)
+        try {
+            for (file in File("/app/documents/").listFiles()!!) {
+                val segment = TextSegment.from(file.readText())
+                val embedding = embeddingModel.embed(segment).content()
+                embeddingStore.add(embedding, segment)
+            }
+
+            isLoaded = true
+        } catch (ex: Exception) {
+            isLoaded = false
+            throw ex
         }
     }
 

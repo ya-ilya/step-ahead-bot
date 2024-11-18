@@ -14,6 +14,9 @@ suspend fun BehaviourContext.handleStartCommand(message: TextMessage) {
         replyMarkup = inlineKeyboard {
             row {
                 dataButton("❔ Мои вопросы", "questions")
+            }
+
+            row {
                 dataButton("\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Мои ответы на вопросы", "answers")
             }
 

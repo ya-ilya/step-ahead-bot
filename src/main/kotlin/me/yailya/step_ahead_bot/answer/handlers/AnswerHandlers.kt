@@ -1,4 +1,4 @@
-@file:OptIn(RiskFeature::class)
+@file:OptIn(RiskFeature::class, PreviewFeature::class)
 
 package me.yailya.step_ahead_bot.answer.handlers
 
@@ -6,10 +6,13 @@ import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.api.deleteMessage
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
 import dev.inmo.tgbotapi.extensions.utils.extensions.raw.message
+import dev.inmo.tgbotapi.extensions.utils.extensions.raw.reply_markup
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
+import dev.inmo.tgbotapi.types.buttons.InlineKeyboardButtons.CallbackDataInlineKeyboardButton
 import dev.inmo.tgbotapi.types.message.textsources.bold
 import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
+import dev.inmo.tgbotapi.utils.PreviewFeature
 import dev.inmo.tgbotapi.utils.RiskFeature
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
@@ -18,6 +21,7 @@ import me.yailya.step_ahead_bot.answer.AnswerEntity
 import me.yailya.step_ahead_bot.answer.Answers
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
+import me.yailya.step_ahead_bot.edit
 import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.replyOrEdit
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -89,7 +93,7 @@ suspend fun BehaviourContext.handleAnswerCallback(
                     dataButton("⬅\uFE0F Предыдущий", "answer_${previous.id}")
                 }
                 if (next != null) {
-                    dataButton("Следущий ➡\uFE0F", "answer_${next.id}")
+                    dataButton("Следующий ➡\uFE0F", "answer_${next.id}")
                 }
             }
         }
@@ -171,8 +175,54 @@ suspend fun BehaviourContext.handleAnswerDeleteCallback(
             return@databaseQuery
         }
 
-        answer.delete()
-        deleteMessage(query.message!!)
+        databaseQuery {
+            answer.delete()
+        }
+
+        try {
+            val row = query
+                .message!!
+                .reply_markup!!
+                .keyboard[2]
+
+            val data = row
+                .filterIsInstance<CallbackDataInlineKeyboardButton>()
+                .first { it.text.contains("Следующий") || it.text.contains("Предыдущий") }
+                .callbackData
+
+            val otherId = data
+                .split("_")
+                .last()
+                .toInt()
+
+            val (previous, other, next) =  answerForKeyboard(query, otherId)
+            
+            edit(
+                query = query,
+                entities = buildEntities {
+                    +bold("Ответ на вопрос #${other.id}${if (other.isAccepted) ". Помечен, как одобренный" else ""}") +
+                            "\n" + other.text
+                },
+                replyMarkup = inlineKeyboard {
+                    row {
+                        dataButton("❔ Посмотреть вопрос", "answer_question_${other.id}")
+                    }
+                    row {
+                        dataButton("\uD83D\uDDD1\uFE0F Удалить", "answer_delete_${other.id}")
+                    }
+                    row {
+                        if (previous != null) {
+                            dataButton("⬅\uFE0F Предыдущий", "answer_${previous.id}")
+                        }
+                        if (next != null) {
+                            dataButton("Следующий ➡\uFE0F", "answer_${next.id}")
+                        }
+                    }
+                }
+            )
+        } catch (ex: Exception) {
+            deleteMessage(query.message!!)
+        }
 
         answerCallbackQuery(
             query,

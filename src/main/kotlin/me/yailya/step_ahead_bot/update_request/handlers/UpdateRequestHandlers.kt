@@ -93,7 +93,7 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
 
                 }
                 if (next != null) {
-                    dataButton("Следущий ➡\uFE0F", "update_request_${next.id}")
+                    dataButton("Следующий ➡\uFE0F", "update_request_${next.id}")
                 }
             }
         }

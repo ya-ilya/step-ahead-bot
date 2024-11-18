@@ -193,7 +193,7 @@ suspend fun BehaviourContext.handleUniversityQuestionCallback(
                     dataButton("⬅\uFE0F Предыдущий", "university_question_${previous.id}_${university.id}")
                 }
                 if (next != null) {
-                    dataButton("Следущий ➡\uFE0F", "university_question_${next.id}_${university.id}")
+                    dataButton("Следующий ➡\uFE0F", "university_question_${next.id}_${university.id}")
                 }
             }
         }
@@ -270,7 +270,7 @@ suspend fun BehaviourContext.handleUniversityQuestionAnswerCallback(
                 }
                 if (next != null) {
                     dataButton(
-                        "Следущий ➡\uFE0F",
+                        "Следующий ➡\uFE0F",
                         "university_question_answer_${next.id}_${questionId}_${university.id}"
                     )
                 }
@@ -343,7 +343,7 @@ suspend fun BehaviourContext.handleUniversityReviewCallback(
                     dataButton("⬅\uFE0F Предыдущий", "university_review_${previous.id}_${university.id}")
                 }
                 if (next != null) {
-                    dataButton("Следущий ➡\uFE0F", "university_review_${next.id}_${university.id}")
+                    dataButton("Следующий ➡\uFE0F", "university_review_${next.id}_${university.id}")
                 }
             }
         }
