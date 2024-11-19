@@ -43,6 +43,8 @@ import me.yailya.step_ahead_bot.question.handlers.handleQuestionDeleteCallback
 import me.yailya.step_ahead_bot.review.Reviews
 import me.yailya.step_ahead_bot.review.handlers.handleReviewCallback
 import me.yailya.step_ahead_bot.review.handlers.handleReviewDeleteCallback
+import me.yailya.step_ahead_bot.teacher.Teachers
+import me.yailya.step_ahead_bot.teacher.review.TeacherReviews
 import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.university.UniversityEntity
 import me.yailya.step_ahead_bot.university.handlers.*
@@ -161,7 +163,15 @@ suspend fun main() {
     val database = Database.connect(jdbcURL, driverClassName, "user", "user_secret")
 
     transaction(database) {
-        SchemaUtils.create(Reviews, UpdateRequests, Questions, Answers, Universities)
+        SchemaUtils.create(
+            Reviews,
+            UpdateRequests,
+            Questions,
+            Answers,
+            Universities,
+            Teachers,
+            TeacherReviews
+        )
     }
 
     databaseQuery {
