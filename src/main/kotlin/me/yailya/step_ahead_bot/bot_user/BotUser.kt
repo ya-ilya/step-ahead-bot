@@ -9,6 +9,7 @@ class BotUser(
     val isAdministrator: Boolean,
     val lastQuestionTime: LocalDateTime?,
     val lastQuestionAnswerTime: LocalDateTime?,
+    val lastTeacherReviewTime: LocalDateTime?,
     val lastReviewTime: LocalDateTime?,
     val lastUpdateRequestTime: LocalDateTime?
 )

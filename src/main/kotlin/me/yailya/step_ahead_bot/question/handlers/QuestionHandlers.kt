@@ -156,7 +156,7 @@ suspend fun BehaviourContext.handleQuestionDeleteCallback(
                 .last()
                 .toInt()
 
-            val (previous, other, next) =  questionForKeyboard(query, otherId)
+            val (previous, other, next) = questionForKeyboard(query, otherId)
 
             edit(
                 query = query,
@@ -166,7 +166,10 @@ suspend fun BehaviourContext.handleQuestionDeleteCallback(
                 },
                 replyMarkup = inlineKeyboard {
                     row {
-                        dataButton("\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Посмотреть ответы", "question_answers_${question.id}")
+                        dataButton(
+                            "\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Посмотреть ответы",
+                            "question_answers_${question.id}"
+                        )
                     }
                     row {
                         dataButton("\uD83D\uDDD1\uFE0F Удалить", "question_delete_${other.id}")

@@ -1,5 +1,7 @@
 package me.yailya.step_ahead_bot.teacher
 
+import me.yailya.step_ahead_bot.teacher.review.TeacherReviewEntity
+import me.yailya.step_ahead_bot.teacher.review.TeacherReviews
 import me.yailya.step_ahead_bot.university.UniversityEntity
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -13,6 +15,8 @@ class TeacherEntity(id: EntityID<Int>) : IntEntity(id) {
     var academicTitle by Teachers.academicTitle
     var university by UniversityEntity referencedOn Teachers.university
     var specialities by Teachers.specialities
+
+    val reviews by TeacherReviewEntity referrersOn TeacherReviews.teacher
 
     fun toModel() = Teacher(
         id.value,

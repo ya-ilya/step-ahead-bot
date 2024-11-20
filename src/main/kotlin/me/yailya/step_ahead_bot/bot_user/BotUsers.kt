@@ -9,6 +9,7 @@ object BotUsers : IntIdTable() {
     val isAdministrator = bool("isAdministrator")
     val lastQuestionTime = datetime("lastQuestionTime").nullable()
     val lastQuestionAnswerTime = datetime("lastQuestionAnswerTime").nullable()
+    val lastTeacherReviewTime = datetime("lastTeacherReviewTime").nullable()
     val lastReviewTime = datetime("lastReviewTime").nullable()
     val lastUpdateRequestTime = datetime("lastUpdateRequestTime").nullable()
 }

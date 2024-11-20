@@ -152,7 +152,7 @@ suspend fun BehaviourContext.handleReviewDeleteCallback(
                 .last()
                 .toInt()
 
-            val (previous, other, next) =  reviewForKeyboard(query, otherId)
+            val (previous, other, next) = reviewForKeyboard(query, otherId)
 
             edit(
                 query = query,

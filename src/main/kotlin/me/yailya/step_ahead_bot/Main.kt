@@ -330,8 +330,12 @@ suspend fun main() {
         }
 
         val universityRegex = "university(?:_(.*))?_([^_]*)".toRegex()
+        val universityTeacherRegex = "teacher_(.*?)$".toRegex()
         val universityReviewRegex = "review_(.*?)$".toRegex()
+        val universityCreateTeacherReviewRegex = "create_teacher_review_(.*?)$".toRegex()
         val universityCreateQuestionAnswerRegex = "create_question_answer_(.*?)$".toRegex()
+        val universityTeacherReviewsRegex = "teacher_reviews_(.*?)$".toRegex()
+        val universityTeacherReviewRegex = "teacher_review_(.*?)_(.*?)$".toRegex()
         val universityQuestionAnswersRegex = "question_answers_(.*?)$".toRegex()
         val universityQuestionAnswerRegex = "question_answer_(.*?)_(.*?)$".toRegex()
 
@@ -353,8 +357,21 @@ suspend fun main() {
                     this.handleUniversityQuestionCallback(it, -1, university)
                 }
 
+                name == "teachers" -> {
+                    this.handleUniversityTeacherCallback(it, -1, university)
+                }
+
                 name == "reviews" -> {
                     this.handleUniversityReviewCallback(it, -1, university)
+                }
+
+                universityTeacherReviewsRegex.matches(name) -> {
+                    this.handleUniversityTeacherReviewCallback(
+                        it,
+                        -1,
+                        universityTeacherReviewsRegex.find(name)!!.groupValues[1].toInt(),
+                        university
+                    )
                 }
 
                 universityQuestionAnswersRegex.matches(name) -> {
@@ -362,6 +379,14 @@ suspend fun main() {
                         it,
                         -1,
                         universityQuestionAnswersRegex.find(name)!!.groupValues[1].toInt(),
+                        university
+                    )
+                }
+
+                universityTeacherRegex.matches(name) -> {
+                    this.handleUniversityTeacherCallback(
+                        it,
+                        universityTeacherRegex.find(name)!!.groupValues[1].toInt(),
                         university
                     )
                 }
@@ -374,12 +399,30 @@ suspend fun main() {
                     )
                 }
 
+                universityTeacherReviewRegex.matches(name) -> {
+                    val universityTeacherReviewValues = universityTeacherReviewRegex.find(name)!!.groupValues
+                    this.handleUniversityTeacherReviewCallback(
+                        it,
+                        universityTeacherReviewValues[1].toInt(),
+                        universityTeacherReviewValues[2].toInt(),
+                        university
+                    )
+                }
+
                 universityQuestionAnswerRegex.matches(name) -> {
                     val universityQuestionAnswerValues = universityQuestionAnswerRegex.find(name)!!.groupValues
                     this.handleUniversityQuestionAnswerCallback(
                         it,
                         universityQuestionAnswerValues[1].toInt(),
                         universityQuestionAnswerValues[2].toInt(),
+                        university
+                    )
+                }
+
+                universityCreateTeacherReviewRegex.matches(name) -> {
+                    this.handleCreateTeacherReviewCallback(
+                        it,
+                        universityCreateTeacherReviewRegex.find(name)!!.groupValues[1].toInt(),
                         university
                     )
                 }

@@ -26,6 +26,12 @@ import me.yailya.step_ahead_bot.replyOrEdit
 import me.yailya.step_ahead_bot.review.Review
 import me.yailya.step_ahead_bot.review.ReviewEntity
 import me.yailya.step_ahead_bot.review.Reviews
+import me.yailya.step_ahead_bot.teacher.Teacher
+import me.yailya.step_ahead_bot.teacher.TeacherEntity
+import me.yailya.step_ahead_bot.teacher.Teachers
+import me.yailya.step_ahead_bot.teacher.review.TeacherReview
+import me.yailya.step_ahead_bot.teacher.review.TeacherReviewEntity
+import me.yailya.step_ahead_bot.teacher.review.TeacherReviews
 import me.yailya.step_ahead_bot.university.University
 import me.yailya.step_ahead_bot.university.ranking.EduRankRanking
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -82,6 +88,10 @@ suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, 
             }
 
             row {
+                dataButton("Учителя", "university_teachers_${university.id}")
+            }
+
+            row {
                 dataButton("❔ Вопросы", "university_questions_${university.id}")
                 dataButton(
                     "✍\uD83C\uDFFB Задать вопрос",
@@ -123,6 +133,155 @@ suspend fun BehaviourContext.handleUniversitySpecialitiesCallback(
     )
 
     answerCallbackQuery(query)
+}
+
+private suspend fun teacherForKeyboard(
+    id: Int,
+    university: University
+): Triple<Teacher?, Teacher, Teacher?> = databaseQuery {
+    val condition = Teachers.university eq university.id
+    val teachers = TeacherEntity.find(condition)
+
+    if (teachers.empty()) {
+        throw RuntimeException("❌ Преподователей в ${university.shortName} пока не добавлено")
+    }
+
+    val current = if (id == -1) {
+        teachers.first()
+    } else {
+        TeacherEntity.findById(id) ?: throw RuntimeException("❌ Данный преподователь не найден")
+    }
+
+    val previous = TeacherEntity
+        .find { condition and (Teachers.id less current.id) }
+        .lastOrNull()
+    val next = TeacherEntity
+        .find { condition and (Teachers.id greater current.id) }
+        .firstOrNull()
+
+    return@databaseQuery Triple(
+        previous?.toModel(),
+        current.toModel(),
+        next?.toModel()
+    )
+}
+
+suspend fun BehaviourContext.handleUniversityTeacherCallback(
+    query: DataCallbackQuery,
+    teacherId: Int,
+    university: University
+) {
+    val (previous, teacher, next) = try {
+        teacherForKeyboard(teacherId, university)
+    } catch (ex: RuntimeException) {
+        answerCallbackQuery(query, ex.message)
+        return
+    }
+
+    replyOrEdit(
+        teacherId == -1,
+        query,
+        buildEntities {
+            +bold("${university.shortName} -> Преподователи -> ${teacher.fullName}") +
+                    "\n- Опыт работы: ${teacher.experience}" +
+                    "\n- Академическая должность: ${teacher.academicTitle}" +
+                    "\n- Специальности: ${teacher.specialities.joinToString()}"
+        },
+        inlineKeyboard {
+            row {
+                dataButton(
+                    "⭐ Отзывы о преподователе",
+                    "university_teacher_reviews_${teacher.id}_${university.id}"
+                )
+                dataButton(
+                    "✍\uD83C\uDFFB Оставить отзыв о преподавателе",
+                    "university_create_teacher_review_${teacher.id}_${university.id}"
+                )
+            }
+
+            row {
+                if (previous != null) {
+                    dataButton("⬅\uFE0F Предыдущий", "university_teacher_${previous.id}_${university.id}")
+                }
+                if (next != null) {
+                    dataButton("Следующий ➡\uFE0F", "university_teacher_${next.id}_${university.id}")
+                }
+            }
+        }
+    )
+
+    answerCallbackQuery(query)
+}
+
+private suspend fun teacherReviewForKeyboard(
+    id: Int,
+    teacherId: Int,
+    university: University
+): Triple<TeacherReview?, TeacherReview, TeacherReview?> = databaseQuery {
+    val condition = TeacherReviews.teacher eq teacherId
+    val teacher = TeacherEntity.findById(teacherId) ?: throw RuntimeException("❌ Данный преподователь не найден")
+
+    if (teacher.university.id.value != university.id) {
+        throw RuntimeException("❌ Данный преподаватель работает в другом ВУЗе")
+    }
+
+    val teacherReviews = teacher.reviews
+
+    if (teacherReviews.empty()) {
+        throw RuntimeException("❌ Отзывов о данном преподавателе не найдено")
+    }
+
+    val current = if (id == -1) {
+        teacherReviews.first()
+    } else {
+        TeacherReviewEntity.findById(id) ?: throw RuntimeException("❌ Данный отзыв о преподавателе не найден")
+    }
+
+    val previous = TeacherReviewEntity
+        .find { condition and (Teachers.id less current.id) }
+        .lastOrNull()
+    val next = TeacherReviewEntity
+        .find { condition and (Teachers.id greater current.id) }
+        .firstOrNull()
+
+    return@databaseQuery Triple(
+        previous?.toModel(),
+        current.toModel(),
+        next?.toModel()
+    )
+}
+
+suspend fun BehaviourContext.handleUniversityTeacherReviewCallback(
+    query: DataCallbackQuery,
+    teacherReviewId: Int,
+    teacherId: Int,
+    university: University
+) {
+    val (previous, teacherReview, next) = try {
+        teacherReviewForKeyboard(teacherReviewId, teacherId, university)
+    } catch (ex: RuntimeException) {
+        answerCallbackQuery(query, ex.message)
+        return
+    }
+
+    replyOrEdit(
+        teacherReviewId == -1,
+        query,
+        buildEntities {
+            +bold("Отзыв о преподавателе #${teacherReviewId}. ${teacherReview.rating}/5") +
+                    "\n" + blockquote(teacherReview.comment)
+        },
+        inlineKeyboard {
+            row {
+                if (previous != null) {
+                    dataButton("⬅\uFE0F Предыдущий", "university_teacher_review_${previous.id}_${university.id}")
+                }
+                if (next != null) {
+                    dataButton("Следующий ➡\uFE0F", "university_teacher_review_${next.id}_${university.id}")
+                }
+            }
+        }
+    )
 }
 
 private suspend fun questionForKeyboard(

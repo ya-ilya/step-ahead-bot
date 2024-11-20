@@ -47,34 +47,34 @@ object Assistant {
 
 
     fun generateResponse(text: String, messages: MutableList<ChatMessage>): String {
-		try {
-			val queryEmbedding = embeddingModel
-				.embed(text)
-				.content()
+        try {
+            val queryEmbedding = embeddingModel
+                .embed(text)
+                .content()
 
-			val relevant = embeddingStore.search(
-				EmbeddingSearchRequest
-					.builder()
-					.queryEmbedding(queryEmbedding)
-					.maxResults(1)
-					.build()
-			).matches()
+            val relevant = embeddingStore.search(
+                EmbeddingSearchRequest
+                    .builder()
+                    .queryEmbedding(queryEmbedding)
+                    .maxResults(1)
+                    .build()
+            ).matches()
 
-			val embeddingMatch = relevant[0]
-				.embedded()
-				.text()
+            val embeddingMatch = relevant[0]
+                .embedded()
+                .text()
 
             messages.add(
                 UserMessage.from("Using this data: ${embeddingMatch}. Respond to this prompt: $text")
             )
 
-			return chatModel
+            return chatModel
                 .generate(messages)
                 .content()
                 .text()
-		} catch (ex: Exception) {
-			println("Error when creating response: ${ex.message}")
-		}
+        } catch (ex: Exception) {
+            println("Error when creating response: ${ex.message}")
+        }
 
         return "Error has been occurred"
     }

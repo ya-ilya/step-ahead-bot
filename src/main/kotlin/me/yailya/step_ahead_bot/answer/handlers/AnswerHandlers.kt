@@ -195,8 +195,8 @@ suspend fun BehaviourContext.handleAnswerDeleteCallback(
                 .last()
                 .toInt()
 
-            val (previous, other, next) =  answerForKeyboard(query, otherId)
-            
+            val (previous, other, next) = answerForKeyboard(query, otherId)
+
             edit(
                 query = query,
                 entities = buildEntities {

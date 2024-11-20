@@ -20,6 +20,7 @@ class BotUserEntity(id: EntityID<Int>) : IntEntity(id) {
     var isAdministrator by BotUsers.isAdministrator
     var lastQuestionTime by BotUsers.lastQuestionTime
     var lastQuestionAnswerTime by BotUsers.lastQuestionAnswerTime
+    var lastTeacherReviewTime by BotUsers.lastTeacherReviewTime
     var lastReviewTime by BotUsers.lastReviewTime
     var lastUpdateRequestTime by BotUsers.lastUpdateRequestTime
 
@@ -35,6 +36,7 @@ class BotUserEntity(id: EntityID<Int>) : IntEntity(id) {
         isAdministrator,
         lastQuestionTime,
         lastQuestionAnswerTime,
+        lastTeacherReviewTime,
         lastReviewTime,
         lastUpdateRequestTime
     )
