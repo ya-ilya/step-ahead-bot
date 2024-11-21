@@ -25,6 +25,10 @@ suspend fun BehaviourContext.handleStartCommand(message: TextMessage) {
             }
 
             row {
+                dataButton("⭐ Мои отзывы о преподавателях", "teacher_reviews")
+            }
+
+            row {
                 dataButton("\uD83C\uDD95 Мои запросы на изменение информации", "update_requests")
             }
         }

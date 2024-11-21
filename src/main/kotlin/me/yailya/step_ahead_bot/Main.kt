@@ -31,10 +31,11 @@ import me.yailya.step_ahead_bot.answer.handlers.handleAnswerDeleteCallback
 import me.yailya.step_ahead_bot.answer.handlers.handleAnswerQuestionCallback
 import me.yailya.step_ahead_bot.assistant.Assistant
 import me.yailya.step_ahead_bot.bot_user.BotUserEntity
+import me.yailya.step_ahead_bot.bot_user.BotUsers
 import me.yailya.step_ahead_bot.commands.*
-import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCallback
-import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCloseCallback
-import me.yailya.step_ahead_bot.moderate_handlers.handleModerateUpdateRequestCloseDoneCallback
+import me.yailya.step_ahead_bot.moderator.handleModerateUpdateRequestCallback
+import me.yailya.step_ahead_bot.moderator.handleModerateUpdateRequestCloseCallback
+import me.yailya.step_ahead_bot.moderator.handleModerateUpdateRequestCloseDoneCallback
 import me.yailya.step_ahead_bot.question.Questions
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionAcceptAnswerCallback
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionAnswerCallback
@@ -43,8 +44,13 @@ import me.yailya.step_ahead_bot.question.handlers.handleQuestionDeleteCallback
 import me.yailya.step_ahead_bot.review.Reviews
 import me.yailya.step_ahead_bot.review.handlers.handleReviewCallback
 import me.yailya.step_ahead_bot.review.handlers.handleReviewDeleteCallback
+import me.yailya.step_ahead_bot.teacher.TeacherAcademicTitle
+import me.yailya.step_ahead_bot.teacher.TeacherEntity
 import me.yailya.step_ahead_bot.teacher.Teachers
 import me.yailya.step_ahead_bot.teacher.review.TeacherReviews
+import me.yailya.step_ahead_bot.teacher.review.handlers.handleTeacherReviewCallback
+import me.yailya.step_ahead_bot.teacher.review.handlers.handleTeacherReviewDeleteCallback
+import me.yailya.step_ahead_bot.teacher.review.handlers.handleTeacherReviewTeacherCallback
 import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.university.UniversityEntity
 import me.yailya.step_ahead_bot.university.handlers.*
@@ -169,6 +175,7 @@ suspend fun main() {
             Questions,
             Answers,
             Universities,
+            BotUsers,
             Teachers,
             TeacherReviews
         )
@@ -180,6 +187,16 @@ suspend fun main() {
                 this.userId = 1005465506
                 this.isModerator = true
                 this.isAdministrator = true
+            }
+        }
+
+        if (TeacherEntity.all().empty()) {
+            TeacherEntity.new {
+                this.university = UniversityEntity.findById(1)!!
+                this.fullName = "Иванов Иван Иванович"
+                this.experience = 5
+                this.academicTitle = TeacherAcademicTitle.Docent
+                this.specialities = listOf("Актер")
             }
         }
     }
@@ -215,6 +232,10 @@ suspend fun main() {
             this.handleQuestionCallback(it, -1)
         }
 
+        onDataCallbackQuery("teacher_reviews") {
+            this.handleTeacherReviewCallback(it, -1)
+        }
+
         onDataCallbackQuery("reviews") {
             this.handleReviewCallback(it, -1)
         }
@@ -241,6 +262,28 @@ suspend fun main() {
 
                 name == "close" -> {
                     this.handleUpdateRequestCloseCallback(it, updateRequestId)
+                }
+            }
+        }
+
+        val teacherReviewRegex = "teacher_review(?:_(.*))?_([^_]*)".toRegex()
+
+        onDataCallbackQuery(teacherReviewRegex) {
+            val values = teacherReviewRegex.find(it.data)!!.groupValues
+            val name = values[1]
+            val teacherReviewId = values[2].toInt()
+
+            when {
+                name.isEmpty() -> {
+                    this.handleTeacherReviewCallback(it, teacherReviewId)
+                }
+
+                name == "teacher" -> {
+                    this.handleTeacherReviewTeacherCallback(it, teacherReviewId)
+                }
+
+                name == "delete" -> {
+                    this.handleTeacherReviewDeleteCallback(it, teacherReviewId)
                 }
             }
         }

@@ -42,14 +42,14 @@ suspend fun BehaviourContext.handleCreateTeacherReviewCallback(
     }
 
     val (teacherEntity, teacherFullName) = databaseQuery {
-        TeacherEntity.findById(teacherId)!!.let { it to it.toModel() }
+        TeacherEntity.findById(teacherId)!!.let { it to it.toModel().fullName }
     }
 
     val commentMessage = waitTextMessage(
         SendTextMessage(
             query.message!!.chat.id,
             buildEntities {
-                +bold("${university.shortName} -> Преподователь -> ${teacherFullName} -> Создание отзыва") +
+                +bold("${university.shortName} -> Преподователь -> $teacherFullName -> Создание отзыва") +
                         "\n" + "Что вы хотите рассказать об этом преподавателе?"
             },
             replyParameters = ReplyParameters(metaInfo = query.message!!.metaInfo)
@@ -86,7 +86,7 @@ suspend fun BehaviourContext.handleCreateTeacherReviewCallback(
         TeacherReviewEntity.new {
             this.botUser = botUserEntity
             this.teacher = teacherEntity
-            this.comment = comment
+            this.comment = commentMessage.content.text
             this.rating = rating
         }.toModel()
     }

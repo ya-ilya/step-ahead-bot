@@ -88,7 +88,7 @@ suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, 
             }
 
             row {
-                dataButton("Учителя", "university_teachers_${university.id}")
+                dataButton("\uD83D\uDC69\u200D\uD83C\uDFEB Преподаватели", "university_teachers_${university.id}")
             }
 
             row {
@@ -193,6 +193,9 @@ suspend fun BehaviourContext.handleUniversityTeacherCallback(
                     "⭐ Отзывы о преподователе",
                     "university_teacher_reviews_${teacher.id}_${university.id}"
                 )
+            }
+
+            row {
                 dataButton(
                     "✍\uD83C\uDFFB Оставить отзыв о преподавателе",
                     "university_create_teacher_review_${teacher.id}_${university.id}"
@@ -268,7 +271,7 @@ suspend fun BehaviourContext.handleUniversityTeacherReviewCallback(
         teacherReviewId == -1,
         query,
         buildEntities {
-            +bold("Отзыв о преподавателе #${teacherReviewId}. ${teacherReview.rating}/5") +
+            +bold("Отзыв о преподавателе #${teacherReview.id}. ${teacherReview.rating}/5") +
                     "\n" + blockquote(teacherReview.comment)
         },
         inlineKeyboard {

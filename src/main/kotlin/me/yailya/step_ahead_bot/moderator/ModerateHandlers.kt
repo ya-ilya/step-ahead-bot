@@ -1,6 +1,6 @@
 @file:OptIn(RiskFeature::class)
 
-package me.yailya.step_ahead_bot.moderate_handlers
+package me.yailya.step_ahead_bot.moderator
 
 import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.api.send.reply

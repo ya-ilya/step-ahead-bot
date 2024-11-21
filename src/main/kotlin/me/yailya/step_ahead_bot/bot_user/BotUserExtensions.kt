@@ -8,6 +8,14 @@ import dev.inmo.tgbotapi.types.queries.callback.CallbackQuery
 import dev.inmo.tgbotapi.utils.RiskFeature
 import me.yailya.step_ahead_bot.databaseQuery
 
+val CallbackQuery.botUser: BotUserEntity
+    get() {
+        val userId = message!!.chat.id.chatId.long
+        return (BotUserEntity.find { BotUsers.userId eq userId }.singleOrNull() ?: BotUserEntity.new {
+            this.userId = userId
+        })
+    }
+
 suspend fun CallbackQuery.botUser() = databaseQuery {
     message!!.botUser()
 }

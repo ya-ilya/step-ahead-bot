@@ -30,7 +30,7 @@ private suspend fun reviewForKeyboard(
     query: DataCallbackQuery,
     id: Int
 ): Triple<Review?, Review, Review?> = databaseQuery {
-    val (botUserEntity) = query.botUser()
+    val botUserEntity = query.botUser
     val condition = Reviews.botUser eq botUserEntity.id
     val reviews = botUserEntity.reviews
 

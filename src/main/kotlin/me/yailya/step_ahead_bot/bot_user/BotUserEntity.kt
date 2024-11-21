@@ -6,6 +6,8 @@ import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.question.Questions
 import me.yailya.step_ahead_bot.review.ReviewEntity
 import me.yailya.step_ahead_bot.review.Reviews
+import me.yailya.step_ahead_bot.teacher.review.TeacherReviewEntity
+import me.yailya.step_ahead_bot.teacher.review.TeacherReviews
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
 import me.yailya.step_ahead_bot.update_request.UpdateRequests
 import org.jetbrains.exposed.dao.IntEntity
@@ -28,6 +30,7 @@ class BotUserEntity(id: EntityID<Int>) : IntEntity(id) {
     val answers by AnswerEntity referrersOn Answers.botUser
     val reviews by ReviewEntity referrersOn Reviews.botUser
     val updateRequests by UpdateRequestEntity referrersOn UpdateRequests.botUser
+    val teacherReviews by TeacherReviewEntity referrersOn TeacherReviews.botUser
 
     fun toModel() = BotUser(
         id.value,

@@ -36,7 +36,7 @@ private suspend fun questionForKeyboard(
     query: DataCallbackQuery,
     id: Int
 ): Triple<Question?, Question, Question?> = databaseQuery {
-    val (botUserEntity) = query.botUser()
+    val botUserEntity = query.botUser
     val condition = Questions.botUser eq botUserEntity.id
     val questions = botUserEntity.questions
 
@@ -284,9 +284,8 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
     answerId: Int,
     questionId: Int
 ) {
-    val (botUserEntity) = query.botUser()
-
     databaseQuery {
+        val botUserEntity = query.botUser
         val answer = AnswerEntity.findById(answerId)
 
         if (answer == null) {

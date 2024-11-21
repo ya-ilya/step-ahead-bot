@@ -23,7 +23,7 @@ private suspend fun updateRequestForKeyboard(
     query: DataCallbackQuery,
     id: Int
 ): Triple<UpdateRequest?, UpdateRequest, UpdateRequest?> = databaseQuery {
-    val (botUserEntity) = query.botUser()
+    val botUserEntity = query.botUser
     val condition = UpdateRequests.botUser eq botUserEntity.id
     val updateRequests = botUserEntity.updateRequests
 
