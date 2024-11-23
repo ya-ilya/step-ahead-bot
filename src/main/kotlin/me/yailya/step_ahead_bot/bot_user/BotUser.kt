@@ -11,5 +11,6 @@ class BotUser(
     val lastQuestionAnswerTime: LocalDateTime?,
     val lastTeacherReviewTime: LocalDateTime?,
     val lastReviewTime: LocalDateTime?,
-    val lastUpdateRequestTime: LocalDateTime?
+    val lastUpdateRequestTime: LocalDateTime?,
+    val lastAddTeacherRequestTime: LocalDateTime?
 )

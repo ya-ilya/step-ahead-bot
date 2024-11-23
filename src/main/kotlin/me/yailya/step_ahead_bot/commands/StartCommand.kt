@@ -31,6 +31,10 @@ suspend fun BehaviourContext.handleStartCommand(message: TextMessage) {
             row {
                 dataButton("\uD83C\uDD95 Мои запросы на изменение информации", "update_requests")
             }
+
+            row {
+                dataButton("\uD83C\uDD95 Мои запросы на добавление новых преподавателей", "add_teacher_requests")
+            }
         }
     )
 }

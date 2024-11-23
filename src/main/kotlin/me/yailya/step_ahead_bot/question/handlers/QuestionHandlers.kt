@@ -168,7 +168,7 @@ suspend fun BehaviourContext.handleQuestionDeleteCallback(
                     row {
                         dataButton(
                             "\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Посмотреть ответы",
-                            "question_answers_${question.id}"
+                            "question_answers_${other.id}"
                         )
                     }
                     row {

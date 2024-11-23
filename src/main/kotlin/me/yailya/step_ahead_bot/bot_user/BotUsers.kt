@@ -12,4 +12,5 @@ object BotUsers : IntIdTable() {
     val lastTeacherReviewTime = datetime("lastTeacherReviewTime").nullable()
     val lastReviewTime = datetime("lastReviewTime").nullable()
     val lastUpdateRequestTime = datetime("lastUpdateRequestTime").nullable()
+    val lastAddTeacherRequestTime = datetime("lastAddTeacherRequestTime").nullable()
 }

@@ -84,7 +84,7 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCallback(
         inlineKeyboard {
             row {
                 dataButton(
-                    "❌ Закрыть, и пометить как выполненый",
+                    "✅ Закрыть, и пометить как выполненый",
                     "moderate_update_request_close_done_${updateRequest.id}"
                 )
             }
@@ -109,7 +109,7 @@ suspend fun BehaviourContext.notifyUserAboutUpdateRequestClosed(entity: UpdateRe
     send(
         ChatId(RawChatId(entity.botUser.userId)),
         buildEntities {
-            +bold("Изменение статуса запроса #${entity.id.value} о ${entity.university.shortName}") +
+            +bold("Изменение статуса запроса на изменение информации #${entity.id.value} о ${entity.university.shortName}") +
                     "\n" + "- Статус изменен с ${UpdateRequestStatus.Open.text} на ${entity.status.text}"
 
             if (entity.moderator != null && entity.commentFromModeration != null) {
@@ -161,7 +161,7 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCloseCallback(
         SendTextMessage(
             query.message!!.chat.id,
             buildEntities {
-                +bold("Закрытие запроса #${updateRequestId} без пометки о выполнении") +
+                +bold("Закрытие запроса на изменение информации #${updateRequestId} без пометки о выполнении") +
                         "\n" + "Прокомментируйте закрытие запроса:"
             },
             replyParameters = ReplyParameters(metaInfo = query.message!!.metaInfo)
@@ -180,7 +180,7 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCloseCallback(
 
     reply(
         to = commentMessage,
-        "Запрос #${updateRequestId} успешно закрыт без пометки о выполнении"
+        "Запрос на изменение информации #${updateRequestId} успешно закрыт без пометки о выполнении"
     )
 
     answerCallbackQuery(query)
@@ -201,7 +201,7 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCloseDoneCallback(
         SendTextMessage(
             query.message!!.chat.id,
             buildEntities {
-                +bold("Закрытие запроса #${updateRequestId} с пометкой о выполнении") +
+                +bold("Закрытие запроса на изменение информации #${updateRequestId} с пометкой о выполнении") +
                         "\n" + "Прокомментируйте закрытие запроса:"
             },
             replyParameters = ReplyParameters(metaInfo = query.message!!.metaInfo)
@@ -220,7 +220,7 @@ suspend fun BehaviourContext.handleModerateUpdateRequestCloseDoneCallback(
 
     reply(
         to = commentMessage,
-        "Запрос #${updateRequestId} закрыт с пометкой о выполнении"
+        "Запрос на изменение информации #${updateRequestId} закрыт с пометкой о выполнении"
     )
 
     answerCallbackQuery(query)

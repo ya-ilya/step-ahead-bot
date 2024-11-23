@@ -6,6 +6,8 @@ import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.question.Questions
 import me.yailya.step_ahead_bot.review.ReviewEntity
 import me.yailya.step_ahead_bot.review.Reviews
+import me.yailya.step_ahead_bot.teacher.request.AddTeacherRequestEntity
+import me.yailya.step_ahead_bot.teacher.request.AddTeacherRequests
 import me.yailya.step_ahead_bot.teacher.review.TeacherReviewEntity
 import me.yailya.step_ahead_bot.teacher.review.TeacherReviews
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
@@ -25,12 +27,14 @@ class BotUserEntity(id: EntityID<Int>) : IntEntity(id) {
     var lastTeacherReviewTime by BotUsers.lastTeacherReviewTime
     var lastReviewTime by BotUsers.lastReviewTime
     var lastUpdateRequestTime by BotUsers.lastUpdateRequestTime
+    var lastAddTeacherRequestTime by BotUsers.lastAddTeacherRequestTime
 
     val questions by QuestionEntity referrersOn Questions.botUser
     val answers by AnswerEntity referrersOn Answers.botUser
     val reviews by ReviewEntity referrersOn Reviews.botUser
     val updateRequests by UpdateRequestEntity referrersOn UpdateRequests.botUser
     val teacherReviews by TeacherReviewEntity referrersOn TeacherReviews.botUser
+    val addTeacherRequests by AddTeacherRequestEntity referrersOn AddTeacherRequests.botUser
 
     fun toModel() = BotUser(
         id.value,
@@ -41,6 +45,7 @@ class BotUserEntity(id: EntityID<Int>) : IntEntity(id) {
         lastQuestionAnswerTime,
         lastTeacherReviewTime,
         lastReviewTime,
-        lastUpdateRequestTime
+        lastUpdateRequestTime,
+        lastAddTeacherRequestTime
     )
 }

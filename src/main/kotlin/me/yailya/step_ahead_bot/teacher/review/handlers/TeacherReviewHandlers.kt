@@ -79,7 +79,10 @@ suspend fun BehaviourContext.handleTeacherReviewCallback(
         },
         inlineKeyboard {
             row {
-                dataButton("\uD83D\uDC69\u200D\uD83C\uDFEB Посмотреть информацию о преподавателе", "teacher_review_teacher_${teacherReview.id}")
+                dataButton(
+                    "\uD83D\uDC69\u200D\uD83C\uDFEB Посмотреть информацию о преподавателе",
+                    "teacher_review_teacher_${teacherReview.id}"
+                )
             }
             row {
                 dataButton("\uD83D\uDDD1\uFE0F Удалить", "teacher_review_delete_${teacherReview.id}")
@@ -193,12 +196,15 @@ suspend fun BehaviourContext.handleTeacherReviewDeleteCallback(
             edit(
                 query = query,
                 entities = buildEntities {
-                    +bold("Отзыв о преподавателе #${teacherReviewId}. ${teacherReview.rating}/5") +
-                            "\n" + blockquote(teacherReview.comment)
+                    +bold("Отзыв о преподавателе #${other.id}. ${other.rating}/5") +
+                            "\n" + blockquote(other.comment)
                 },
                 replyMarkup = inlineKeyboard {
                     row {
-                        dataButton("\uD83D\uDC69\u200D\uD83C\uDFEB Посмотреть информацию о преподавателе", "teacher_review_teacher_${teacherReview.id}")
+                        dataButton(
+                            "\uD83D\uDC69\u200D\uD83C\uDFEB Посмотреть информацию о преподавателе",
+                            "teacher_review_teacher_${other.id}"
+                        )
                     }
 
                     row {
@@ -221,7 +227,7 @@ suspend fun BehaviourContext.handleTeacherReviewDeleteCallback(
 
         answerCallbackQuery(
             query,
-            "✅ Ваш ответ на вопрос #${teacherReviewId} был удален"
+            "✅ Ваш отзыв о преподавателе #${teacherReviewId} был удален"
         )
     }
 

@@ -33,9 +33,7 @@ import me.yailya.step_ahead_bot.assistant.Assistant
 import me.yailya.step_ahead_bot.bot_user.BotUserEntity
 import me.yailya.step_ahead_bot.bot_user.BotUsers
 import me.yailya.step_ahead_bot.commands.*
-import me.yailya.step_ahead_bot.moderator.handleModerateUpdateRequestCallback
-import me.yailya.step_ahead_bot.moderator.handleModerateUpdateRequestCloseCallback
-import me.yailya.step_ahead_bot.moderator.handleModerateUpdateRequestCloseDoneCallback
+import me.yailya.step_ahead_bot.moderator.*
 import me.yailya.step_ahead_bot.question.Questions
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionAcceptAnswerCallback
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionAnswerCallback
@@ -47,6 +45,9 @@ import me.yailya.step_ahead_bot.review.handlers.handleReviewDeleteCallback
 import me.yailya.step_ahead_bot.teacher.TeacherAcademicTitle
 import me.yailya.step_ahead_bot.teacher.TeacherEntity
 import me.yailya.step_ahead_bot.teacher.Teachers
+import me.yailya.step_ahead_bot.teacher.request.AddTeacherRequests
+import me.yailya.step_ahead_bot.teacher.request.handlers.handleAddTeacherRequestCallback
+import me.yailya.step_ahead_bot.teacher.request.handlers.handleAddTeacherRequestCloseCallback
 import me.yailya.step_ahead_bot.teacher.review.TeacherReviews
 import me.yailya.step_ahead_bot.teacher.review.handlers.handleTeacherReviewCallback
 import me.yailya.step_ahead_bot.teacher.review.handlers.handleTeacherReviewDeleteCallback
@@ -177,7 +178,8 @@ suspend fun main() {
             Universities,
             BotUsers,
             Teachers,
-            TeacherReviews
+            TeacherReviews,
+            AddTeacherRequests
         )
     }
 
@@ -240,12 +242,38 @@ suspend fun main() {
             this.handleReviewCallback(it, -1)
         }
 
+        onDataCallbackQuery("add_teacher_requests") {
+            this.handleAddTeacherRequestCallback(it, -1)
+        }
+
+        onDataCallbackQuery("moderate_add_teacher_requests") {
+            this.handleModerateAddTeacherRequestCallback(it, -1)
+        }
+
         onDataCallbackQuery("update_requests") {
             this.handleUpdateRequestCallback(it, -1)
         }
 
         onDataCallbackQuery("moderate_update_requests") {
             this.handleModerateUpdateRequestCallback(it, -1)
+        }
+
+        val addTeacherRequestRegex = "add_teacher_request(?:_(.*))?_([^_]*)".toRegex()
+
+        onDataCallbackQuery(addTeacherRequestRegex) {
+            val values = addTeacherRequestRegex.find(it.data)!!.groupValues
+            val name = values[1]
+            val addTeacherRequestId = values[2].toInt()
+
+            when {
+                name.isEmpty() -> {
+                    this.handleAddTeacherRequestCallback(it, addTeacherRequestId)
+                }
+
+                name == "close" -> {
+                    this.handleAddTeacherRequestCloseCallback(it, addTeacherRequestId)
+                }
+            }
         }
 
         val updateRequestRegex = "update_request(?:_(.*))?_([^_]*)".toRegex()
@@ -486,8 +514,34 @@ suspend fun main() {
                     this.handleCreateReviewCallback(it, university)
                 }
 
+                name == "create_add_teacher_request" -> {
+                    this.handleCreateAddTeacherRequestCallback(it, university)
+                }
+
                 name == "create_update_request" -> {
                     this.handleCreateUpdateRequestCallback(it, university)
+                }
+            }
+        }
+
+        val moderateAddTeacherRequestRegex = "moderate_add_teacher_request(?:_(.*))?_([^_]*)".toRegex()
+
+        onDataCallbackQuery(moderateAddTeacherRequestRegex) {
+            val values = moderateAddTeacherRequestRegex.find(it.data)!!.groupValues
+            val name = values[1]
+            val addTeacherRequestId = values[2].toInt()
+
+            when {
+                name.isEmpty() -> {
+                    this.handleModerateAddTeacherRequestCallback(it, addTeacherRequestId)
+                }
+
+                name == "close" -> {
+                    this.handleModerateAddTeacherRequestCloseCallback(it, addTeacherRequestId)
+                }
+
+                name == "close_done" -> {
+                    this.handleModerateAddTeacherRequestCloseDoneCallback(it, addTeacherRequestId)
                 }
             }
         }

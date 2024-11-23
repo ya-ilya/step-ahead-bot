@@ -23,6 +23,13 @@ suspend fun BehaviourContext.handleModerateCommand(message: TextMessage) {
             row {
                 dataButton("\uD83D\uDD0D Рассмотреть открытые запросы на изменение", "moderate_update_requests")
             }
+
+            row {
+                dataButton(
+                    "\uD83D\uDD0D Рассмотреть открыте запросы на добавление преподавателя",
+                    "moderate_add_teacher_requests"
+                )
+            }
         }
     )
 }

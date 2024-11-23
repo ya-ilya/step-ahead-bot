@@ -109,6 +109,13 @@ suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, 
 
             row {
                 dataButton(
+                    "✍\uD83C\uDFFB Создать запрос на добавление нового преподавателя",
+                    "university_create_add_teacher_request_${university.id}"
+                )
+            }
+
+            row {
+                dataButton(
                     "✍\uD83C\uDFFB Создать запрос на изменение информации",
                     "university_create_update_request_${university.id}"
                 )
@@ -241,10 +248,10 @@ private suspend fun teacherReviewForKeyboard(
     }
 
     val previous = TeacherReviewEntity
-        .find { condition and (Teachers.id less current.id) }
+        .find { condition and (TeacherReviews.id less current.id) }
         .lastOrNull()
     val next = TeacherReviewEntity
-        .find { condition and (Teachers.id greater current.id) }
+        .find { condition and (TeacherReviews.id greater current.id) }
         .firstOrNull()
 
     return@databaseQuery Triple(

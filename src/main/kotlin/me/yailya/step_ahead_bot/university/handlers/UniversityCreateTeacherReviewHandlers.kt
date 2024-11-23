@@ -12,6 +12,7 @@ import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
 import dev.inmo.tgbotapi.requests.send.SendTextMessage
 import dev.inmo.tgbotapi.types.ReplyParameters
+import dev.inmo.tgbotapi.types.buttons.inline.dataInlineButton
 import dev.inmo.tgbotapi.types.message.textsources.bold
 import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
 import dev.inmo.tgbotapi.utils.RiskFeature
@@ -20,6 +21,7 @@ import dev.inmo.tgbotapi.utils.row
 import kotlinx.coroutines.flow.first
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
+import me.yailya.step_ahead_bot.editInlineButton
 import me.yailya.step_ahead_bot.teacher.TeacherEntity
 import me.yailya.step_ahead_bot.teacher.review.TeacherReviewEntity
 import me.yailya.step_ahead_bot.university.University
@@ -77,6 +79,12 @@ suspend fun BehaviourContext.handleCreateTeacherReviewCallback(
     ).first()
 
     answerCallbackQuery(ratingQuery)
+
+    editInlineButton(
+        ratingQuery,
+        { button -> button.text.contains(ratingQuery.data) },
+        { button -> dataInlineButton("✅ ${button.text}", ratingQuery.data) }
+    )
 
     val rating = ratingQuery.data.toInt()
 

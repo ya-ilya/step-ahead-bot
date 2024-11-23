@@ -35,11 +35,11 @@ private suspend fun updateRequestForKeyboard(
         updateRequests.first()
     } else {
         UpdateRequestEntity.findById(id)
-            ?: throw RuntimeException("❌ Данный запрос на изменение не существует")
+            ?: throw RuntimeException("❌ Данный запрос на изменение информации не существует")
     }
 
     if (current.botUser.id != botUserEntity.id) {
-        throw RuntimeException("❌ Данный запрос на изменение создали не вы")
+        throw RuntimeException("❌ Данный запрос на изменение информации создали не вы")
     }
 
     val previous = UpdateRequestEntity
@@ -114,7 +114,7 @@ suspend fun BehaviourContext.handleUpdateRequestCloseCallback(
 
     reply(
         to = query,
-        text = "Запрос #${updateRequestId} был успешно закрыт"
+        text = "Запрос на изменение информации #${updateRequestId} был успешно закрыт"
     )
 
     answerCallbackQuery(query)
