@@ -10,7 +10,6 @@ import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
-import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.replyOrEdit
 import me.yailya.step_ahead_bot.update_request.UpdateRequest
 import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
@@ -97,24 +96,6 @@ suspend fun BehaviourContext.handleUpdateRequestCallback(
                 }
             }
         }
-    )
-
-    answerCallbackQuery(query)
-}
-
-suspend fun BehaviourContext.handleUpdateRequestCloseCallback(
-    query: DataCallbackQuery,
-    updateRequestId: Int
-) {
-    databaseQuery {
-        UpdateRequestEntity.findById(updateRequestId)!!.apply {
-            this.status = UpdateRequestStatus.Closed
-        }
-    }
-
-    reply(
-        to = query,
-        text = "Запрос на изменение информации #${updateRequestId} был успешно закрыт"
     )
 
     answerCallbackQuery(query)

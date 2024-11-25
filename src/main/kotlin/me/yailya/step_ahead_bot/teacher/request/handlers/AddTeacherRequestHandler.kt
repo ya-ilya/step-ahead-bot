@@ -9,7 +9,6 @@ import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
-import me.yailya.step_ahead_bot.reply
 import me.yailya.step_ahead_bot.replyOrEdit
 import me.yailya.step_ahead_bot.teacher.request.AddTeacherRequest
 import me.yailya.step_ahead_bot.teacher.request.AddTeacherRequestEntity
@@ -18,7 +17,7 @@ import me.yailya.step_ahead_bot.teacher.request.AddTeacherRequests
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 
-private suspend fun addTeacherRequestForKeyboard(
+suspend fun addTeacherRequestForKeyboard(
     query: DataCallbackQuery,
     id: Int
 ): Triple<AddTeacherRequest?, AddTeacherRequest, AddTeacherRequest?> = databaseQuery {
@@ -94,24 +93,6 @@ suspend fun BehaviourContext.handleAddTeacherRequestCallback(
                 }
             }
         }
-    )
-
-    answerCallbackQuery(query)
-}
-
-suspend fun BehaviourContext.handleAddTeacherRequestCloseCallback(
-    query: DataCallbackQuery,
-    addTeacherRequestId: Int
-) {
-    databaseQuery {
-        AddTeacherRequestEntity.findById(addTeacherRequestId)!!.apply {
-            this.status = AddTeacherRequestStatus.Closed
-        }
-    }
-
-    reply(
-        to = query,
-        text = "Запрос на добавление нового преподавателя #${addTeacherRequestId} был успешно закрыт"
     )
 
     answerCallbackQuery(query)
