@@ -28,7 +28,6 @@ dependencies {
 
     implementation("dev.langchain4j:langchain4j:$langchainVersion")
     implementation("dev.langchain4j:langchain4j-ollama:$langchainVersion")
-    implementation("dev.langchain4j:langchain4j-chroma:$langchainVersion")
     implementation("dev.langchain4j:langchain4j-embeddings:$langchainVersion")
     implementation("dev.inmo:tgbotapi:$tgbotapiVersion")
 

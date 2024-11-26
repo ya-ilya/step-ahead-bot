@@ -30,6 +30,7 @@ import me.yailya.step_ahead_bot.answer.handlers.handleAnswerCallback
 import me.yailya.step_ahead_bot.answer.handlers.handleAnswerDeleteCallback
 import me.yailya.step_ahead_bot.answer.handlers.handleAnswerQuestionCallback
 import me.yailya.step_ahead_bot.assistant.Assistant
+import me.yailya.step_ahead_bot.assistant.handlers.handleAssistantStop
 import me.yailya.step_ahead_bot.bot_user.BotUserEntity
 import me.yailya.step_ahead_bot.bot_user.BotUsers
 import me.yailya.step_ahead_bot.commands.*
@@ -131,7 +132,7 @@ suspend fun BehaviourContext.replyOrEdit(
 suspend fun BehaviourContext.editInlineButton(
     query: CallbackQuery,
     buttonFilter: (InlineKeyboardButton) -> Boolean,
-    buttonTransformer: (InlineKeyboardButton) -> InlineKeyboardButton
+    buttonTransformer: ((InlineKeyboardButton) -> InlineKeyboardButton)?
 ) {
     val keyboardBuilder = InlineKeyboardBuilder()
 
@@ -140,7 +141,7 @@ suspend fun BehaviourContext.editInlineButton(
 
         for (button in row) {
             if (buttonFilter(button)) {
-                rowBuilder.add(buttonTransformer(button))
+                rowBuilder.add(buttonTransformer?.invoke(button) ?: continue)
             } else {
                 rowBuilder.add(button)
             }
@@ -566,6 +567,15 @@ suspend fun main() {
                     this.handleModerateUpdateRequestCloseDoneCallback(it, updateRequestId)
                 }
             }
+        }
+
+        val assistantStopRegex = "assistant_stop_(.*?)$".toRegex()
+
+        onDataCallbackQuery(assistantStopRegex) {
+            val values = assistantStopRegex.find(it.data)!!.groupValues
+            val userId = values[1].toLong()
+
+            handleAssistantStop(it, userId)
         }
     }.join()
 }

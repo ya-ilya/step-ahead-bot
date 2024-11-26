@@ -38,19 +38,6 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [ gpu ]
-  chromadb:
-    container_name: chromadb
-    image: chromadb/chroma:latest
-    volumes:
-      - chromadb_data:/chroma/chroma
-    environment:
-      - IS_PERSISTENT=TRUE
-      - PERSIST_DIRECTORY=/chroma/chroma
-      - ANONYMIZED_TELEMETRY=${ANONYMIZED_TELEMETRY:-FALSE}
-    ports:
-      - 8000:8000
-    networks:
-      - net
   bot:
     container_name: bot
     env_file: ".env"
@@ -64,11 +51,8 @@ services:
         condition: service_started
       database:
         condition: service_started
-      chromadb:
-        condition: service_started
 volumes:
   mysql_data:
-  chromadb_data:
   ollama_data:
 networks:
   net:

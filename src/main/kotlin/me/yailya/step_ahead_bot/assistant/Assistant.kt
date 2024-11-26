@@ -1,22 +1,19 @@
 package me.yailya.step_ahead_bot.assistant
 
+import dev.langchain4j.data.message.AiMessage
 import dev.langchain4j.data.message.ChatMessage
 import dev.langchain4j.data.message.UserMessage
 import dev.langchain4j.data.segment.TextSegment
 import dev.langchain4j.model.ollama.OllamaChatModel
 import dev.langchain4j.model.ollama.OllamaEmbeddingModel
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest
-import dev.langchain4j.store.embedding.chroma.ChromaEmbeddingStore
+import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore
 import java.io.File
 
 object Assistant {
     var isLoaded: Boolean = false
 
-    private val embeddingStore = ChromaEmbeddingStore
-        .builder()
-        .baseUrl("http://chromadb:8000")
-        .collectionName("universities")
-        .build()
+    private val embeddingStore = InMemoryEmbeddingStore<TextSegment>()
 
     private val embeddingModel: OllamaEmbeddingModel = OllamaEmbeddingModel
         .builder()
@@ -45,7 +42,6 @@ object Assistant {
         }
     }
 
-
     fun generateResponse(text: String, messages: MutableList<ChatMessage>): String {
         try {
             val queryEmbedding = embeddingModel
@@ -65,13 +61,20 @@ object Assistant {
                 .text()
 
             messages.add(
-                UserMessage.from("Using this data: ${embeddingMatch}. Respond to this prompt: $text")
+                AiMessage.from("This is additional data for my next response. $embeddingMatch")
             )
 
-            return chatModel
+            messages.add(
+                UserMessage.from(text)
+            )
+
+            val response = chatModel
                 .generate(messages)
                 .content()
-                .text()
+
+            messages.add(response)
+
+            return response.text()
         } catch (ex: Exception) {
             println("Error when creating response: ${ex.message}")
         }
