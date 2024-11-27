@@ -1,5 +1,6 @@
 package me.yailya.step_ahead_bot.commands
 
+import dev.inmo.tgbotapi.extensions.api.edit.edit
 import dev.inmo.tgbotapi.extensions.api.send.reply
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
 import dev.inmo.tgbotapi.extensions.behaviour_builder.expectations.waitTextMessage
@@ -57,8 +58,13 @@ suspend fun BehaviourContext.handleAssistantCommand(message: TextMessage) {
             break
         }
 
-        reply(
+        val waitMessage = reply(
             to = request,
+            text = "⏳ Генерация ответа..."
+        )
+
+        edit(
+            waitMessage,
             text = Assistant.generateResponse(request.content.text, messages)
         )
     }
