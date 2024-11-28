@@ -48,3 +48,17 @@ Telegram-бот, предлагающий актуальные и структу
 7. Реализована система модерации. Доверенные пользователи могут получить права модератора, чтобы одобрять или отклонять запросы на изменение информации о вузах и запросы на добавление новых преподавателей;
 8. Реализован помощник с искусственным интеллектом. В него загружена базовая информация о вузах, которые есть в базе данных бота. Для создания помощника использовался такой инструмент, как Ollama, а так же фреймворк LangChain;
 9. Для автоматизации развертывания использован Docker.
+
+- ### Список используемой литературы
+
+Документация Docker : сайт. – URL: https://docs.docker.com/ (дата обращения: 28.11.2024) <br>
+Документация Exposed : сайт. – URL: https://jetbrains.github.io/Exposed/home.html (дата обращения: 28.11.2024) <br>
+Документация Kotlin : сайт. – URL: https://kotlinlang.org/docs/home.html (дата обращения: 28.11.2024) <br>
+Документация LangChain4J : сайт. – URL: https://docs.langchain4j.dev/intro/ (дата обращения: 28.11.2024) <br>
+Документация MySQL : сайт. – URL: https://dev.mysql.com/doc/ (дата обращения: 28.11.2024) <br>
+Документация Ollama : сайт. – URL: https://github.com/ollama/ollama/tree/main/docs (дата обращения: 28.11.2024) <br>
+Документация Telegram API : сайт. – URL: https://core.telegram.org/#getting-started (дата обращения: 28.11.2024) <br>
+Документация TelegramBotAPI : сайт. – URL: https://docs.inmo.dev/tgbotapi/index.html (дата обращения: 28.11.2024) <br>
+Информация о Kotlin : сайт. – URL: https://kotlinlang.org/ (дата обращения: 28.11.2024) <br>
+Информация о LangChain : сайт. – URL: https://www.langchain.com/ (дата обращения: 28.11.2024) <br>
+Информация о Intellij IDEA : сайт. – URL: https://www.jetbrains.com/idea/ (дата обращения: 28.11.2024) <br>
