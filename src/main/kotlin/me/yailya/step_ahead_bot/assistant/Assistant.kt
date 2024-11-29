@@ -8,11 +8,10 @@ import dev.langchain4j.model.ollama.OllamaChatModel
 import dev.langchain4j.model.ollama.OllamaEmbeddingModel
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest
 import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore
-import java.io.File
+import me.yailya.step_ahead_bot.databaseQuery
+import me.yailya.step_ahead_bot.university.UniversityEntity
 
 object Assistant {
-    var isLoaded: Boolean = false
-
     private val embeddingStore = InMemoryEmbeddingStore<TextSegment>()
 
     private val embeddingModel: OllamaEmbeddingModel = OllamaEmbeddingModel
@@ -24,21 +23,36 @@ object Assistant {
     private val chatModel: OllamaChatModel = OllamaChatModel
         .builder()
         .baseUrl("http://ollama:11434")
-        .modelName("llama3.1:8b")
+        .modelName("assistant")
         .build()
 
-    init {
-        try {
-            for (file in File("/app/documents/").listFiles()!!) {
-                val segment = TextSegment.from(file.readText())
+    suspend fun addUniversitiesEmbeddingData() {
+        databaseQuery {
+            for (university in UniversityEntity.all()) {
+                val segment = TextSegment.from(
+                    """
+                                Название университета: ${university.name}
+                                Название университета на английском: ${university.nameEn}
+                                Краткое название университета: ${university.shortName}
+                                Айди университета в базе данных бота ${university.name}: #${university.id.value}
+
+                                ${university.shortName} предлагает широкий спектр специальностей: ${university.specialities.joinToString()}
+
+                                Номер телефона ${university.shortName}: ${university.contacts.phone}
+                                Электронная почта ${university.shortName}: ${university.contacts.email}
+
+                                ВКонтакте ${university.shortName}: ${university.socialNetworks.vk}
+                                Telegram ${university.shortName}: ${university.socialNetworks.tg}
+
+                                Количество студентов в ${university.inNumbers.year} в ${university.shortName}: ${university.inNumbers.studentsCount}
+                                Количество преподавателей в ${university.inNumbers.year} в ${university.shortName}: ${university.inNumbers.professorsCount}
+
+                                Ссылка на список поступающих в ${university.shortName}: ${university.listOfApplicants}
+                            """.trimIndent()
+                )
                 val embedding = embeddingModel.embed(segment).content()
                 embeddingStore.add(embedding, segment)
             }
-
-            isLoaded = true
-        } catch (ex: Exception) {
-            isLoaded = false
-            throw ex
         }
     }
 

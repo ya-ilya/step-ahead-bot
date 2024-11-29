@@ -11,6 +11,4 @@ FROM openjdk:21-jdk-slim
 RUN mkdir /app
 COPY --from=build /home/gradle/src/build/libs/shadow.jar /app/application.jar
 
-COPY --from=build /home/gradle/src/documents/ /app/documents/
-
 ENTRYPOINT ["java", "-jar", "/app/application.jar"]

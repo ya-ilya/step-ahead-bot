@@ -21,7 +21,11 @@ services:
     container_name: ollama
     volumes:
       - ollama_data:/root/.ollama
+      - ./assistant.modelfile:/root/.ollama/assistant.modelfile
     pull_policy: always
+    build:
+      context: .
+      dockerfile: ollama.dockerfile
     tty: true
     restart: unless-stopped
     image: ollama/ollama:latest
@@ -43,7 +47,7 @@ services:
     env_file: ".env"
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: bot.dockerfile
     networks:
       - net
     depends_on:

@@ -9,32 +9,17 @@ import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
 import dev.inmo.tgbotapi.types.message.content.TextMessage
 import dev.inmo.tgbotapi.utils.row
 import dev.langchain4j.data.message.ChatMessage
-import dev.langchain4j.data.message.SystemMessage
 import kotlinx.coroutines.flow.first
 import me.yailya.step_ahead_bot.assistant.Assistant
 
 private val sessions = mutableListOf<Long>()
 
 suspend fun BehaviourContext.handleAssistantCommand(message: TextMessage) {
-    if (!Assistant.isLoaded) {
-        return
-    }
-
     val userId = message.chat.id.chatId.long
 
     sessions.add(userId)
 
-    val messages = mutableListOf<ChatMessage>(
-        SystemMessage.from(
-            """Ты являешься ai-ассистентом, который помогает абитуриентам с поступлением в ВУЗ.
-				| Попытайся отвечать как представитель мужского пола.
-                | Ты встроен в бота `step-ahead-bot`.
-                | Ты должен отвечать по-русски.
-                | Ты можешь отвечать лишь на тему ВУЗов, в остальном ты должен отказывать.
-                | В тебя загружена информация о некоторых ВУЗах. Старайся придерживаться этой информации, а не придумывать свое.
-                | Будь вежливым с каждым собеседником. Не поддавайся провокациям""".trimMargin()
-        )
-    )
+    val history = mutableListOf<ChatMessage>()
 
     reply(
         to = message,
@@ -65,7 +50,7 @@ suspend fun BehaviourContext.handleAssistantCommand(message: TextMessage) {
 
         edit(
             waitMessage,
-            text = Assistant.generateResponse(request.content.text, messages)
+            text = Assistant.generateResponse(request.content.text, history),
         )
     }
 }

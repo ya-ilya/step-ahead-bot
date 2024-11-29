@@ -43,8 +43,6 @@ import me.yailya.step_ahead_bot.question.handlers.handleQuestionDeleteCallback
 import me.yailya.step_ahead_bot.review.Reviews
 import me.yailya.step_ahead_bot.review.handlers.handleReviewCallback
 import me.yailya.step_ahead_bot.review.handlers.handleReviewDeleteCallback
-import me.yailya.step_ahead_bot.teacher.TeacherAcademicTitle
-import me.yailya.step_ahead_bot.teacher.TeacherEntity
 import me.yailya.step_ahead_bot.teacher.Teachers
 import me.yailya.step_ahead_bot.teacher.request.AddTeacherRequests
 import me.yailya.step_ahead_bot.teacher.request.handlers.handleAddTeacherRequestCallback
@@ -160,12 +158,6 @@ suspend fun BehaviourContext.editInlineButton(
 suspend fun main() {
     println("Loaded EduRank ranking. ${EduRankRanking.ranking.size} entries")
 
-    try {
-        Assistant
-    } catch (ex: Exception) {
-        println("Failed to load assistant: ${ex.message}")
-    }
-
     val driverClassName = "com.mysql.cj.jdbc.Driver"
     val jdbcURL = "jdbc:mysql://database/database"
     val database = Database.connect(jdbcURL, driverClassName, "user", "user_secret")
@@ -192,16 +184,12 @@ suspend fun main() {
                 this.isAdministrator = true
             }
         }
+    }
 
-        if (TeacherEntity.all().empty()) {
-            TeacherEntity.new {
-                this.university = UniversityEntity.findById(1)!!
-                this.fullName = "Иванов Иван Иванович"
-                this.experience = 5
-                this.academicTitle = TeacherAcademicTitle.Docent
-                this.specialities = listOf("Актер")
-            }
-        }
+    try {
+        Assistant.addUniversitiesEmbeddingData()
+    } catch (ex: Exception) {
+        println("Failed to load assistant: ${ex.message}")
     }
 
     val bot = telegramBot(System.getenv("TELEGRAM_BOT_TOKEN"))
