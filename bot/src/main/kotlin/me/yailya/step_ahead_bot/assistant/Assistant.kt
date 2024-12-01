@@ -93,6 +93,6 @@ object Assistant {
             println("Error when creating response: ${ex.message}")
         }
 
-        return "Error has been occurred"
+        return "❌ Произошла ошибка при генерации ответа. Попробуйте еще раз, или свяжитесь с администрацией"
     }
 }

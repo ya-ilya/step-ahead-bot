@@ -23,6 +23,9 @@ services:
       - ollama_data:/root/.ollama
       - ./assistant.modelfile:/root/.ollama/assistant.modelfile
     pull_policy: always
+    healthcheck:
+      interval: 15s
+      test: (ls ollama_state_file && exit 1) || echo 0
     build:
       context: .
       dockerfile: ollama.dockerfile
@@ -48,11 +51,13 @@ services:
     build:
       context: .
       dockerfile: bot.dockerfile
+    ports:
+      - 5005:5005
     networks:
       - net
     depends_on:
       ollama:
-        condition: service_started
+        condition: service_healthy
       database:
         condition: service_started
 volumes:

@@ -50,7 +50,7 @@ suspend fun BehaviourContext.handleAssistantCommand(message: TextMessage) {
 
         edit(
             waitMessage,
-            text = Assistant.generateResponse(request.content.text, history),
+            text = Assistant.generateResponse(request.content.text, history)
         )
     }
 }

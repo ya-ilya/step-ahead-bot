@@ -1,57 +1,25 @@
-val exposedVersion: String by project
-val h2Version: String by project
-val langchainVersion: String by project
-val serializationVersion: String by project
-val tgbotapiVersion: String by project
-val mysqlVersion: String by project
-
-plugins {
-    kotlin("jvm") version "2.0.20"
-    kotlin("plugin.serialization") version "2.0.20"
-    id("com.gradleup.shadow") version "8.3.5"
-}
-
-group = "me.yailya"
-version = "0.1"
-
 repositories {
     mavenCentral()
+    gradlePluginPortal()
 }
 
-dependencies {
-    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-json:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
-
-    implementation("dev.langchain4j:langchain4j:$langchainVersion")
-    implementation("dev.langchain4j:langchain4j-ollama:$langchainVersion")
-    implementation("dev.langchain4j:langchain4j-embeddings:$langchainVersion")
-    implementation("dev.inmo:tgbotapi:$tgbotapiVersion")
-
-    implementation("com.mysql:mysql-connector-j:$mysqlVersion")
+plugins {
+    kotlin("jvm")
+    kotlin("plugin.serialization")
+    id("com.gradleup.shadow")
 }
 
-kotlin {
-    jvmToolchain(21)
-}
-
-tasks {
-    shadowJar {
-        archiveBaseName.set("shadow")
-        archiveClassifier.set("")
-        archiveVersion.set("")
+subprojects {
+    apply {
+        plugin("org.jetbrains.kotlin.jvm")
+        plugin("com.gradleup.shadow")
     }
 
-    jar {
-        archiveFileName.set("${project.name}-release.jar")
+    repositories {
+        mavenCentral()
+    }
 
-        manifest {
-            attributes(
-                "Main-Class" to "me.yailya.step_ahead_bot.MainKt"
-            )
-        }
+    kotlin {
+        jvmToolchain(21)
     }
 }

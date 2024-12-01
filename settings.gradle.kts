@@ -1,6 +1,21 @@
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
-}
-
 rootProject.name = "step-ahead-bot"
 
+pluginManagement {
+    val kotlinVersion: String by settings
+    val shadowVersion: String by settings
+
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    plugins {
+        kotlin("jvm") version kotlinVersion
+        kotlin("plugin.serialization") version kotlinVersion
+        id("com.gradleup.shadow") version shadowVersion
+    }
+}
+
+include(
+    "bot"
+)

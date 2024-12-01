@@ -85,9 +85,11 @@ suspend fun BehaviourContext.handleCreateAddTeacherRequestCallback(
 
     answerCallbackQuery(academicTitleQuery)
 
+    val academicTitle = TeacherAcademicTitle.valueOf(academicTitleQuery.data)
+
     editInlineButton(
         academicTitleQuery,
-        { button -> button.text.contains(academicTitleQuery.data) },
+        { button -> button.text.contains(academicTitle.text) },
         { button -> dataInlineButton("✅ ${button.text}", academicTitleQuery.data) }
     )
 
@@ -108,7 +110,7 @@ suspend fun BehaviourContext.handleCreateAddTeacherRequestCallback(
             this.university = UniversityEntity.findById(university.id)!!
             this.fullName = fullNameMessage.content.text
             this.experience = experienceMessage.content.text.toInt()
-            this.academicTitle = TeacherAcademicTitle.valueOf(academicTitleQuery.data)
+            this.academicTitle = academicTitle
             this.specialities = specialitiesMessage.content.text.split(",").map { it.trim() }
             this.status = AddTeacherRequestStatus.Open
         }.toModel()

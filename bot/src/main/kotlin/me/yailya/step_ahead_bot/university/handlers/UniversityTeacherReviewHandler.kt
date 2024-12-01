@@ -88,4 +88,6 @@ suspend fun BehaviourContext.handleUniversityTeacherReviewCallback(
             }
         }
     )
+
+    answerCallbackQuery(query)
 }

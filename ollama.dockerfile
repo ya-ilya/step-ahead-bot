@@ -1,6 +1,7 @@
 FROM ollama/ollama
 
 # Copy the script to the docker image
+COPY ./assistant.modelfile /assistant.modelfile
 COPY ./wait_for_ollama.sh /wait_for_ollama.sh
 
 # Ensure the script is executable
