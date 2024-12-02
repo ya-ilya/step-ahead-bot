@@ -9,7 +9,7 @@ import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 
-suspend fun BehaviourContext.handleModerateCommand(message: TextMessage) {
+suspend fun BehaviourContext.moderateHandleCommand(message: TextMessage) {
     val (_, botUser) = message.botUser()
 
     if (!databaseQuery { botUser.isModerator }) {
@@ -18,16 +18,19 @@ suspend fun BehaviourContext.handleModerateCommand(message: TextMessage) {
 
     reply(
         to = message,
-        text = "Здраствуйте, модератор #${botUser.id}. Выберете нужную вам опцию:",
+        text = "Здравствуйте, модератор #${botUser.id}. Выберете нужную вам опцию:",
         replyMarkup = inlineKeyboard {
             row {
-                dataButton("\uD83D\uDD0D Рассмотреть открытые запросы на изменение", "moderate_update_requests")
+                dataButton(
+                    "\uD83D\uDD0D Рассмотреть открытые запросы на изменение",
+                    "moderate_UniversityUpdateRequests"
+                )
             }
 
             row {
                 dataButton(
-                    "\uD83D\uDD0D Рассмотреть открыте запросы на добавление преподавателя",
-                    "moderate_add_teacher_requests"
+                    "\uD83D\uDD0D Рассмотреть открытые запросы на добавление преподавателя",
+                    "moderate_AddTeacherRequests"
                 )
             }
         }

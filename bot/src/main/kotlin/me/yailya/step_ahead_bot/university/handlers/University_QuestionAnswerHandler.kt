@@ -1,4 +1,4 @@
-package me.yailya.step_ahead_bot.question.handlers
+package me.yailya.step_ahead_bot.university.handlers
 
 import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
@@ -8,22 +8,28 @@ import dev.inmo.tgbotapi.types.message.textsources.bold
 import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
-import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.question.answer.Answer
 import me.yailya.step_ahead_bot.question.answer.AnswerEntity
 import me.yailya.step_ahead_bot.question.answer.Answers
 import me.yailya.step_ahead_bot.replyOrEdit
+import me.yailya.step_ahead_bot.university.University
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 
 suspend fun answerForKeyboard(
     id: Int,
-    questionId: Int
+    questionId: Int,
+    university: University
 ): Triple<Answer?, Answer, Answer?> = databaseQuery {
     val condition = Answers.question eq questionId
     val question = QuestionEntity.findById(questionId) ?: throw RuntimeException("❌ Данный вопрос не существует")
+
+    if (question.university.id.value != university.id) {
+        throw RuntimeException("❌ Данный вопрос был задан о другом ВУЗе")
+    }
+
     val answers = question.answers
 
     if (answers.empty()) {
@@ -50,14 +56,14 @@ suspend fun answerForKeyboard(
     )
 }
 
-suspend fun BehaviourContext.handleQuestionAnswerCallback(
+suspend fun BehaviourContext.universityHandleQuestionAnswerCallback(
     query: DataCallbackQuery,
     answerId: Int,
-    questionId: Int
+    questionId: Int,
+    university: University
 ) {
-    val (_, botUser) = query.botUser()
     val (previous, answer, next) = try {
-        answerForKeyboard(answerId, questionId)
+        answerForKeyboard(answerId, questionId, university)
     } catch (ex: RuntimeException) {
         answerCallbackQuery(query, ex.message)
         return
@@ -67,24 +73,22 @@ suspend fun BehaviourContext.handleQuestionAnswerCallback(
         answerId == -1,
         query,
         buildEntities {
-            +bold("Ответ на вопрос #${answer.id} о ${answer.question.university.shortName}") +
+            +bold("Ответ на вопрос о ${university.shortName} #${answer.id}") +
                     "\n" + answer.text
         },
         inlineKeyboard {
             row {
-                if (answer.question.botUser.id == botUser.id) {
+                if (previous != null) {
                     dataButton(
-                        if (answer.isAccepted) "❌ Отменить одобрение" else "✅ Одобрить ответ",
-                        "question_accept_answer_${answer.id}_${questionId}"
+                        "⬅\uFE0F Предыдущий",
+                        "university_QuestionAnswer_${previous.id}_${questionId}_${university.id}"
                     )
                 }
-            }
-            row {
-                if (previous != null) {
-                    dataButton("⬅\uFE0F Предыдущий", "question_answer_${previous.id}_${questionId}")
-                }
                 if (next != null) {
-                    dataButton("Следующий ➡\uFE0F", "question_answer_${next.id}_${questionId}")
+                    dataButton(
+                        "Следующий ➡\uFE0F",
+                        "university_QuestionAnswer_${next.id}_${questionId}_${university.id}"
+                    )
                 }
             }
         }

@@ -48,7 +48,7 @@ suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, 
                 universityRankData.rankingUrl
             ) +
                     "\n" + "- Студентов: ${university.inNumbers.studentsCount}" +
-                    "\n" + "- Преподователей: ${university.inNumbers.professorsCount}" +
+                    "\n" + "- преподавателей: ${university.inNumbers.professorsCount}" +
                     "\n" + "- Год основания: ${university.inNumbers.yearOfFoundation}" +
                     "\n" + bold("Дополнительные баллы для поступления") + extraPointsText +
                     "\n" + bold("Списки поступающих в ${university.shortName}") +
@@ -64,40 +64,52 @@ suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, 
         linkPreviewOptions = LinkPreviewOptions.Disabled,
         replyMarkup = inlineKeyboard {
             row {
-                dataButton("\uD83C\uDF93 Специальности", "university_specialities_${university.id}")
-            }
-
-            row {
-                dataButton("\uD83D\uDC69\u200D\uD83C\uDFEB Преподаватели", "university_teachers_${university.id}")
-            }
-
-            row {
-                dataButton("❔ Вопросы", "university_questions_${university.id}")
                 dataButton(
-                    "✍\uD83C\uDFFB Задать вопрос",
-                    "university_create_question_${university.id}"
+                    "\uD83C\uDF93 Специальности",
+                    "university_specialities_${university.id}"
                 )
             }
 
             row {
-                dataButton("⭐ Отзывы", "university_reviews_${university.id}")
+                dataButton(
+                    "\uD83D\uDC69\u200D\uD83C\uDFEB Преподаватели",
+                    "university_Teachers_${university.id}"
+                )
+            }
+
+            row {
+                dataButton(
+                    "❔ Вопросы",
+                    "university_Questions_${university.id}"
+                )
+                dataButton(
+                    "✍\uD83C\uDFFB Задать вопрос",
+                    "university_create_Question_${university.id}"
+                )
+            }
+
+            row {
+                dataButton(
+                    "⭐ Отзывы",
+                    "university_UniversityReviews_${university.id}"
+                )
                 dataButton(
                     "✍\uD83C\uDFFB Создать отзыв",
-                    "university_create_review_${university.id}"
+                    "university_create_UniversityReview_${university.id}"
                 )
             }
 
             row {
                 dataButton(
                     "✍\uD83C\uDFFB Создать запрос на добавление нового преподавателя",
-                    "university_create_add_teacher_request_${university.id}"
+                    "university_create_AddTeacherRequest_${university.id}"
                 )
             }
 
             row {
                 dataButton(
                     "✍\uD83C\uDFFB Создать запрос на изменение информации",
-                    "university_create_update_request_${university.id}"
+                    "university_create_UniversityUpdateRequest_${university.id}"
                 )
             }
         }
@@ -106,7 +118,7 @@ suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, 
     answerCallbackQuery(query)
 }
 
-suspend fun BehaviourContext.handleUniversitySpecialitiesCallback(
+suspend fun BehaviourContext.universityHandleSpecialitiesCallback(
     query: DataCallbackQuery,
     university: University
 ) {

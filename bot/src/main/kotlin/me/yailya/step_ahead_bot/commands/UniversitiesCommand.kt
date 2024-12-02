@@ -16,7 +16,10 @@ suspend fun BehaviourContext.handleUniversitiesCommand(message: TextMessage) {
             for (chunk in UniversityEntity.getUniversityModels().chunked(4)) {
                 row {
                     for (university in chunk) {
-                        dataButton("(${university.id}) ${university.shortName}", "university_${university.id}")
+                        dataButton(
+                            "(${university.id}) ${university.shortName}",
+                            "university_${university.id}"
+                        )
                     }
                 }
             }

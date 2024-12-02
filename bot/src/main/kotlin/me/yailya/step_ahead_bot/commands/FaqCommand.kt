@@ -7,6 +7,6 @@ import dev.inmo.tgbotapi.types.message.content.TextMessage
 suspend fun BehaviourContext.handleFaqCommand(message: TextMessage) {
     reply(
         to = message,
-        text = "Вопрос/ответ:\n1. Как увидеть информацию о каком-либо ВУЗе: используйте комманду /start, а затем используйте функциональную клавишу с кратким названием нужного ВУЗа."
+        text = "Вопрос/ответ:\n1. Как увидеть информацию о каком-либо ВУЗе: используйте команду /start, а затем используйте функциональную клавишу с кратким названием нужного ВУЗа."
     )
 }

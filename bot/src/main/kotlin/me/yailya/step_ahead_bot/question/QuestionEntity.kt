@@ -1,8 +1,8 @@
 package me.yailya.step_ahead_bot.question
 
-import me.yailya.step_ahead_bot.answer.AnswerEntity
-import me.yailya.step_ahead_bot.answer.Answers
 import me.yailya.step_ahead_bot.bot_user.BotUserEntity
+import me.yailya.step_ahead_bot.question.answer.AnswerEntity
+import me.yailya.step_ahead_bot.question.answer.Answers
 import me.yailya.step_ahead_bot.university.UniversityEntity
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass

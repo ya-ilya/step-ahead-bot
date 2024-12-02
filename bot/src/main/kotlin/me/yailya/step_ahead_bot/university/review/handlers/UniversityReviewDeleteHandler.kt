@@ -1,6 +1,6 @@
 @file:OptIn(RiskFeature::class)
 
-package me.yailya.step_ahead_bot.teacher.review.handlers
+package me.yailya.step_ahead_bot.university.review.handlers
 
 import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.api.deleteMessage
@@ -19,37 +19,38 @@ import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.edit
-import me.yailya.step_ahead_bot.teacher.review.TeacherReviewEntity
+import me.yailya.step_ahead_bot.university.review.UniversityReviewEntity
 
-suspend fun BehaviourContext.handleTeacherReviewDeleteCallback(
+
+suspend fun BehaviourContext.handleUniversityReviewDeleteCallback(
     query: DataCallbackQuery,
-    teacherReviewId: Int
+    reviewId: Int
 ) {
-    val (otherBotUser) = query.botUser()
+    val otherBotUser = query.botUser()
 
     databaseQuery {
-        val teacherReview = TeacherReviewEntity.findById(teacherReviewId)
+        val review = UniversityReviewEntity.findById(reviewId)
 
-        if (teacherReview == null) {
+        if (review == null) {
             answerCallbackQuery(
                 query,
-                "❌ Данного отзыва о преподавателе не существует"
+                "❌ Данного отзыва не существует"
             )
 
             return@databaseQuery
         }
 
-        if (teacherReview.botUser.id != otherBotUser.id) {
+        if (review.botUser.id != otherBotUser.first.id) {
             answerCallbackQuery(
                 query,
-                "❌ Вы не можете удалить не ваш отзыв о преподавателе"
+                "❌ Вы не можете удалить не ваш отзыв"
             )
 
             return@databaseQuery
         }
 
         databaseQuery {
-            teacherReview.delete()
+            review.delete()
         }
 
         try {
@@ -68,32 +69,29 @@ suspend fun BehaviourContext.handleTeacherReviewDeleteCallback(
                 .last()
                 .toInt()
 
-            val (previous, other, next) = teacherReviewForKeyboard(query, otherId)
+            val (previous, other, next) = universityReviewForKeyboard(query, otherId)
 
             edit(
                 query = query,
                 entities = buildEntities {
-                    +bold("Отзыв о преподавателе #${other.id}. ${other.rating}/5") +
+                    +bold("${other.university.shortName} -> Отзыв #${other.id}. ${other.rating}/5") +
+                            "\n" + "Положительные стороны:" +
+                            "\n" + blockquote(other.pros) +
+                            "\n" + "Отрицательные стороны:" +
+                            "\n" + blockquote(other.cons) +
+                            "\n" + "Комментарий:" +
                             "\n" + blockquote(other.comment)
                 },
                 replyMarkup = inlineKeyboard {
                     row {
-                        dataButton(
-                            "\uD83D\uDC69\u200D\uD83C\uDFEB Посмотреть информацию о преподавателе",
-                            "TeacherReview_teacher_${other.id}"
-                        )
+                        dataButton("\uD83D\uDDD1\uFE0F Удалить", "UniversityReview_delete_${other.id}")
                     }
-
-                    row {
-                        dataButton("\uD83D\uDDD1\uFE0F Удалить", "TeacherReview_delete_${other.id}")
-                    }
-
                     row {
                         if (previous != null) {
-                            dataButton("⬅\uFE0F Предыдущий", "TeacherReview_${previous.id}")
+                            dataButton("⬅\uFE0F Предыдущий", "UniversityReview_${previous.id}")
                         }
                         if (next != null) {
-                            dataButton("Следующий ➡\uFE0F", "TeacherReview_${next.id}")
+                            dataButton("➡\uFE0F Следующий", "UniversityReview_${next.id}")
                         }
                     }
                 }
@@ -104,9 +102,7 @@ suspend fun BehaviourContext.handleTeacherReviewDeleteCallback(
 
         answerCallbackQuery(
             query,
-            "✅ Ваш отзыв о преподавателе #${teacherReviewId} был удален"
+            "✅ Ваш отзыв #${reviewId} был удален"
         )
     }
-
-    answerCallbackQuery(query)
 }

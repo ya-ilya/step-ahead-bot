@@ -37,7 +37,7 @@ suspend fun BehaviourContext.handleAssistantCommand(message: TextMessage) {
         if (!sessions.contains(userId)) {
             reply(
                 to = request,
-                text = "❌ Данная сессия с ассистеном была отменена!"
+                text = "❌ Данная сессия с ассистентом была отменена!"
             )
 
             break

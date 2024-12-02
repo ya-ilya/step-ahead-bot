@@ -13,27 +13,27 @@ suspend fun BehaviourContext.handleStartCommand(message: TextMessage) {
         text = "Приветствуем вас!",
         replyMarkup = inlineKeyboard {
             row {
-                dataButton("❔ Мои вопросы", "questions")
+                dataButton("❔ Мои вопросы", "Questions")
             }
 
             row {
-                dataButton("\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Мои ответы на вопросы", "answers")
+                dataButton("\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Мои ответы на вопросы", "Answers")
             }
 
             row {
-                dataButton("⭐ Мои отзывы", "reviews")
+                dataButton("⭐ Мои отзывы", "UniversityReviews")
             }
 
             row {
-                dataButton("⭐ Мои отзывы о преподавателях", "teacher_reviews")
+                dataButton("⭐ Мои отзывы о преподавателях", "TeacherReviews")
             }
 
             row {
-                dataButton("\uD83C\uDD95 Мои запросы на изменение информации", "update_requests")
+                dataButton("\uD83C\uDD95 Мои запросы на изменение информации о вузах", "UniversityUpdateRequests")
             }
 
             row {
-                dataButton("\uD83C\uDD95 Мои запросы на добавление новых преподавателей", "add_teacher_requests")
+                dataButton("\uD83C\uDD95 Мои запросы на добавление новых преподавателей", "AddTeacherRequests")
             }
         }
     )

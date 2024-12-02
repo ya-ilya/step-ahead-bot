@@ -1,4 +1,4 @@
-package me.yailya.step_ahead_bot.teacher.review.handlers
+package me.yailya.step_ahead_bot.university.handlers
 
 import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
@@ -9,25 +9,32 @@ import dev.inmo.tgbotapi.types.message.textsources.bold
 import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
 import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
-import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.replyOrEdit
+import me.yailya.step_ahead_bot.teacher.TeacherEntity
 import me.yailya.step_ahead_bot.teacher.review.TeacherReview
 import me.yailya.step_ahead_bot.teacher.review.TeacherReviewEntity
 import me.yailya.step_ahead_bot.teacher.review.TeacherReviews
+import me.yailya.step_ahead_bot.university.University
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 
 suspend fun teacherReviewForKeyboard(
-    query: DataCallbackQuery,
-    id: Int
+    id: Int,
+    teacherId: Int,
+    university: University
 ): Triple<TeacherReview?, TeacherReview, TeacherReview?> = databaseQuery {
-    val botUserEntity = query.botUser
-    val condition = TeacherReviews.botUser eq botUserEntity.id
-    val teacherReviews = botUserEntity.teacherReviews
+    val condition = TeacherReviews.teacher eq teacherId
+    val teacher = TeacherEntity.findById(teacherId) ?: throw RuntimeException("❌ Данный преподаватель не найден")
+
+    if (teacher.university.id.value != university.id) {
+        throw RuntimeException("❌ Данный преподаватель работает в другом ВУЗе")
+    }
+
+    val teacherReviews = teacher.reviews
 
     if (teacherReviews.empty()) {
-        throw RuntimeException("❌ Вы еще не создавали отзывов о преподавателях")
+        throw RuntimeException("❌ Отзывов о данном преподавателе не найдено")
     }
 
     val current = if (id == -1) {
@@ -50,12 +57,14 @@ suspend fun teacherReviewForKeyboard(
     )
 }
 
-suspend fun BehaviourContext.handleTeacherReviewCallback(
+suspend fun BehaviourContext.universityHandleTeacherReviewCallback(
     query: DataCallbackQuery,
-    teacherReviewId: Int
+    teacherReviewId: Int,
+    teacherId: Int,
+    university: University
 ) {
     val (previous, teacherReview, next) = try {
-        teacherReviewForKeyboard(query, teacherReviewId)
+        teacherReviewForKeyboard(teacherReviewId, teacherId, university)
     } catch (ex: RuntimeException) {
         answerCallbackQuery(query, ex.message)
         return
@@ -70,20 +79,11 @@ suspend fun BehaviourContext.handleTeacherReviewCallback(
         },
         inlineKeyboard {
             row {
-                dataButton(
-                    "\uD83D\uDC69\u200D\uD83C\uDFEB Посмотреть информацию о преподавателе",
-                    "TeacherReview_teacher_${teacherReview.id}"
-                )
-            }
-            row {
-                dataButton("\uD83D\uDDD1\uFE0F Удалить", "TeacherReview_delete_${teacherReview.id}")
-            }
-            row {
                 if (previous != null) {
-                    dataButton("⬅\uFE0F Предыдущий", "TeacherReview_${previous.id}")
+                    dataButton("⬅\uFE0F Предыдущий", "university_TeacherReview_${previous.id}_${university.id}")
                 }
                 if (next != null) {
-                    dataButton("Следующий ➡\uFE0F", "TeacherReview_${next.id}")
+                    dataButton("Следующий ➡\uFE0F", "university_TeacherReview_${next.id}_${university.id}")
                 }
             }
         }

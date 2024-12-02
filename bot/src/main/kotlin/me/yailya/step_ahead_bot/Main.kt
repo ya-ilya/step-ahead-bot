@@ -1,4 +1,5 @@
 @file:OptIn(RiskFeature::class)
+@file:Suppress("LocalVariableName")
 
 package me.yailya.step_ahead_bot
 
@@ -25,10 +26,6 @@ import dev.inmo.tgbotapi.types.message.textsources.TextSourcesList
 import dev.inmo.tgbotapi.types.queries.callback.CallbackQuery
 import dev.inmo.tgbotapi.utils.RiskFeature
 import kotlinx.coroutines.Dispatchers
-import me.yailya.step_ahead_bot.answer.Answers
-import me.yailya.step_ahead_bot.answer.handlers.handleAnswerCallback
-import me.yailya.step_ahead_bot.answer.handlers.handleAnswerDeleteCallback
-import me.yailya.step_ahead_bot.answer.handlers.handleAnswerQuestionCallback
 import me.yailya.step_ahead_bot.assistant.Assistant
 import me.yailya.step_ahead_bot.assistant.handlers.handleAssistantStop
 import me.yailya.step_ahead_bot.bot_user.BotUserEntity
@@ -36,17 +33,18 @@ import me.yailya.step_ahead_bot.bot_user.BotUsers
 import me.yailya.step_ahead_bot.commands.*
 import me.yailya.step_ahead_bot.moderator.*
 import me.yailya.step_ahead_bot.question.Questions
+import me.yailya.step_ahead_bot.question.answer.Answers
+import me.yailya.step_ahead_bot.question.answer.handlers.handleAnswerCallback
+import me.yailya.step_ahead_bot.question.answer.handlers.handleAnswerDeleteCallback
+import me.yailya.step_ahead_bot.question.answer.handlers.handleAnswerQuestionCallback
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionAcceptAnswerCallback
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionAnswerCallback
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionCallback
 import me.yailya.step_ahead_bot.question.handlers.handleQuestionDeleteCallback
-import me.yailya.step_ahead_bot.review.Reviews
-import me.yailya.step_ahead_bot.review.handlers.handleReviewCallback
-import me.yailya.step_ahead_bot.review.handlers.handleReviewDeleteCallback
 import me.yailya.step_ahead_bot.teacher.Teachers
-import me.yailya.step_ahead_bot.teacher.request.AddTeacherRequests
-import me.yailya.step_ahead_bot.teacher.request.handlers.handleAddTeacherRequestCallback
-import me.yailya.step_ahead_bot.teacher.request.handlers.handleAddTeacherRequestCloseCallback
+import me.yailya.step_ahead_bot.teacher.add_teacher_request.AddTeacherRequests
+import me.yailya.step_ahead_bot.teacher.add_teacher_request.handlers.handleAddTeacherRequestCallback
+import me.yailya.step_ahead_bot.teacher.add_teacher_request.handlers.handleAddTeacherRequestCloseCallback
 import me.yailya.step_ahead_bot.teacher.review.TeacherReviews
 import me.yailya.step_ahead_bot.teacher.review.handlers.handleTeacherReviewCallback
 import me.yailya.step_ahead_bot.teacher.review.handlers.handleTeacherReviewDeleteCallback
@@ -55,9 +53,12 @@ import me.yailya.step_ahead_bot.university.Universities
 import me.yailya.step_ahead_bot.university.UniversityEntity
 import me.yailya.step_ahead_bot.university.handlers.*
 import me.yailya.step_ahead_bot.university.ranking.EduRankRanking
-import me.yailya.step_ahead_bot.update_request.UpdateRequests
-import me.yailya.step_ahead_bot.update_request.handlers.handleUpdateRequestCallback
-import me.yailya.step_ahead_bot.update_request.handlers.handleUpdateRequestCloseCallback
+import me.yailya.step_ahead_bot.university.review.UniversityReviews
+import me.yailya.step_ahead_bot.university.review.handlers.handleUniversityReviewCallback
+import me.yailya.step_ahead_bot.university.review.handlers.handleUniversityReviewDeleteCallback
+import me.yailya.step_ahead_bot.university.update_request.UniversityUpdateRequests
+import me.yailya.step_ahead_bot.university.update_request.handlers.handleUniversityUpdateRequestCallback
+import me.yailya.step_ahead_bot.university.update_request.handlers.handleUniversityUpdateRequestCloseCallback
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -164,8 +165,8 @@ suspend fun main() {
 
     transaction(database) {
         SchemaUtils.create(
-            Reviews,
-            UpdateRequests,
+            UniversityReviews,
+            UniversityUpdateRequests,
             Questions,
             Answers,
             Universities,
@@ -208,46 +209,46 @@ suspend fun main() {
         }
 
         onCommand("moderate") {
-            this.handleModerateCommand(it)
+            this.moderateHandleCommand(it)
         }
 
         onCommand("universities") {
             this.handleUniversitiesCommand(it)
         }
 
-        onDataCallbackQuery("answers") {
+        onDataCallbackQuery("Answers") {
             this.handleAnswerCallback(it, -1)
         }
 
-        onDataCallbackQuery("questions") {
+        onDataCallbackQuery("Questions") {
             this.handleQuestionCallback(it, -1)
         }
 
-        onDataCallbackQuery("teacher_reviews") {
+        onDataCallbackQuery("TeacherReviews") {
             this.handleTeacherReviewCallback(it, -1)
         }
 
-        onDataCallbackQuery("reviews") {
-            this.handleReviewCallback(it, -1)
+        onDataCallbackQuery("UniversityReviews") {
+            this.handleUniversityReviewCallback(it, -1)
         }
 
-        onDataCallbackQuery("add_teacher_requests") {
+        onDataCallbackQuery("AddTeacherRequests") {
             this.handleAddTeacherRequestCallback(it, -1)
         }
 
-        onDataCallbackQuery("moderate_add_teacher_requests") {
-            this.handleModerateAddTeacherRequestCallback(it, -1)
+        onDataCallbackQuery("moderate_AddTeacherRequests") {
+            this.moderateHandleAddTeacherRequestCallback(it, -1)
         }
 
-        onDataCallbackQuery("update_requests") {
-            this.handleUpdateRequestCallback(it, -1)
+        onDataCallbackQuery("UniversityUpdateRequests") {
+            this.handleUniversityUpdateRequestCallback(it, -1)
         }
 
-        onDataCallbackQuery("moderate_update_requests") {
-            this.handleModerateUpdateRequestCallback(it, -1)
+        onDataCallbackQuery("moderate_UniversityUpdateRequests") {
+            this.moderateHandleUniversityUpdateRequestCallback(it, -1)
         }
 
-        val addTeacherRequestRegex = "add_teacher_request(?:_(.*))?_([^_]*)".toRegex()
+        val addTeacherRequestRegex = "AddTeacherRequest(?:_(.*))?_([^_]*)".toRegex()
 
         onDataCallbackQuery(addTeacherRequestRegex) {
             val values = addTeacherRequestRegex.find(it.data)!!.groupValues
@@ -265,7 +266,7 @@ suspend fun main() {
             }
         }
 
-        val updateRequestRegex = "update_request(?:_(.*))?_([^_]*)".toRegex()
+        val updateRequestRegex = "UniversityUpdateRequest(?:_(.*))?_([^_]*)".toRegex()
 
         onDataCallbackQuery(updateRequestRegex) {
             val values = updateRequestRegex.find(it.data)!!.groupValues
@@ -274,16 +275,16 @@ suspend fun main() {
 
             when {
                 name.isEmpty() -> {
-                    this.handleUpdateRequestCallback(it, updateRequestId)
+                    this.handleUniversityUpdateRequestCallback(it, updateRequestId)
                 }
 
                 name == "close" -> {
-                    this.handleUpdateRequestCloseCallback(it, updateRequestId)
+                    this.handleUniversityUpdateRequestCloseCallback(it, updateRequestId)
                 }
             }
         }
 
-        val teacherReviewRegex = "teacher_review(?:_(.*))?_([^_]*)".toRegex()
+        val teacherReviewRegex = "TeacherReview(?:_(.*))?_([^_]*)".toRegex()
 
         onDataCallbackQuery(teacherReviewRegex) {
             val values = teacherReviewRegex.find(it.data)!!.groupValues
@@ -305,7 +306,7 @@ suspend fun main() {
             }
         }
 
-        val answerRegex = "answer(?:_(.*))?_([^_]*)".toRegex()
+        val answerRegex = "Answer(?:_(.*))?_([^_]*)".toRegex()
 
         onDataCallbackQuery(answerRegex) {
             val values = answerRegex.find(it.data)!!.groupValues
@@ -327,7 +328,7 @@ suspend fun main() {
             }
         }
 
-        val questionRegex = "question(?:_(.*))?_([^_]*)".toRegex()
+        val questionRegex = "Question(?:_(.*))?_([^_]*)".toRegex()
         val questionAcceptAnswerRegex = "accept_answer_(.*?)$".toRegex()
         val questionAnswerRegex = "answer_(.*?)$".toRegex()
 
@@ -371,7 +372,7 @@ suspend fun main() {
             }
         }
 
-        val reviewRegex = "review(?:_(.*))?_([^_]*)".toRegex()
+        val reviewRegex = "UniversityReview(?:_(.*))?_([^_]*)".toRegex()
 
         onDataCallbackQuery(reviewRegex) {
             val values = reviewRegex.find(it.data)!!.groupValues
@@ -380,24 +381,25 @@ suspend fun main() {
 
             when {
                 name.isEmpty() -> {
-                    this.handleReviewCallback(it, reviewId)
+                    this.handleUniversityReviewCallback(it, reviewId)
                 }
 
                 name == "delete" -> {
-                    this.handleReviewDeleteCallback(it, reviewId)
+                    this.handleUniversityReviewDeleteCallback(it, reviewId)
                 }
             }
         }
 
         val universityRegex = "university(?:_(.*))?_([^_]*)".toRegex()
-        val universityTeacherRegex = "teacher_(.*?)$".toRegex()
-        val universityReviewRegex = "review_(.*?)$".toRegex()
-        val universityCreateTeacherReviewRegex = "create_teacher_review_(.*?)$".toRegex()
-        val universityCreateQuestionAnswerRegex = "create_question_answer_(.*?)$".toRegex()
-        val universityTeacherReviewsRegex = "teacher_reviews_(.*?)$".toRegex()
-        val universityTeacherReviewRegex = "teacher_review_(.*?)_(.*?)$".toRegex()
-        val universityQuestionAnswersRegex = "question_answers_(.*?)$".toRegex()
-        val universityQuestionAnswerRegex = "question_answer_(.*?)_(.*?)$".toRegex()
+        val university_QuestionRegex = "Question_(.*?)$".toRegex()
+        val university_TeacherRegex = "Teacher_(.*?)$".toRegex()
+        val university_UniversityReviewRegex = "UniversityReview_(.*?)$".toRegex()
+        val university_CreateTeacherReviewRegex = "create_TeacherReview_(.*?)$".toRegex()
+        val universityCreateQuestionAnswerRegex = "create_QuestionAnswer_(.*?)$".toRegex()
+        val universityTeacherReviewsRegex = "TeacherReviews_(.*?)$".toRegex()
+        val universityTeacherReviewRegex = "TeacherReview_(.*?)_(.*?)$".toRegex()
+        val universityQuestionAnswersRegex = "QuestionAnswers_(.*?)$".toRegex()
+        val universityQuestionAnswerRegex = "QuestionAnswer_(.*?)_(.*?)$".toRegex()
 
         onDataCallbackQuery(universityRegex) {
             val values = universityRegex.find(it.data)!!.groupValues
@@ -410,23 +412,23 @@ suspend fun main() {
                 }
 
                 name == "specialities" -> {
-                    this.handleUniversitySpecialitiesCallback(it, university)
+                    this.universityHandleSpecialitiesCallback(it, university)
                 }
 
-                name == "questions" -> {
-                    this.handleUniversityQuestionCallback(it, -1, university)
+                name == "Questions" -> {
+                    this.universityHandleQuestionCallback(it, -1, university)
                 }
 
-                name == "teachers" -> {
-                    this.handleUniversityTeacherCallback(it, -1, university)
+                name == "Teachers" -> {
+                    this.universityHandleTeacherCallback(it, -1, university)
                 }
 
-                name == "reviews" -> {
-                    this.handleUniversityReviewCallback(it, -1, university)
+                name == "UniversityReviews" -> {
+                    this.universityHandleUniversityReviewCallback(it, -1, university)
                 }
 
                 universityTeacherReviewsRegex.matches(name) -> {
-                    this.handleUniversityTeacherReviewCallback(
+                    this.universityHandleTeacherReviewCallback(
                         it,
                         -1,
                         universityTeacherReviewsRegex.find(name)!!.groupValues[1].toInt(),
@@ -435,7 +437,7 @@ suspend fun main() {
                 }
 
                 universityQuestionAnswersRegex.matches(name) -> {
-                    this.handleUniversityQuestionAnswerCallback(
+                    this.universityHandleQuestionAnswerCallback(
                         it,
                         -1,
                         universityQuestionAnswersRegex.find(name)!!.groupValues[1].toInt(),
@@ -443,25 +445,33 @@ suspend fun main() {
                     )
                 }
 
-                universityTeacherRegex.matches(name) -> {
-                    this.handleUniversityTeacherCallback(
+                university_QuestionRegex.matches(name) -> {
+                    this.universityHandleQuestionCallback(
                         it,
-                        universityTeacherRegex.find(name)!!.groupValues[1].toInt(),
+                        university_QuestionRegex.find(name)!!.groupValues[1].toInt(),
                         university
                     )
                 }
 
-                universityReviewRegex.matches(name) -> {
-                    this.handleUniversityReviewCallback(
+                university_TeacherRegex.matches(name) -> {
+                    this.universityHandleTeacherCallback(
                         it,
-                        universityReviewRegex.find(name)!!.groupValues[1].toInt(),
+                        university_TeacherRegex.find(name)!!.groupValues[1].toInt(),
+                        university
+                    )
+                }
+
+                university_UniversityReviewRegex.matches(name) -> {
+                    this.universityHandleUniversityReviewCallback(
+                        it,
+                        university_UniversityReviewRegex.find(name)!!.groupValues[1].toInt(),
                         university
                     )
                 }
 
                 universityTeacherReviewRegex.matches(name) -> {
                     val universityTeacherReviewValues = universityTeacherReviewRegex.find(name)!!.groupValues
-                    this.handleUniversityTeacherReviewCallback(
+                    this.universityHandleTeacherReviewCallback(
                         it,
                         universityTeacherReviewValues[1].toInt(),
                         universityTeacherReviewValues[2].toInt(),
@@ -471,7 +481,7 @@ suspend fun main() {
 
                 universityQuestionAnswerRegex.matches(name) -> {
                     val universityQuestionAnswerValues = universityQuestionAnswerRegex.find(name)!!.groupValues
-                    this.handleUniversityQuestionAnswerCallback(
+                    this.universityHandleQuestionAnswerCallback(
                         it,
                         universityQuestionAnswerValues[1].toInt(),
                         universityQuestionAnswerValues[2].toInt(),
@@ -479,41 +489,41 @@ suspend fun main() {
                     )
                 }
 
-                universityCreateTeacherReviewRegex.matches(name) -> {
-                    this.handleCreateTeacherReviewCallback(
+                university_CreateTeacherReviewRegex.matches(name) -> {
+                    this.universityHandleCreateTeacherReviewCallback(
                         it,
-                        universityCreateTeacherReviewRegex.find(name)!!.groupValues[1].toInt(),
+                        university_CreateTeacherReviewRegex.find(name)!!.groupValues[1].toInt(),
                         university
                     )
                 }
 
-                name == "create_question" -> {
-                    this.handleCreateQuestionCallback(it, university)
+                name == "create_Question" -> {
+                    this.universityHandleCreateQuestionCallback(it, university)
                 }
 
                 universityCreateQuestionAnswerRegex.matches(name) -> {
-                    this.handleCreateQuestionAnswerCallback(
+                    this.universityHandleCreateQuestionAnswerCallback(
                         it,
                         universityCreateQuestionAnswerRegex.find(name)!!.groupValues[1].toInt(),
                         university
                     )
                 }
 
-                name == "create_review" -> {
-                    this.handleCreateReviewCallback(it, university)
+                name == "create_UniversityReview" -> {
+                    this.universityHandleCreateUniversityReviewCallback(it, university)
                 }
 
-                name == "create_add_teacher_request" -> {
-                    this.handleCreateAddTeacherRequestCallback(it, university)
+                name == "create_AddTeacherRequest" -> {
+                    this.universityHandleCreateAddTeacherRequestCallback(it, university)
                 }
 
-                name == "create_update_request" -> {
-                    this.handleCreateUpdateRequestCallback(it, university)
+                name == "create_UniversityUpdateRequest" -> {
+                    this.universityHandleCreateUniversityUpdateRequestCallback(it, university)
                 }
             }
         }
 
-        val moderateAddTeacherRequestRegex = "moderate_add_teacher_request(?:_(.*))?_([^_]*)".toRegex()
+        val moderateAddTeacherRequestRegex = "moderate_AddTeacherRequest(?:_(.*))?_([^_]*)".toRegex()
 
         onDataCallbackQuery(moderateAddTeacherRequestRegex) {
             val values = moderateAddTeacherRequestRegex.find(it.data)!!.groupValues
@@ -522,37 +532,37 @@ suspend fun main() {
 
             when {
                 name.isEmpty() -> {
-                    this.handleModerateAddTeacherRequestCallback(it, addTeacherRequestId)
+                    this.moderateHandleAddTeacherRequestCallback(it, addTeacherRequestId)
                 }
 
                 name == "close" -> {
-                    this.handleModerateAddTeacherRequestCloseCallback(it, addTeacherRequestId)
+                    this.moderateHandleAddTeacherRequestCloseCallback(it, addTeacherRequestId)
                 }
 
                 name == "close_done" -> {
-                    this.handleModerateAddTeacherRequestCloseDoneCallback(it, addTeacherRequestId)
+                    this.moderateHandleAddTeacherRequestCloseDoneCallback(it, addTeacherRequestId)
                 }
             }
         }
 
-        val moderateUpdateRequestRegex = "moderate_update_request(?:_(.*))?_([^_]*)".toRegex()
+        val moderateUniversityUpdateRequestRegex = "moderate_UniversityUpdateRequest(?:_(.*))?_([^_]*)".toRegex()
 
-        onDataCallbackQuery(moderateUpdateRequestRegex) {
-            val values = moderateUpdateRequestRegex.find(it.data)!!.groupValues
+        onDataCallbackQuery(moderateUniversityUpdateRequestRegex) {
+            val values = moderateUniversityUpdateRequestRegex.find(it.data)!!.groupValues
             val name = values[1]
             val updateRequestId = values[2].toInt()
 
             when {
                 name.isEmpty() -> {
-                    this.handleModerateUpdateRequestCallback(it, updateRequestId)
+                    this.moderateHandleUniversityUpdateRequestCallback(it, updateRequestId)
                 }
 
                 name == "close" -> {
-                    this.handleModerateUpdateRequestCloseCallback(it, updateRequestId)
+                    this.moderateHandleUniversityUpdateRequestCloseCallback(it, updateRequestId)
                 }
 
                 name == "close_done" -> {
-                    this.handleModerateUpdateRequestCloseDoneCallback(it, updateRequestId)
+                    this.moderateHandleUniversityUpdateRequestCloseDoneCallback(it, updateRequestId)
                 }
             }
         }

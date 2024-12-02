@@ -1,6 +1,6 @@
 @file:OptIn(RiskFeature::class)
 
-package me.yailya.step_ahead_bot.teacher.review.handlers
+package me.yailya.step_ahead_bot.question.answer.handlers
 
 import dev.inmo.tgbotapi.extensions.api.answers.answerCallbackQuery
 import dev.inmo.tgbotapi.extensions.api.deleteMessage
@@ -10,7 +10,6 @@ import dev.inmo.tgbotapi.extensions.utils.extensions.raw.reply_markup
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
 import dev.inmo.tgbotapi.types.buttons.InlineKeyboardButtons.CallbackDataInlineKeyboardButton
-import dev.inmo.tgbotapi.types.message.textsources.blockquote
 import dev.inmo.tgbotapi.types.message.textsources.bold
 import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
 import dev.inmo.tgbotapi.utils.RiskFeature
@@ -19,37 +18,37 @@ import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.edit
-import me.yailya.step_ahead_bot.teacher.review.TeacherReviewEntity
+import me.yailya.step_ahead_bot.question.answer.AnswerEntity
 
-suspend fun BehaviourContext.handleTeacherReviewDeleteCallback(
+suspend fun BehaviourContext.handleAnswerDeleteCallback(
     query: DataCallbackQuery,
-    teacherReviewId: Int
+    answerId: Int
 ) {
     val (otherBotUser) = query.botUser()
 
     databaseQuery {
-        val teacherReview = TeacherReviewEntity.findById(teacherReviewId)
+        val answer = AnswerEntity.findById(answerId)
 
-        if (teacherReview == null) {
+        if (answer == null) {
             answerCallbackQuery(
                 query,
-                "❌ Данного отзыва о преподавателе не существует"
+                "❌ Данного ответа на вопрос не существует"
             )
 
             return@databaseQuery
         }
 
-        if (teacherReview.botUser.id != otherBotUser.id) {
+        if (answer.botUser.id != otherBotUser.id) {
             answerCallbackQuery(
                 query,
-                "❌ Вы не можете удалить не ваш отзыв о преподавателе"
+                "❌ Вы не можете удалить не ваш ответ на вопрос"
             )
 
             return@databaseQuery
         }
 
         databaseQuery {
-            teacherReview.delete()
+            answer.delete()
         }
 
         try {
@@ -68,32 +67,27 @@ suspend fun BehaviourContext.handleTeacherReviewDeleteCallback(
                 .last()
                 .toInt()
 
-            val (previous, other, next) = teacherReviewForKeyboard(query, otherId)
+            val (previous, other, next) = answerForKeyboard(query, otherId)
 
             edit(
                 query = query,
                 entities = buildEntities {
-                    +bold("Отзыв о преподавателе #${other.id}. ${other.rating}/5") +
-                            "\n" + blockquote(other.comment)
+                    +bold("Ответ на вопрос #${other.id}${if (other.isAccepted) ". Помечен, как одобренный" else ""}") +
+                            "\n" + other.text
                 },
                 replyMarkup = inlineKeyboard {
                     row {
-                        dataButton(
-                            "\uD83D\uDC69\u200D\uD83C\uDFEB Посмотреть информацию о преподавателе",
-                            "TeacherReview_teacher_${other.id}"
-                        )
+                        dataButton("❔ Посмотреть вопрос", "Answer_question_${other.id}")
                     }
-
                     row {
-                        dataButton("\uD83D\uDDD1\uFE0F Удалить", "TeacherReview_delete_${other.id}")
+                        dataButton("\uD83D\uDDD1\uFE0F Удалить", "Answer_delete_${other.id}")
                     }
-
                     row {
                         if (previous != null) {
-                            dataButton("⬅\uFE0F Предыдущий", "TeacherReview_${previous.id}")
+                            dataButton("⬅\uFE0F Предыдущий", "Answer_${previous.id}")
                         }
                         if (next != null) {
-                            dataButton("Следующий ➡\uFE0F", "TeacherReview_${next.id}")
+                            dataButton("Следующий ➡\uFE0F", "Answer_${next.id}")
                         }
                     }
                 }
@@ -104,7 +98,7 @@ suspend fun BehaviourContext.handleTeacherReviewDeleteCallback(
 
         answerCallbackQuery(
             query,
-            "✅ Ваш отзыв о преподавателе #${teacherReviewId} был удален"
+            "✅ Ваш ответ на вопрос #${answerId} был удален"
         )
     }
 

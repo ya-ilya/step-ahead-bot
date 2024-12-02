@@ -1,17 +1,17 @@
 package me.yailya.step_ahead_bot.bot_user
 
-import me.yailya.step_ahead_bot.answer.AnswerEntity
-import me.yailya.step_ahead_bot.answer.Answers
 import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.question.Questions
-import me.yailya.step_ahead_bot.review.ReviewEntity
-import me.yailya.step_ahead_bot.review.Reviews
-import me.yailya.step_ahead_bot.teacher.request.AddTeacherRequestEntity
-import me.yailya.step_ahead_bot.teacher.request.AddTeacherRequests
+import me.yailya.step_ahead_bot.question.answer.AnswerEntity
+import me.yailya.step_ahead_bot.question.answer.Answers
+import me.yailya.step_ahead_bot.teacher.add_teacher_request.AddTeacherRequestEntity
+import me.yailya.step_ahead_bot.teacher.add_teacher_request.AddTeacherRequests
 import me.yailya.step_ahead_bot.teacher.review.TeacherReviewEntity
 import me.yailya.step_ahead_bot.teacher.review.TeacherReviews
-import me.yailya.step_ahead_bot.update_request.UpdateRequestEntity
-import me.yailya.step_ahead_bot.update_request.UpdateRequests
+import me.yailya.step_ahead_bot.university.review.UniversityReviewEntity
+import me.yailya.step_ahead_bot.university.review.UniversityReviews
+import me.yailya.step_ahead_bot.university.update_request.UniversityUpdateRequestEntity
+import me.yailya.step_ahead_bot.university.update_request.UniversityUpdateRequests
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -31,8 +31,8 @@ class BotUserEntity(id: EntityID<Int>) : IntEntity(id) {
 
     val questions by QuestionEntity referrersOn Questions.botUser
     val answers by AnswerEntity referrersOn Answers.botUser
-    val reviews by ReviewEntity referrersOn Reviews.botUser
-    val updateRequests by UpdateRequestEntity referrersOn UpdateRequests.botUser
+    val reviews by UniversityReviewEntity referrersOn UniversityReviews.botUser
+    val updateRequests by UniversityUpdateRequestEntity referrersOn UniversityUpdateRequests.botUser
     val teacherReviews by TeacherReviewEntity referrersOn TeacherReviews.botUser
     val addTeacherRequests by AddTeacherRequestEntity referrersOn AddTeacherRequests.botUser
 

@@ -9,11 +9,11 @@ import dev.inmo.tgbotapi.types.buttons.InlineKeyboardButtons.CallbackDataInlineK
 import dev.inmo.tgbotapi.types.message.textsources.bold
 import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
 import dev.inmo.tgbotapi.utils.buildEntities
-import me.yailya.step_ahead_bot.answer.AnswerEntity
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.editInlineButton
 import me.yailya.step_ahead_bot.question.QuestionEntity
+import me.yailya.step_ahead_bot.question.answer.AnswerEntity
 
 
 suspend fun BehaviourContext.notifyUserAboutAnswerAccepted(entity: AnswerEntity) {
@@ -89,7 +89,7 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
 
         editInlineButton(
             query,
-            { button -> button.text.contains("одобр", true) },
+            { button -> button.text.contains("Отменить одобрение") || button.text.contains("Одобрить ответ") },
             {
                 CallbackDataInlineKeyboardButton(
                     if (answer.isAccepted) "❌ Отменить одобрение" else "✅ Одобрить ответ",
@@ -103,7 +103,7 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
             if (answer.isAccepted) {
                 "✅ Данный ответ на вопрос был помечен как принятый"
             } else {
-                "❌ Данный ответ на вопрос перестал быть помеченым, как принятый"
+                "❌ Данный ответ на вопрос перестал быть помеченным, как принятый"
             }
         )
     }

@@ -69,7 +69,7 @@ data class University(
         CertificateWithDistinction("аттестат с отличием"),
         Portfolio("портфолио"),
         Essay("сочинение"),
-        Soldering("прохождение воинской сложбы"),
+        Soldering("прохождение воинской службы"),
         Volunteering("волонтерство")
     }
 }
