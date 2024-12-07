@@ -79,18 +79,18 @@ suspend fun BehaviourContext.handleQuestionDeleteCallback(
                     row {
                         dataButton(
                             "\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Посмотреть ответы",
-                            "question_answers_${other.id}"
+                            "Question_QuestionAnswers_${other.id}"
                         )
                     }
                     row {
-                        dataButton("\uD83D\uDDD1\uFE0F Удалить", "question_delete_${other.id}")
+                        dataButton("\uD83D\uDDD1\uFE0F Удалить", "Question_delete_${other.id}")
                     }
                     row {
                         if (previous != null) {
-                            dataButton("⬅\uFE0F Предыдущий", "question_${other.id}")
+                            dataButton("⬅\uFE0F Предыдущий", "Question_${other.id}")
                         }
                         if (next != null) {
-                            dataButton("Следующий ➡\uFE0F", "question_${other.id}")
+                            dataButton("Следующий ➡\uFE0F", "Question_${other.id}")
                         }
                     }
                 }

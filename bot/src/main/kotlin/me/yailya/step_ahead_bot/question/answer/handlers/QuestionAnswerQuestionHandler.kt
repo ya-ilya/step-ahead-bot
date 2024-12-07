@@ -10,7 +10,7 @@ import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
-import me.yailya.step_ahead_bot.question.answer.AnswerEntity
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswerEntity
 import me.yailya.step_ahead_bot.reply
 
 suspend fun BehaviourContext.handleAnswerQuestionCallback(
@@ -20,7 +20,7 @@ suspend fun BehaviourContext.handleAnswerQuestionCallback(
     val (otherBotUser) = query.botUser()
 
     databaseQuery {
-        val answer = AnswerEntity.findById(answerId)
+        val answer = QuestionAnswerEntity.findById(answerId)
 
         if (answer == null) {
             answerCallbackQuery(
@@ -50,7 +50,7 @@ suspend fun BehaviourContext.handleAnswerQuestionCallback(
             },
             replyMarkup = inlineKeyboard {
                 row {
-                    dataButton("Посмотреть все ответы на этот вопрос", "Question_answers_${question.id}")
+                    dataButton("Посмотреть все ответы на этот вопрос", "Question_QuestionAnswers_${question.id}")
                 }
             }
         )

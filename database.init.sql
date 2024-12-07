@@ -181,7 +181,7 @@ VALUES
     'https://olymp.hse.ru/mmo/it'
 );
 
-CREATE TABLE OlympiadEntries
+CREATE TABLE OlympiadUniversityEntries
 (
     id INT PRIMARY KEY,
     olympiad INT,
@@ -194,10 +194,11 @@ CREATE TABLE OlympiadEntries
     FOREIGN KEY (university) REFERENCES Universities(id)
 );
 
-INSERT INTO OlympiadEntries(
+INSERT INTO OlympiadUniversityEntries(
     id,
     olympiad,
     university,
+    grade,
     subject,
     onlyWinner,
     benefit
@@ -213,10 +214,11 @@ VALUES
     "Право на прием БВИ"
 );
 
-INSERT INTO OlympiadEntries(
+INSERT INTO OlympiadUniversityEntries(
     id,
     olympiad,
     university,
+    grade,
     subject,
     onlyWinner,
     benefit
@@ -232,10 +234,11 @@ VALUES
     "Право на прием БВИ"
 );
 
-INSERT INTO OlympiadEntries(
+INSERT INTO OlympiadUniversityEntries(
     id,
     olympiad,
     university,
+    grade,
     subject,
     onlyWinner,
     benefit

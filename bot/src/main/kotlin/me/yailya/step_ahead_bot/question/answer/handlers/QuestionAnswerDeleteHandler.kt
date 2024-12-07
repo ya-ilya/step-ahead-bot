@@ -18,7 +18,7 @@ import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.edit
-import me.yailya.step_ahead_bot.question.answer.AnswerEntity
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswerEntity
 
 suspend fun BehaviourContext.handleAnswerDeleteCallback(
     query: DataCallbackQuery,
@@ -27,7 +27,7 @@ suspend fun BehaviourContext.handleAnswerDeleteCallback(
     val (otherBotUser) = query.botUser()
 
     databaseQuery {
-        val answer = AnswerEntity.findById(answerId)
+        val answer = QuestionAnswerEntity.findById(answerId)
 
         if (answer == null) {
             answerCallbackQuery(
@@ -77,17 +77,17 @@ suspend fun BehaviourContext.handleAnswerDeleteCallback(
                 },
                 replyMarkup = inlineKeyboard {
                     row {
-                        dataButton("❔ Посмотреть вопрос", "Answer_question_${other.id}")
+                        dataButton("❔ Посмотреть вопрос", "QuestionAnswer_question_${other.id}")
                     }
                     row {
-                        dataButton("\uD83D\uDDD1\uFE0F Удалить", "Answer_delete_${other.id}")
+                        dataButton("\uD83D\uDDD1\uFE0F Удалить", "QuestionAnswer_delete_${other.id}")
                     }
                     row {
                         if (previous != null) {
-                            dataButton("⬅\uFE0F Предыдущий", "Answer_${previous.id}")
+                            dataButton("⬅\uFE0F Предыдущий", "QuestionAnswer_${previous.id}")
                         }
                         if (next != null) {
-                            dataButton("Следующий ➡\uFE0F", "Answer_${next.id}")
+                            dataButton("Следующий ➡\uFE0F", "QuestionAnswer_${next.id}")
                         }
                     }
                 }

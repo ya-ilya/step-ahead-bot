@@ -20,11 +20,11 @@ import kotlinx.coroutines.flow.first
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.question.QuestionEntity
-import me.yailya.step_ahead_bot.question.answer.AnswerEntity
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswerEntity
 import me.yailya.step_ahead_bot.university.University
 import java.time.LocalDateTime
 
-suspend fun BehaviourContext.notifyUserAboutQuestionAnswerCreated(entity: AnswerEntity) {
+suspend fun BehaviourContext.notifyUserAboutQuestionAnswerCreated(entity: QuestionAnswerEntity) {
     val university = entity.question.university
     send(
         ChatId(RawChatId(entity.question.botUser.userId)),
@@ -88,7 +88,7 @@ suspend fun BehaviourContext.universityHandleCreateQuestionAnswerCallback(
     val answer = databaseQuery {
         botUserEntity.lastQuestionAnswerTime = LocalDateTime.now()
 
-        AnswerEntity.new {
+        QuestionAnswerEntity.new {
             this.botUser = botUserEntity
             this.question = questionEntity
             this.text = textMessage.content.text

@@ -6,15 +6,15 @@ import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class AnswerEntity(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<AnswerEntity>(Answers)
+class QuestionAnswerEntity(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<QuestionAnswerEntity>(QuestionAnswers)
 
-    var botUser by BotUserEntity referencedOn Answers.botUser
-    var question by QuestionEntity referencedOn Answers.question
-    var text by Answers.text
-    var isAccepted by Answers.isAccepted
+    var botUser by BotUserEntity referencedOn QuestionAnswers.botUser
+    var question by QuestionEntity referencedOn QuestionAnswers.question
+    var text by QuestionAnswers.text
+    var isAccepted by QuestionAnswers.isAccepted
 
-    fun toModel() = Answer(
+    fun toModel() = QuestionAnswer(
         id.value,
         botUser.toModel(),
         question.toModel(),

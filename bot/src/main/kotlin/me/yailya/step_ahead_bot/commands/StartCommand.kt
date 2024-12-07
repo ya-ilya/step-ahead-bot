@@ -17,7 +17,7 @@ suspend fun BehaviourContext.handleStartCommand(message: TextMessage) {
             }
 
             row {
-                dataButton("\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Мои ответы на вопросы", "Answers")
+                dataButton("\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Мои ответы на вопросы", "QuestionAnswers")
             }
 
             row {

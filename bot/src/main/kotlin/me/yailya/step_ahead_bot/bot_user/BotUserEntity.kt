@@ -2,8 +2,8 @@ package me.yailya.step_ahead_bot.bot_user
 
 import me.yailya.step_ahead_bot.question.QuestionEntity
 import me.yailya.step_ahead_bot.question.Questions
-import me.yailya.step_ahead_bot.question.answer.AnswerEntity
-import me.yailya.step_ahead_bot.question.answer.Answers
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswerEntity
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswers
 import me.yailya.step_ahead_bot.teacher.add_teacher_request.AddTeacherRequestEntity
 import me.yailya.step_ahead_bot.teacher.add_teacher_request.AddTeacherRequests
 import me.yailya.step_ahead_bot.teacher.review.TeacherReviewEntity
@@ -30,7 +30,7 @@ class BotUserEntity(id: EntityID<Int>) : IntEntity(id) {
     var lastAddTeacherRequestTime by BotUsers.lastAddTeacherRequestTime
 
     val questions by QuestionEntity referrersOn Questions.botUser
-    val answers by AnswerEntity referrersOn Answers.botUser
+    val answers by QuestionAnswerEntity referrersOn QuestionAnswers.botUser
     val reviews by UniversityReviewEntity referrersOn UniversityReviews.botUser
     val updateRequests by UniversityUpdateRequestEntity referrersOn UniversityUpdateRequests.botUser
     val teacherReviews by TeacherReviewEntity referrersOn TeacherReviews.botUser

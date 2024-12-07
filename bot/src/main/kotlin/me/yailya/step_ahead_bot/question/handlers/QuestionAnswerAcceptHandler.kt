@@ -13,10 +13,10 @@ import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.editInlineButton
 import me.yailya.step_ahead_bot.question.QuestionEntity
-import me.yailya.step_ahead_bot.question.answer.AnswerEntity
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswerEntity
 
 
-suspend fun BehaviourContext.notifyUserAboutAnswerAccepted(entity: AnswerEntity) {
+suspend fun BehaviourContext.notifyUserAboutAnswerAccepted(entity: QuestionAnswerEntity) {
     send(
         ChatId(RawChatId(entity.botUser.userId)),
         buildEntities {
@@ -32,7 +32,7 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
 ) {
     databaseQuery {
         val botUserEntity = query.botUser
-        val answer = AnswerEntity.findById(answerId)
+        val answer = QuestionAnswerEntity.findById(answerId)
 
         if (answer == null) {
             answerCallbackQuery(
@@ -93,7 +93,7 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
             {
                 CallbackDataInlineKeyboardButton(
                     if (answer.isAccepted) "❌ Отменить одобрение" else "✅ Одобрить ответ",
-                    "question_accept_answer_${answer.id}_${questionId}"
+                    "Question_accept_answer_${answer.id}_${questionId}"
                 )
             }
         )

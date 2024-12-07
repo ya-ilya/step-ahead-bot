@@ -10,9 +10,9 @@ import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.question.QuestionEntity
-import me.yailya.step_ahead_bot.question.answer.Answer
-import me.yailya.step_ahead_bot.question.answer.AnswerEntity
-import me.yailya.step_ahead_bot.question.answer.Answers
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswer
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswerEntity
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswers
 import me.yailya.step_ahead_bot.replyOrEdit
 import me.yailya.step_ahead_bot.university.University
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -22,8 +22,8 @@ suspend fun answerForKeyboard(
     id: Int,
     questionId: Int,
     university: University
-): Triple<Answer?, Answer, Answer?> = databaseQuery {
-    val condition = Answers.question eq questionId
+): Triple<QuestionAnswer?, QuestionAnswer, QuestionAnswer?> = databaseQuery {
+    val condition = QuestionAnswers.question eq questionId
     val question = QuestionEntity.findById(questionId) ?: throw RuntimeException("❌ Данный вопрос не существует")
 
     if (question.university.id.value != university.id) {
@@ -39,14 +39,14 @@ suspend fun answerForKeyboard(
     val current = if (id == -1) {
         answers.first()
     } else {
-        AnswerEntity.findById(id) ?: throw RuntimeException("❌ Данного ответа на вопрос не существует")
+        QuestionAnswerEntity.findById(id) ?: throw RuntimeException("❌ Данного ответа на вопрос не существует")
     }
 
-    val previous = AnswerEntity
-        .find { condition and (Answers.id less current.id) }
+    val previous = QuestionAnswerEntity
+        .find { condition and (QuestionAnswers.id less current.id) }
         .lastOrNull()
-    val next = AnswerEntity
-        .find { condition and (Answers.id greater current.id) }
+    val next = QuestionAnswerEntity
+        .find { condition and (QuestionAnswers.id greater current.id) }
         .firstOrNull()
 
     return@databaseQuery Triple(

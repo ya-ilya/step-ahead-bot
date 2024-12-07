@@ -10,9 +10,9 @@ import dev.inmo.tgbotapi.utils.buildEntities
 import dev.inmo.tgbotapi.utils.row
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
-import me.yailya.step_ahead_bot.question.answer.Answer
-import me.yailya.step_ahead_bot.question.answer.AnswerEntity
-import me.yailya.step_ahead_bot.question.answer.Answers
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswer
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswerEntity
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswers
 import me.yailya.step_ahead_bot.replyOrEdit
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
@@ -20,9 +20,9 @@ import org.jetbrains.exposed.sql.and
 suspend fun answerForKeyboard(
     query: DataCallbackQuery,
     id: Int
-): Triple<Answer?, Answer, Answer?> = databaseQuery {
+): Triple<QuestionAnswer?, QuestionAnswer, QuestionAnswer?> = databaseQuery {
     val botUserEntity = query.botUser
-    val condition = Answers.botUser eq botUserEntity.id
+    val condition = QuestionAnswers.botUser eq botUserEntity.id
     val answers = botUserEntity.answers
 
     if (answers.empty()) {
@@ -32,18 +32,18 @@ suspend fun answerForKeyboard(
     val current = if (id == -1) {
         answers.first()
     } else {
-        AnswerEntity.findById(id) ?: throw RuntimeException("❌ Данного ответа на вопрос не существует")
+        QuestionAnswerEntity.findById(id) ?: throw RuntimeException("❌ Данного ответа на вопрос не существует")
     }
 
     if (current.botUser.id != botUserEntity.id) {
         throw RuntimeException("❌ Данный ответ на вопрос создали не вы")
     }
 
-    val previous = AnswerEntity
-        .find { condition and (Answers.id less current.id) }
+    val previous = QuestionAnswerEntity
+        .find { condition and (QuestionAnswers.id less current.id) }
         .lastOrNull()
-    val next = AnswerEntity
-        .find { condition and (Answers.id greater current.id) }
+    val next = QuestionAnswerEntity
+        .find { condition and (QuestionAnswers.id greater current.id) }
         .firstOrNull()
 
     return@databaseQuery Triple(
@@ -73,17 +73,17 @@ suspend fun BehaviourContext.handleAnswerCallback(
         },
         inlineKeyboard {
             row {
-                dataButton("❔ Посмотреть вопрос", "Answer_question_${answer.id}")
+                dataButton("❔ Посмотреть вопрос", "QuestionAnswer_question_${answer.id}")
             }
             row {
-                dataButton("\uD83D\uDDD1\uFE0F Удалить", "Answer_delete_${answer.id}")
+                dataButton("\uD83D\uDDD1\uFE0F Удалить", "QuestionAnswer_delete_${answer.id}")
             }
             row {
                 if (previous != null) {
-                    dataButton("⬅\uFE0F Предыдущий", "Answer_${previous.id}")
+                    dataButton("⬅\uFE0F Предыдущий", "QuestionAnswer_${previous.id}")
                 }
                 if (next != null) {
-                    dataButton("Следующий ➡\uFE0F", "Answer_${next.id}")
+                    dataButton("Следующий ➡\uFE0F", "QuestionAnswer_${next.id}")
                 }
             }
         }

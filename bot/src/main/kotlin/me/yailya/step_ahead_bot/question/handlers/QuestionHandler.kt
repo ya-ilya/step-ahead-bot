@@ -75,17 +75,20 @@ suspend fun BehaviourContext.handleQuestionCallback(
         },
         inlineKeyboard {
             row {
-                dataButton("\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Посмотреть ответы", "question_answers_${question.id}")
+                dataButton(
+                    "\uD83D\uDE4B\uD83C\uDFFB\u200D♂\uFE0F Посмотреть ответы",
+                    "Question_QuestionAnswers_${question.id}"
+                )
             }
             row {
-                dataButton("\uD83D\uDDD1\uFE0F Удалить", "question_delete_${question.id}")
+                dataButton("\uD83D\uDDD1\uFE0F Удалить", "Question_delete_${question.id}")
             }
             row {
                 if (previous != null) {
-                    dataButton("⬅\uFE0F Предыдущий", "question_${previous.id}")
+                    dataButton("⬅\uFE0F Предыдущий", "Question_${previous.id}")
                 }
                 if (next != null) {
-                    dataButton("Следующий ➡\uFE0F", "question_${next.id}")
+                    dataButton("Следующий ➡\uFE0F", "Question_${next.id}")
                 }
             }
         }

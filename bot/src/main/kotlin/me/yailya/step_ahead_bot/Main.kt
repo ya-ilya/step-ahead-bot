@@ -35,7 +35,7 @@ import me.yailya.step_ahead_bot.moderator.*
 import me.yailya.step_ahead_bot.olympiad.Olympiads
 import me.yailya.step_ahead_bot.olympiad.university_entry.OlympiadUniversityEntries
 import me.yailya.step_ahead_bot.question.Questions
-import me.yailya.step_ahead_bot.question.answer.Answers
+import me.yailya.step_ahead_bot.question.answer.QuestionAnswers
 import me.yailya.step_ahead_bot.question.answer.handlers.handleAnswerCallback
 import me.yailya.step_ahead_bot.question.answer.handlers.handleAnswerDeleteCallback
 import me.yailya.step_ahead_bot.question.answer.handlers.handleAnswerQuestionCallback
@@ -170,7 +170,7 @@ suspend fun main() {
             UniversityReviews,
             UniversityUpdateRequests,
             Questions,
-            Answers,
+            QuestionAnswers,
             Universities,
             BotUsers,
             Teachers,
@@ -220,7 +220,7 @@ suspend fun main() {
             this.handleUniversitiesCommand(it)
         }
 
-        onDataCallbackQuery("Answers") {
+        onDataCallbackQuery("QuestionAnswers") {
             this.handleAnswerCallback(it, -1)
         }
 
@@ -310,7 +310,7 @@ suspend fun main() {
             }
         }
 
-        val answerRegex = "Answer(?:_(.*))?_([^_]*)".toRegex()
+        val answerRegex = "QuestionAnswer(?:_(.*))?_([^_]*)".toRegex()
 
         onDataCallbackQuery(answerRegex) {
             val values = answerRegex.find(it.data)!!.groupValues
@@ -334,7 +334,7 @@ suspend fun main() {
 
         val questionRegex = "Question(?:_(.*))?_([^_]*)".toRegex()
         val questionAcceptAnswerRegex = "accept_answer_(.*?)$".toRegex()
-        val questionAnswerRegex = "answer_(.*?)$".toRegex()
+        val questionAnswerRegex = "QuestionAnswer_(.*?)$".toRegex()
 
         onDataCallbackQuery(questionRegex) {
             val values = questionRegex.find(it.data)!!.groupValues
@@ -350,7 +350,7 @@ suspend fun main() {
                     this.handleQuestionDeleteCallback(it, questionId)
                 }
 
-                name == "answers" -> {
+                name == "QuestionAnswers" -> {
                     this.handleQuestionAnswerCallback(
                         it,
                         -1,
