@@ -4,6 +4,5 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 
 object Olympiads : IntIdTable() {
     val name = text("name")
-    val level = integer("level")
     val website = text("website")
 }

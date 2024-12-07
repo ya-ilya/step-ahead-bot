@@ -8,13 +8,11 @@ class OlympiadEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<OlympiadEntity>(Olympiads)
 
     var name by Olympiads.name
-    var level by Olympiads.level
     var website by Olympiads.website
 
     fun toModel() = Olympiad(
         id.value,
         name,
-        level,
         website
     )
 }

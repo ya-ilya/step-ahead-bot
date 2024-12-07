@@ -7,6 +7,8 @@ class OlympiadUniversityEntry(
     val id: Int,
     val olympiad: Olympiad,
     val university: University,
+    val grade: Int,
+    val subject: String,
     val onlyWinner: Boolean,
     val benefit: String
 )

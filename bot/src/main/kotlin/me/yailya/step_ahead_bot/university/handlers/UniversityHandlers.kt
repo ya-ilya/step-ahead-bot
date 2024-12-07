@@ -79,6 +79,13 @@ suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, 
 
             row {
                 dataButton(
+                    "\uD83C\uDFC6 Олимпиады",
+                    "university_Olympiads_${university.id}"
+                )
+            }
+
+            row {
+                dataButton(
                     "❔ Вопросы",
                     "university_Questions_${university.id}"
                 )

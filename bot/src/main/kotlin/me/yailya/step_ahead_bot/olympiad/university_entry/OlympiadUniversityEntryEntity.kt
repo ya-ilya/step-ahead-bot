@@ -11,6 +11,8 @@ class OlympiadUniversityEntryEntity(id: EntityID<Int>) : IntEntity(id) {
 
     var olympiad by OlympiadEntity referencedOn OlympiadUniversityEntries.olympiad
     var university by UniversityEntity referencedOn OlympiadUniversityEntries.university
+    var grade by OlympiadUniversityEntries.grade
+    var subject by OlympiadUniversityEntries.subject
     var onlyWinner by OlympiadUniversityEntries.onlyWinner
     var benefit by OlympiadUniversityEntries.benefit
 
@@ -18,6 +20,8 @@ class OlympiadUniversityEntryEntity(id: EntityID<Int>) : IntEntity(id) {
         id.value,
         olympiad.toModel(),
         university.toModel(),
+        grade,
+        subject,
         onlyWinner,
         benefit
     )

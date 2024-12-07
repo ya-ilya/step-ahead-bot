@@ -7,6 +7,8 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 object OlympiadUniversityEntries : IntIdTable() {
     val olympiad = reference("olympiad", Olympiads)
     val university = reference("university", Universities)
+    val grade = integer("grade")
+    val subject = text("subject")
     val onlyWinner = bool("onlyWinner")
     val benefit = text("benefit")
 }

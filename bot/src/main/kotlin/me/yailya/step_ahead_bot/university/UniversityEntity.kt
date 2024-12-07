@@ -1,6 +1,8 @@
 package me.yailya.step_ahead_bot.university
 
 import me.yailya.step_ahead_bot.databaseQuery
+import me.yailya.step_ahead_bot.olympiad.university_entry.OlympiadUniversityEntries
+import me.yailya.step_ahead_bot.olympiad.university_entry.OlympiadUniversityEntryEntity
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -27,6 +29,8 @@ class UniversityEntity(id: EntityID<Int>) : IntEntity(id) {
     val socialNetworks by Universities.socialNetworks
     val listOfApplicants by Universities.listOfApplication
     val specialities by Universities.specialities
+
+    val olympiads by OlympiadUniversityEntryEntity referrersOn OlympiadUniversityEntries.university
 
     fun toModel() = University(
         id.value,

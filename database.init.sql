@@ -134,3 +134,119 @@ VALUES
     'https://pk.mipt.ru/bachelor/2024_decree/',
     '["Прикладная математика и информатика","Экономика и ERP системы","Прикладная информатика","Computer science","Радиотехника и компьютерные технологии","Общая и прикладная физика","Авиационные технологии и автономные транспортные системы","Геокосмические науки и технологии","Физика перспективных технологий","Биофизика и биоинформатика","Природоподобные, плазменные и ядерные технологии","Управление инновациями в бизнесе","Программная инженерия и компьютерные технологии","Компьютерные технологии и вычислительная техника","Системное программирование и прикладная математика","Математическое моделирование и компьютерные технологии","Прикладная информатика и инженерия","ВШПИ Программная инженерия","Электроника и наноэлектроника","Техническая физика","Биотехнология","Системная биология и биоинженерия","Biomedical engineering","Создание креативного высокотехнологичного бизнеса","Управление инновациями в бизнесе"]'
 );
+
+CREATE TABLE Olympiads
+(
+    id INT PRIMARY KEY,
+    name VARCHAR(1024),
+    website VARCHAR(8192)
+);
+
+INSERT INTO Olympiads
+(
+    id,
+    name,
+    website
+)
+VALUES
+(
+    1,
+    'Всероссийская олимпиада школьников',
+    'https://vos.olimpiada.ru/'
+);
+
+INSERT INTO Olympiads
+(
+    id,
+    name,
+    website
+)
+VALUES
+(
+    2,
+    'Московская олимпиада школьников',
+    'https://mos.olimpiada.ru/'
+);
+
+INSERT INTO Olympiads
+(
+    id,
+    name,
+    website
+)
+VALUES
+(
+    3,
+    'Высшая проба',
+    'https://olymp.hse.ru/mmo/it'
+);
+
+CREATE TABLE OlympiadEntries
+(
+    id INT PRIMARY KEY,
+    olympiad INT,
+    university INT,
+    grade INT,
+    subject VARCHAR(1024),
+    onlyWinner BOOLEAN,
+    benefit VARCHAR(1024),
+    FOREIGN KEY (olympiad) REFERENCES Olympiads(id),
+    FOREIGN KEY (university) REFERENCES Universities(id)
+);
+
+INSERT INTO OlympiadEntries(
+    id,
+    olympiad,
+    university,
+    subject,
+    onlyWinner,
+    benefit
+)
+VALUES
+(
+    1,
+    3,
+    2,
+    11,
+    "Математика",
+    false,
+    "Право на прием БВИ"
+);
+
+INSERT INTO OlympiadEntries(
+    id,
+    olympiad,
+    university,
+    subject,
+    onlyWinner,
+    benefit
+)
+VALUES
+(
+    2,
+    3,
+    2,
+    10,
+    "Математика",
+    true,
+    "Право на прием БВИ"
+);
+
+INSERT INTO OlympiadEntries(
+    id,
+    olympiad,
+    university,
+    subject,
+    onlyWinner,
+    benefit
+)
+VALUES
+(
+    3,
+    3,
+    2,
+    10,
+    "Математика",
+    false,
+    "Право на 100 баллов"
+);

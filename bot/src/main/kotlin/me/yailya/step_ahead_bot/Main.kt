@@ -32,6 +32,8 @@ import me.yailya.step_ahead_bot.bot_user.BotUserEntity
 import me.yailya.step_ahead_bot.bot_user.BotUsers
 import me.yailya.step_ahead_bot.commands.*
 import me.yailya.step_ahead_bot.moderator.*
+import me.yailya.step_ahead_bot.olympiad.Olympiads
+import me.yailya.step_ahead_bot.olympiad.university_entry.OlympiadUniversityEntries
 import me.yailya.step_ahead_bot.question.Questions
 import me.yailya.step_ahead_bot.question.answer.Answers
 import me.yailya.step_ahead_bot.question.answer.handlers.handleAnswerCallback
@@ -173,7 +175,9 @@ suspend fun main() {
             BotUsers,
             Teachers,
             TeacherReviews,
-            AddTeacherRequests
+            AddTeacherRequests,
+            Olympiads,
+            OlympiadUniversityEntries
         )
     }
 
@@ -393,6 +397,7 @@ suspend fun main() {
         val universityRegex = "university(?:_(.*))?_([^_]*)".toRegex()
         val university_QuestionRegex = "Question_(.*?)$".toRegex()
         val university_TeacherRegex = "Teacher_(.*?)$".toRegex()
+        val university_OlympiadRegex = "Olympiad_(.*?)$".toRegex()
         val university_UniversityReviewRegex = "UniversityReview_(.*?)$".toRegex()
         val university_CreateTeacherReviewRegex = "create_TeacherReview_(.*?)$".toRegex()
         val universityCreateQuestionAnswerRegex = "create_QuestionAnswer_(.*?)$".toRegex()
@@ -421,6 +426,10 @@ suspend fun main() {
 
                 name == "Teachers" -> {
                     this.universityHandleTeacherCallback(it, -1, university)
+                }
+
+                name == "Olympiads" -> {
+                    this.universityHandleOlympiadCallback(it, -1, university)
                 }
 
                 name == "UniversityReviews" -> {
@@ -457,6 +466,14 @@ suspend fun main() {
                     this.universityHandleTeacherCallback(
                         it,
                         university_TeacherRegex.find(name)!!.groupValues[1].toInt(),
+                        university
+                    )
+                }
+
+                university_OlympiadRegex.matches(name) -> {
+                    this.universityHandleOlympiadCallback(
+                        it,
+                        university_OlympiadRegex.find(name)!!.groupValues[1].toInt(),
                         university
                     )
                 }
