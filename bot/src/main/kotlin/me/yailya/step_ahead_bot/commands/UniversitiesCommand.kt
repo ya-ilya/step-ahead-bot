@@ -13,7 +13,7 @@ suspend fun BehaviourContext.handleUniversitiesCommand(message: TextMessage) {
         to = message,
         text = "Список ВУЗов. Вы можете выбрать один из них, чтобы посмотреть подробную информацию",
         replyMarkup = inlineKeyboard {
-            for (chunk in UniversityEntity.getUniversityModels().chunked(4)) {
+            for (chunk in UniversityEntity.getUniversityModels().chunked(3)) {
                 row {
                     for (university in chunk) {
                         dataButton(

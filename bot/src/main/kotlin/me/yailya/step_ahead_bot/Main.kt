@@ -113,19 +113,22 @@ suspend fun BehaviourContext.replyOrEdit(
     conditionToReply: Boolean,
     query: CallbackQuery,
     entities: TextSourcesList,
-    replyMarkup: InlineKeyboardMarkup? = null
+    replyMarkup: InlineKeyboardMarkup? = null,
+    linkPreviewOptions: LinkPreviewOptions? = null
 ) {
     if (conditionToReply) {
         reply(
             to = query,
             entities = entities,
-            replyMarkup = replyMarkup
+            replyMarkup = replyMarkup,
+            linkPreviewOptions = linkPreviewOptions
         )
     } else {
         edit(
             query = query,
             entities = entities,
-            replyMarkup = replyMarkup
+            replyMarkup = replyMarkup,
+            linkPreviewOptions = linkPreviewOptions
         )
     }
 }
