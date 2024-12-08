@@ -8,6 +8,7 @@ import dev.inmo.tgbotapi.extensions.utils.types.buttons.dataButton
 import dev.inmo.tgbotapi.extensions.utils.types.buttons.inlineKeyboard
 import dev.inmo.tgbotapi.types.message.content.TextMessage
 import dev.inmo.tgbotapi.utils.row
+import dev.langchain4j.data.message.AiMessage
 import dev.langchain4j.data.message.ChatMessage
 import kotlinx.coroutines.flow.first
 import me.yailya.step_ahead_bot.assistant.Assistant
@@ -20,6 +21,10 @@ suspend fun BehaviourContext.handleAssistantCommand(message: TextMessage) {
     sessions.add(userId)
 
     val history = mutableListOf<ChatMessage>()
+
+    history.add(
+        AiMessage.from("Как я могу вам помочь?")
+    )
 
     reply(
         to = message,

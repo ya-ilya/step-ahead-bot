@@ -38,7 +38,7 @@ suspend fun olympiadUniversityEntriesForKeyboard(
     } else {
         null
     }
-    val next = if (olympiads.elementAtOrNull(index * 4) != null) {
+    val next = if (olympiads.elementAtOrNull(index * 3 + 3) != null) {
         index + 1
     } else {
         null
