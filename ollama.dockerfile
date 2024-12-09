@@ -8,4 +8,4 @@ COPY ./startup.ollama.sh /startup.ollama.sh
 RUN chmod +x /startup.ollama.sh
 
 EXPOSE 7869:11434
-ENTRYPOINT ["/bin/sh", "/wait_for_ollama.sh"]
+ENTRYPOINT ["/bin/sh", "/startup.ollama.sh"]

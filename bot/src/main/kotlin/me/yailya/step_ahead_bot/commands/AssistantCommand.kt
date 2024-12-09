@@ -53,10 +53,20 @@ suspend fun BehaviourContext.handleAssistantCommand(message: TextMessage) {
             text = "⏳ Генерация ответа..."
         )
 
-        edit(
-            waitMessage,
-            text = Assistant.generateResponse(request.content.text, history)
-        )
+        val response = Assistant.generateResponse(request.content.text, history)
+
+        if (response != null) {
+            edit(
+                waitMessage,
+                text = response
+            )
+        } else {
+            removeSession(userId)
+            edit(
+                waitMessage,
+                text = "❌ Произошла ошибка при генерации ответа. Попробуйте еще раз, или свяжитесь с администрацией"
+            )
+        }
     }
 }
 

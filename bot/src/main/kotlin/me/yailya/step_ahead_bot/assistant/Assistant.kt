@@ -56,7 +56,7 @@ object Assistant {
         }
     }
 
-    fun generateResponse(text: String, messages: MutableList<ChatMessage>): String {
+    fun generateResponse(text: String, messages: MutableList<ChatMessage>): String? {
         try {
             val queryEmbedding = embeddingModel
                 .embed(text)
@@ -93,6 +93,6 @@ object Assistant {
             println("Error when creating response: ${ex.message}")
         }
 
-        return "❌ Произошла ошибка при генерации ответа. Попробуйте еще раз, или свяжитесь с администрацией"
+        return null
     }
 }
