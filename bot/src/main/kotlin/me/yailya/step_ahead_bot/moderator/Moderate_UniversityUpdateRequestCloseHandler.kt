@@ -29,11 +29,15 @@ suspend fun BehaviourContext.moderateHandleUniversityUpdateRequestCloseCallback(
         return
     }
 
+    val university = databaseQuery {
+        updateRequestEntity!!.university.toModel()
+    }
+
     val commentMessage = waitTextMessage(
         SendTextMessage(
             query.message!!.chat.id,
             buildEntities {
-                +bold("Закрытие запроса на изменение информации #${updateRequestId} без пометки о выполнении") +
+                +bold("${university.shortName} -> Закрытие запроса на изменение информации #${updateRequestId} без пометки о выполнении") +
                         "\n" + "Прокомментируйте закрытие запроса:"
             },
             replyParameters = ReplyParameters(metaInfo = query.message!!.metaInfo)

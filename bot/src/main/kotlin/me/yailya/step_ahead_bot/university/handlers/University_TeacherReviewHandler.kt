@@ -74,7 +74,7 @@ suspend fun BehaviourContext.universityHandleTeacherReviewCallback(
         teacherReviewId == -1,
         query,
         buildEntities {
-            +bold("Отзыв о преподавателе #${teacherReview.id}. ${teacherReview.rating}/5") +
+            +bold("Преподаватель ${teacherReview.teacher.fullName} -> Отзыв #${teacherReview.id}. ${teacherReview.rating}/5") +
                     "\n" + blockquote(teacherReview.comment)
         },
         inlineKeyboard {

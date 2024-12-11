@@ -64,7 +64,7 @@ suspend fun BehaviourContext.universityHandleTeacherCallback(
         teacherId == -1,
         query,
         buildEntities {
-            +bold("${university.shortName} -> преподаватели -> ${teacher.fullName}") +
+            +bold("${university.shortName} -> Преподаватель ${teacher.fullName}") +
                     "\n- Опыт работы: ${teacher.experience}" +
                     "\n- Академическая должность: ${teacher.academicTitle}" +
                     "\n- Специальности: ${teacher.specialities.joinToString()}"

@@ -51,7 +51,7 @@ suspend fun BehaviourContext.universityHandleCreateTeacherReviewCallback(
         SendTextMessage(
             query.message!!.chat.id,
             buildEntities {
-                +bold("${university.shortName} -> преподаватель -> $teacherFullName -> Создание отзыва") +
+                +bold("${university.shortName} -> Преподаватель $teacherFullName -> Создание отзыва") +
                         "\n" + "Что вы хотите рассказать об этом преподавателе?"
             },
             replyParameters = ReplyParameters(metaInfo = query.message!!.metaInfo)

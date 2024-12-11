@@ -64,7 +64,7 @@ suspend fun BehaviourContext.universityHandleQuestionCallback(
         questionId == -1,
         query,
         buildEntities {
-            +bold("Вопрос #${question.id}") +
+            +bold("${university.shortName} -> Вопрос #${question.id}") +
                     "\n" + question.text
         },
         inlineKeyboard {

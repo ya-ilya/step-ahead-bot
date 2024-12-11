@@ -39,7 +39,7 @@ suspend fun BehaviourContext.moderateHandleAddTeacherRequestCloseDoneCallback(
 
     reply(
         to = query,
-        "Запрос на добавление нового преподавателя #${addTeacherRequestId} закрыт с пометкой о выполнении. ID добавленного преподавателя: ${teacherEntity.id}"
+        "✅ Запрос на добавление нового преподавателя #${addTeacherRequestId} закрыт с пометкой о выполнении. ID добавленного преподавателя: ${teacherEntity.id}"
     )
 
     answerCallbackQuery(query)

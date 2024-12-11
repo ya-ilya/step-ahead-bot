@@ -33,7 +33,7 @@ suspend fun universityReviewForKeyboard(
         reviews.first()
     } else {
         UniversityReviewEntity.findById(id)
-            ?: throw RuntimeException("❌ Данного отзыва не существует, либо же он был оставлен о другом ВУЗе")
+            ?: throw RuntimeException("❌ Данного отзыва о вузе не существует, либо же он был оставлен о другом ВУЗе")
     }
 
     val previous = UniversityReviewEntity
@@ -66,7 +66,7 @@ suspend fun BehaviourContext.universityHandleUniversityReviewCallback(
         reviewId == -1,
         query,
         buildEntities {
-            +bold("Отзыв #${review.id}. ${review.rating}/5") +
+            +bold("${university.shortName} -> Отзыв #${review.id}. ${review.rating}/5") +
                     "\n" + "Положительные стороны:" +
                     "\n" + blockquote(review.pros) +
                     "\n" + "Отрицательные стороны:" +
