@@ -5,22 +5,27 @@ import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
 import dev.inmo.tgbotapi.types.queries.callback.DataCallbackQuery
 import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.reply
-import me.yailya.step_ahead_bot.university.update_request.UniversityUpdateRequestEntity
 import me.yailya.step_ahead_bot.university.update_request.UniversityUpdateRequestStatus
 
 suspend fun BehaviourContext.handleUniversityUpdateRequestCloseCallback(
     query: DataCallbackQuery,
     updateRequestId: Int
 ) {
+    val (isCheckSuccessful, updateRequestEntity) = isUpdateRequestMayClosed(query, updateRequestId)
+
+    if (!isCheckSuccessful) {
+        return
+    }
+
     databaseQuery {
-        UniversityUpdateRequestEntity.findById(updateRequestId)!!.apply {
+        updateRequestEntity!!.apply {
             this.status = UniversityUpdateRequestStatus.Closed
         }
     }
 
     reply(
         to = query,
-        text = "Запрос на изменение информации #${updateRequestId} был успешно закрыт"
+        text = "✅ Запрос на изменение информации #${updateRequestId} был успешно закрыт"
     )
 
     answerCallbackQuery(query)

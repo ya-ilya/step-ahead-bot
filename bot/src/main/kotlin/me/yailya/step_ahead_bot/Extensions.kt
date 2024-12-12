@@ -19,6 +19,7 @@ import dev.inmo.tgbotapi.types.message.abstracts.ContentMessage
 import dev.inmo.tgbotapi.types.message.content.TextContent
 import dev.inmo.tgbotapi.types.message.textsources.TextSourcesList
 import dev.inmo.tgbotapi.types.queries.callback.CallbackQuery
+import dev.inmo.tgbotapi.utils.EntitiesBuilder
 import dev.inmo.tgbotapi.utils.RiskFeature
 
 suspend fun BehaviourContext.reply(
@@ -89,13 +90,13 @@ suspend fun BehaviourContext.replyOrEdit(
 }
 
 suspend fun BehaviourContext.editInlineButton(
-    query: CallbackQuery,
+    message: ContentMessage<TextContent>,
     buttonFilter: (InlineKeyboardButton) -> Boolean,
     buttonTransformer: ((InlineKeyboardButton) -> InlineKeyboardButton)?
 ) {
     val keyboardBuilder = InlineKeyboardBuilder()
 
-    for (row in query.message!!.reply_markup!!.keyboard) {
+    for (row in message.reply_markup!!.keyboard) {
         val rowBuilder = InlineKeyboardRowBuilder()
 
         for (button in row) {
@@ -110,8 +111,17 @@ suspend fun BehaviourContext.editInlineButton(
     }
 
     edit(
-        query = query,
-        entities = query.message!!.entities!!,
+        message = message,
+        entities = message.entities ?: EntitiesBuilder().build(),
         replyMarkup = keyboardBuilder.build()
     )
+}
+
+@Suppress("UNCHECKED_CAST")
+suspend fun BehaviourContext.editInlineButton(
+    query: CallbackQuery,
+    buttonFilter: (InlineKeyboardButton) -> Boolean,
+    buttonTransformer: ((InlineKeyboardButton) -> InlineKeyboardButton)?
+) {
+    editInlineButton(query.message as ContentMessage<TextContent>, buttonFilter, buttonTransformer)
 }

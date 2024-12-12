@@ -118,7 +118,7 @@ suspend fun BehaviourContext.notifyUserAboutAddTeacherRequestClosed(
     )
 }
 
-suspend fun BehaviourContext.checkAddTeacherRequestNotClosed(
+suspend fun BehaviourContext.isAddTeacherRequestMayClosed(
     query: DataCallbackQuery,
     addTeacherRequestId: Int
 ): Pair<Boolean, AddTeacherRequestEntity?> {

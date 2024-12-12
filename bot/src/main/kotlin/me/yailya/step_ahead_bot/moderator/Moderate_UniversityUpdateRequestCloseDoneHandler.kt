@@ -23,7 +23,7 @@ suspend fun BehaviourContext.moderateHandleUniversityUpdateRequestCloseDoneCallb
     updateRequestId: Int
 ) {
     val (botUserEntity, _) = query.botUser()
-    val (isCheckSuccessful, updateRequestEntity) = checkUpdateRequestNotClosed(query, updateRequestId)
+    val (isCheckSuccessful, updateRequestEntity) = isUpdateRequestMayClosed(query, updateRequestId)
 
     if (!isCheckSuccessful) {
         return
@@ -56,7 +56,7 @@ suspend fun BehaviourContext.moderateHandleUniversityUpdateRequestCloseDoneCallb
 
     reply(
         to = commentMessage,
-        "Запрос на изменение информации #${updateRequestId} закрыт с пометкой о выполнении"
+        "✅ Запрос на изменение информации #${updateRequestId} закрыт с пометкой о выполнении"
     )
 
     answerCallbackQuery(query)

@@ -1,4 +1,3 @@
-@file:OptIn(RiskFeature::class)
 @file:Suppress("LocalVariableName")
 
 package me.yailya.step_ahead_bot
@@ -7,7 +6,6 @@ import dev.inmo.tgbotapi.extensions.api.telegramBot
 import dev.inmo.tgbotapi.extensions.behaviour_builder.buildBehaviourWithLongPolling
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onCommand
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onDataCallbackQuery
-import dev.inmo.tgbotapi.utils.RiskFeature
 import kotlinx.coroutines.Dispatchers
 import me.yailya.step_ahead_bot.assistant.Assistant
 import me.yailya.step_ahead_bot.assistant.handlers.handleAssistantStop

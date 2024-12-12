@@ -115,11 +115,11 @@ suspend fun BehaviourContext.notifyUserAboutUpdateRequestClosed(entity: Universi
     )
 }
 
-suspend fun BehaviourContext.checkUpdateRequestNotClosed(
+suspend fun BehaviourContext.isUpdateRequestMayClosed(
     query: DataCallbackQuery,
     updateRequestId: Int
-): Pair<Boolean, UniversityUpdateRequestEntity?> {
-    val updateRequestEntity = databaseQuery { UniversityUpdateRequestEntity.findById(updateRequestId) }
+): Pair<Boolean, UniversityUpdateRequestEntity?> = databaseQuery {
+    val updateRequestEntity = UniversityUpdateRequestEntity.findById(updateRequestId)
 
     if (updateRequestEntity == null) {
         answerCallbackQuery(
@@ -127,17 +127,17 @@ suspend fun BehaviourContext.checkUpdateRequestNotClosed(
             "❌ Этого запроса не существует"
         )
 
-        return false to null
+        return@databaseQuery false to null
     }
 
-    if (databaseQuery { updateRequestEntity.status } != UniversityUpdateRequestStatus.Open) {
+    if (updateRequestEntity.status != UniversityUpdateRequestStatus.Open) {
         answerCallbackQuery(
             query,
             "❌ Этот запрос уже был закрыт"
         )
 
-        return false to updateRequestEntity
+        return@databaseQuery false to updateRequestEntity
     }
 
-    return true to updateRequestEntity
+    return@databaseQuery true to updateRequestEntity
 }

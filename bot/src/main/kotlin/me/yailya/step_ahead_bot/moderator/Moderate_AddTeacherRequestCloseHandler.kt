@@ -13,7 +13,7 @@ suspend fun BehaviourContext.moderateHandleAddTeacherRequestCloseCallback(
     addTeacherRequestId: Int
 ) {
     val (botUserEntity, _) = query.botUser()
-    val (isCheckSuccessful, addTeacherRequestEntity) = checkAddTeacherRequestNotClosed(query, addTeacherRequestId)
+    val (isCheckSuccessful, addTeacherRequestEntity) = isAddTeacherRequestMayClosed(query, addTeacherRequestId)
 
     if (!isCheckSuccessful) {
         return
