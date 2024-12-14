@@ -71,7 +71,7 @@ suspend fun BehaviourContext.moderateHandleUniversityUpdateRequestCallback(
         updateRequestId == -1,
         query,
         buildEntities {
-            +"${university.shortName} -> Запрос на изменение информации #${updateRequest.id}]\n- Статус: ${updateRequest.status.text}" +
+            +"${university.shortName} -> Запрос на изменение информации #${updateRequest.id}]" +
                     "\nИнформация, которую пользователь бы хотел поменять: " + blockquote(updateRequest.text)
         },
         inlineKeyboard {

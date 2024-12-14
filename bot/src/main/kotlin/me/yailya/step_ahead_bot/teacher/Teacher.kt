@@ -8,5 +8,6 @@ class Teacher(
     val experience: Int,
     val academicTitle: TeacherAcademicTitle,
     val university: University,
-    val specialities: List<String>
+    val specialities: List<String>,
+    val averageRating: Double
 )

@@ -1,8 +1,8 @@
 package me.yailya.step_ahead_bot.university
 
 import me.yailya.step_ahead_bot.databaseQuery
-import me.yailya.step_ahead_bot.olympiad.university_entry.OlympiadUniversityEntries
-import me.yailya.step_ahead_bot.olympiad.university_entry.OlympiadUniversityEntryEntity
+import me.yailya.step_ahead_bot.university.review.UniversityReviewEntity
+import me.yailya.step_ahead_bot.university.review.UniversityReviews
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -30,7 +30,7 @@ class UniversityEntity(id: EntityID<Int>) : IntEntity(id) {
     val listOfApplicants by Universities.listOfApplication
     val specialities by Universities.specialities
 
-    val olympiads by OlympiadUniversityEntryEntity referrersOn OlympiadUniversityEntries.university
+    val reviews by UniversityReviewEntity referrersOn UniversityReviews.university
 
     fun toModel() = University(
         id.value,
@@ -48,6 +48,7 @@ class UniversityEntity(id: EntityID<Int>) : IntEntity(id) {
         contacts,
         socialNetworks,
         listOfApplicants,
-        specialities
+        specialities,
+        Math.round(reviews.map { it.rating }.average() * 100.0) / 100.0
     )
 }

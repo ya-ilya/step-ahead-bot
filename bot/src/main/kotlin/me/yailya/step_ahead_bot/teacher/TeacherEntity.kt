@@ -24,6 +24,7 @@ class TeacherEntity(id: EntityID<Int>) : IntEntity(id) {
         experience,
         academicTitle,
         university.toModel(),
-        specialities
+        specialities,
+        Math.round(reviews.map { it.rating }.average() * 100.0) / 100.0
     )
 }

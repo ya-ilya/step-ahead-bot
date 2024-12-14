@@ -72,14 +72,14 @@ suspend fun BehaviourContext.universityHandleTeacherCallback(
         inlineKeyboard {
             row {
                 dataButton(
-                    "⭐ Отзывы о преподавателе",
+                    "⭐ Отзывы${if (teacher.averageRating > 0) " (${teacher.averageRating}/5.0)" else ""}",
                     "university_teacher_reviews_${teacher.id}_${university.id}"
                 )
             }
 
             row {
                 dataButton(
-                    "✍\uD83C\uDFFB Оставить отзыв о преподавателе",
+                    "✍\uD83C\uDFFB Создать отзыв",
                     "university_create_teacher_review_${teacher.id}_${university.id}"
                 )
             }

@@ -16,6 +16,7 @@ import dev.inmo.tgbotapi.utils.buildEntities
 import kotlinx.coroutines.flow.first
 import me.yailya.step_ahead_bot.bot_user.botUser
 import me.yailya.step_ahead_bot.databaseQuery
+import me.yailya.step_ahead_bot.editInlineButton
 import me.yailya.step_ahead_bot.university.update_request.UniversityUpdateRequestStatus
 
 suspend fun BehaviourContext.moderateHandleUniversityUpdateRequestCloseDoneCallback(
@@ -53,6 +54,12 @@ suspend fun BehaviourContext.moderateHandleUniversityUpdateRequestCloseDoneCallb
             notifyUserAboutUpdateRequestClosed(this)
         }
     }
+
+    editInlineButton(
+        query,
+        { button -> button.text.contains("Закрыть") },
+        null
+    )
 
     reply(
         to = commentMessage,

@@ -19,7 +19,8 @@ data class University(
     val contacts: UniversityContacts,
     val socialNetworks: UniversitySocialNetworks,
     val listOfApplicants: String,
-    val specialities: List<String>
+    val specialities: List<String>,
+    val averageRating: Double
 ) {
     @Serializable
     data class UniversityBudgetInfo(

@@ -68,7 +68,7 @@ suspend fun BehaviourContext.moderateHandleAddTeacherRequestCallback(
         updateRequestId == -1,
         query,
         buildEntities {
-            +"${university.shortName} -> Запрос на добавление нового преподавателя #${addTeacherRequest.id}]\n- Статус: ${addTeacherRequest.status.text}" +
+            +"${university.shortName} -> Запрос на добавление нового преподавателя #${addTeacherRequest.id}]" +
                     "\n- ФИО: ${addTeacherRequest.fullName}" +
                     "\n- Опыт работы: ${addTeacherRequest.experience}" +
                     "\n- Академическая должность: ${addTeacherRequest.academicTitle}" +

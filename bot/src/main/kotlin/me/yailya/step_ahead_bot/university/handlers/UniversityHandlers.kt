@@ -97,7 +97,7 @@ suspend fun BehaviourContext.handleUniversityCallback(query: DataCallbackQuery, 
 
             row {
                 dataButton(
-                    "⭐ Отзывы",
+                    "⭐ Отзывы${if (university.averageRating > 0) " (${university.averageRating}/5.0)" else ""}",
                     "university_UniversityReviews_${university.id}"
                 )
                 dataButton(
