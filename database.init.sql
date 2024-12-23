@@ -253,3 +253,71 @@ VALUES
     false,
     "Право на 100 баллов"
 );
+
+CREATE TABLE Teachers
+(
+    id INT PRIMARY KEY,
+    fullName VARCHAR(1024),
+    experience INT,
+    academicTitle JSON,
+    university INT,
+    specialities JSON,
+    FOREIGN KEY (university) REFERENCES Universities(id)
+);
+
+INSERT INTO Teachers
+(
+    id,
+    fullName,
+    experience,
+    academicTitle,
+    university,
+    specialities
+)
+VALUES
+(
+    1,
+    "Каюкова Галина Петровна",
+    9,
+    '"Professor"',
+    1,
+    '["Химическая технология"]'
+);
+
+INSERT INTO Teachers
+(
+    id,
+    fullName,
+    experience,
+    academicTitle,
+    university,
+    specialities
+)
+VALUES
+(
+    2,
+    "Алексеев Вадим Александрович",
+    3,
+    '"Professor"',
+    2,
+    '["Юриспруденция"]'
+);
+
+INSERT INTO Teachers
+(
+    id,
+    fullName,
+    experience,
+    academicTitle,
+    university,
+    specialities
+)
+VALUES
+(
+    3,
+    "Ященко Иван Валериевич",
+    3,
+    '"HeadOfTheDepartment"',
+    3,
+    '["Прикладные математика и физика", "Биотехнология"]'
+);
