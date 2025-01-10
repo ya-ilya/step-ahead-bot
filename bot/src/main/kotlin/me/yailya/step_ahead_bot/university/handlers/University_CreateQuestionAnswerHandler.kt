@@ -61,8 +61,6 @@ suspend fun BehaviourContext.universityHandleCreateQuestionAnswerCallback(
 
             return
         }
-
-        // other non administrator stuff here
     }
 
     if (botUser.lastQuestionAnswerTime != null && LocalDateTime.now() < botUser.lastQuestionAnswerTime.plusMinutes(1)) {

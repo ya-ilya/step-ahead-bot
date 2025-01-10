@@ -21,7 +21,6 @@ import me.yailya.step_ahead_bot.databaseQuery
 import me.yailya.step_ahead_bot.edit
 import me.yailya.step_ahead_bot.university.review.UniversityReviewEntity
 
-
 suspend fun BehaviourContext.handleUniversityReviewDeleteCallback(
     query: DataCallbackQuery,
     reviewId: Int

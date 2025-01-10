@@ -50,9 +50,12 @@ import org.jetbrains.exposed.sql.transactions.transaction
 suspend fun main() {
     println("Loaded EduRank ranking. ${EduRankRanking.ranking.size} entries")
 
-    val driverClassName = "com.mysql.cj.jdbc.Driver"
-    val jdbcURL = "jdbc:mysql://database/database"
-    val database = Database.connect(jdbcURL, driverClassName, "user", "user_secret")
+    val database = Database.connect(
+        "jdbc:mysql://database/database",
+        "com.mysql.cj.jdbc.Driver",
+        "user",
+        "user_secret"
+    )
 
     transaction(database) {
         SchemaUtils.create(
