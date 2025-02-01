@@ -12,7 +12,7 @@ import me.yailya.step_ahead_bot.editInlineButton
 
 suspend fun BehaviourContext.handleAssistantStop(query: DataCallbackQuery, userId: Long) {
     if (query.message!!.chat.id.chatId.long != userId) {
-        answerCallbackQuery(query, "❌ Вы не можете остановить не свою сессию")
+        answerCallbackQuery(query, "❌ Вы не можете остановить не свою сессию", showAlert = true)
     }
 
     if (removeSession(userId)) {

@@ -33,7 +33,7 @@ suspend fun BehaviourContext.handleUniversityReviewDeleteCallback(
         if (review == null) {
             answerCallbackQuery(
                 query,
-                "❌ Данного отзыва о вузе не существует"
+                "❌ Данного отзыва о вузе не существует", showAlert = true
             )
 
             return@databaseQuery
@@ -42,7 +42,7 @@ suspend fun BehaviourContext.handleUniversityReviewDeleteCallback(
         if (review.botUser.id != otherBotUser.first.id) {
             answerCallbackQuery(
                 query,
-                "❌ Вы не можете удалить не ваш отзыв о вузе"
+                "❌ Вы не можете удалить не ваш отзыв о вузе", showAlert = true
             )
 
             return@databaseQuery
@@ -101,7 +101,7 @@ suspend fun BehaviourContext.handleUniversityReviewDeleteCallback(
 
         answerCallbackQuery(
             query,
-            "✅ Ваш отзыв #${reviewId} был удален"
+            "✅ Ваш отзыв #${reviewId} был удален", showAlert = true
         )
     }
 }

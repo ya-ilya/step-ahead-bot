@@ -60,7 +60,7 @@ suspend fun BehaviourContext.handleAnswerCallback(
     val (previous, answer, next) = try {
         answerForKeyboard(query, answerId)
     } catch (ex: RuntimeException) {
-        answerCallbackQuery(query, ex.message)
+        answerCallbackQuery(query, ex.message, showAlert = true)
         return
     }
 

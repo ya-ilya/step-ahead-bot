@@ -5,8 +5,4 @@ enum class TeacherAcademicTitle(val text: String) {
     Docent("Доцент"),
     Professor("Профессор"),
     HeadOfTheDepartment("Заведующий кафедрой");
-
-    override fun toString(): String {
-        return text
-    }
 }

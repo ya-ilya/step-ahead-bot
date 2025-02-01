@@ -40,7 +40,8 @@ suspend fun BehaviourContext.universityHandleCreateAddTeacherRequestCallback(
     ) {
         answerCallbackQuery(
             query,
-            "⏳ Вы должны подождать минуту, прежде чем создать новый запрос на добавление нового преподавателя"
+            "⏳ Вы должны подождать минуту, прежде чем создать новый запрос на добавление нового преподавателя",
+            showAlert = true
         )
 
         return
@@ -72,12 +73,10 @@ suspend fun BehaviourContext.universityHandleCreateAddTeacherRequestCallback(
                 +"Выберете должность преподавателя:"
             },
             replyMarkup = inlineKeyboard {
-                row {
-                    dataButton("Доцент", "Docent")
-                }
-
-                row {
-                    dataButton("Профессор", "Professor")
+                for (academicTitle in TeacherAcademicTitle.entries) {
+                    row {
+                        dataButton(academicTitle.text, academicTitle.name)
+                    }
                 }
             }
         )

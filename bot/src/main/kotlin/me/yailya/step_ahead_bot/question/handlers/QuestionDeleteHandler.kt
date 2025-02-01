@@ -32,7 +32,7 @@ suspend fun BehaviourContext.handleQuestionDeleteCallback(
         if (question == null) {
             answerCallbackQuery(
                 query,
-                "❌ Данного вопроса не существует"
+                "❌ Данного вопроса не существует", showAlert = true
             )
 
             return@databaseQuery
@@ -41,7 +41,7 @@ suspend fun BehaviourContext.handleQuestionDeleteCallback(
         if (question.botUser.id != otherBotUser.first.id) {
             answerCallbackQuery(
                 query,
-                "❌ Вы не можете удалить не ваш вопрос"
+                "❌ Вы не можете удалить не ваш вопрос", showAlert = true
             )
 
             return@databaseQuery
@@ -101,7 +101,7 @@ suspend fun BehaviourContext.handleQuestionDeleteCallback(
 
         answerCallbackQuery(
             query,
-            "✅ Ваш вопрос #${questionId} был удален"
+            "✅ Ваш вопрос #${questionId} был удален", showAlert = true
         )
     }
 }

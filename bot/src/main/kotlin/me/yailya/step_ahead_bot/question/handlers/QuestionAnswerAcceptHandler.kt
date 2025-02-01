@@ -37,7 +37,7 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
         if (answer == null) {
             answerCallbackQuery(
                 query,
-                "❌ Данного ответа на вопрос не существует"
+                "❌ Данного ответа на вопрос не существует", showAlert = true
             )
 
             return@databaseQuery
@@ -48,7 +48,7 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
         if (question == null) {
             answerCallbackQuery(
                 query,
-                "❌ Данного вопроса не существует"
+                "❌ Данного вопроса не существует", showAlert = true
             )
 
             return@databaseQuery
@@ -57,7 +57,7 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
         if (question.botUser.id != botUserEntity.id) {
             answerCallbackQuery(
                 query,
-                "❌ Вы не можете одобрить ответ не на ваш вопрос"
+                "❌ Вы не можете одобрить ответ не на ваш вопрос", showAlert = true
             )
 
             return@databaseQuery
@@ -66,7 +66,7 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
         if (answer.question.id != question.id) {
             answerCallbackQuery(
                 query,
-                "❌ Данный ответ был дан на другой вопрос"
+                "❌ Данный ответ был дан на другой вопрос", showAlert = true
             )
 
             return@databaseQuery
@@ -75,7 +75,7 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
         if (!answer.isAccepted && question.answers.any { it.isAccepted }) {
             answerCallbackQuery(
                 query,
-                "❌ У данного вопроса уже есть принятый ответ"
+                "❌ У данного вопроса уже есть принятый ответ", showAlert = true
             )
 
             return@databaseQuery
@@ -104,7 +104,7 @@ suspend fun BehaviourContext.handleQuestionAcceptAnswerCallback(
                 "✅ Данный ответ на вопрос был помечен как принятый"
             } else {
                 "❌ Данный ответ на вопрос перестал быть помеченным, как принятый"
-            }
+            }, showAlert = true
         )
     }
 }

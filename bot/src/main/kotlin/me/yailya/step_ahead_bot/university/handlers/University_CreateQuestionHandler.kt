@@ -30,7 +30,7 @@ suspend fun BehaviourContext.universityHandleCreateQuestionCallback(
     if (botUser.lastQuestionTime != null && LocalDateTime.now() < botUser.lastQuestionTime.plusMinutes(1)) {
         answerCallbackQuery(
             query,
-            "⏳ Вы должны подождать минуту, прежде чем задать новый вопрос"
+            "⏳ Вы должны подождать минуту, прежде чем задать новый вопрос", showAlert = true
         )
 
         return

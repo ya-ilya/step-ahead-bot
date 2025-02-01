@@ -66,7 +66,7 @@ suspend fun BehaviourContext.universityHandleTeacherReviewCallback(
     val (previous, teacherReview, next) = try {
         teacherReviewForKeyboard(teacherReviewId, teacherId, university)
     } catch (ex: RuntimeException) {
-        answerCallbackQuery(query, ex.message)
+        answerCallbackQuery(query, ex.message, showAlert = true)
         return
     }
 

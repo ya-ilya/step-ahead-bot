@@ -84,7 +84,7 @@ suspend fun main() {
     }
 
     try {
-        Assistant.addUniversitiesEmbeddingData()
+        Assistant.addUniversitiesData()
     } catch (ex: Exception) {
         println("Failed to load assistant: ${ex.message}")
     }
@@ -100,16 +100,16 @@ suspend fun main() {
             this.handleStartCommand(it)
         }
 
-        onCommand("faq") {
-            this.handleFaqCommand(it)
-        }
-
         onCommand("moderate") {
             this.moderateHandleCommand(it)
         }
 
         onCommand("universities") {
             this.handleUniversitiesCommand(it)
+        }
+
+        onCommand("recommendations") {
+            this.handleRecommendationsCommand(it)
         }
 
         onDataCallbackQuery("QuestionAnswers") {

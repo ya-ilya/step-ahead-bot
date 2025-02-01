@@ -61,7 +61,7 @@ suspend fun BehaviourContext.universityHandleOlympiadCallback(
     val (previous, olympiadUniversityEntries, next) = try {
         olympiadUniversityEntriesForKeyboard(if (index == -1) 0 else index, university)
     } catch (ex: RuntimeException) {
-        answerCallbackQuery(query, ex.message)
+        answerCallbackQuery(query, ex.message, showAlert = true)
         return
     }
 

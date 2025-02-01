@@ -16,6 +16,9 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - net
+    healthcheck:
+      interval: 15s
+      test: (mysqladmin ping --silent && exit 1) || echo 0
     command: [ 'mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci' ]
   ollama:
     container_name: ollama
@@ -23,9 +26,6 @@ services:
       - ollama_data:/root/.ollama
       - ./assistant.modelfile:/root/.ollama/assistant.modelfile
     pull_policy: always
-    healthcheck:
-      interval: 15s
-      test: (ls ollama_state_file && exit 1) || echo 0
     build:
       context: .
       dockerfile: ollama.dockerfile
@@ -57,9 +57,9 @@ services:
       - net
     depends_on:
       ollama:
-        condition: service_healthy
-      database:
         condition: service_started
+      database:
+        condition: service_healthy
 volumes:
   mysql_data:
   ollama_data:

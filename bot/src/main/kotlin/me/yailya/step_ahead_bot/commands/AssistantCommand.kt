@@ -17,19 +17,18 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import me.yailya.step_ahead_bot.assistant.Assistant
+import me.yailya.step_ahead_bot.assistant.AssistantQueue
 import me.yailya.step_ahead_bot.editInlineButton
 
-private const val MAX_QUEUE_SIZE = 1
-
 private val sessions = mutableSetOf<Long>()
-private val queue = mutableSetOf<Long>()
+private val queue = AssistantQueue(maxSize = System.getenv("ASSISTANT_QUEUE_MAX_SIZE").toInt())
 
 suspend fun BehaviourContext.handleAssistantCommand(message: TextMessage) {
     val userId = message.chat.id.chatId.long
 
     sessions.add(userId)
 
-    val history = mutableListOf<ChatMessage>()
+    val history = mutableListOf<ChatMessage>(AiMessage.from(Assistant.defaultPrompt))
 
     history.add(
         AiMessage.from("Как я могу вам помочь?")
@@ -67,15 +66,15 @@ suspend fun BehaviourContext.handleAssistantCommand(message: TextMessage) {
             break
         }
 
-        if (queue.size == MAX_QUEUE_SIZE) {
-            val text = { "⏳ Ожидание в очереди (ваше место: ${queue.indexOf(userId) + 1})..." }
+        if (queue.isFull()) {
+            val text = { "⏳ Ожидание в очереди (ваше место: ${queue.getUserPosition(userId)}..." }
             val queueMessage = reply(
                 to = request,
                 text = text()
             )
 
             runBlocking {
-                while (sessions.contains(userId) && queue.size == MAX_QUEUE_SIZE) {
+                while (sessions.contains(userId) && queue.isFull()) {
                     if (!queueMessage.content.text.contentEquals(text())) {
                         editMessageText(
                             queueMessage,
@@ -88,7 +87,7 @@ suspend fun BehaviourContext.handleAssistantCommand(message: TextMessage) {
                 deleteMessage(queueMessage)
             }
         } else {
-            queue.add(userId)
+            queue.addUser(userId)
         }
 
         if (!sessions.contains(userId)) {
@@ -126,7 +125,7 @@ suspend fun BehaviourContext.handleAssistantCommand(message: TextMessage) {
                 )
             }
         } finally {
-            queue.remove(userId)
+            queue.removeUser(userId)
         }
     }
 }

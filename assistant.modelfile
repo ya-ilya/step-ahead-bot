@@ -1,6 +1,6 @@
 FROM llama3.1:8b
 
-PARAMETER temperature 1
+PARAMETER temperature 0.5
 
 # set the system message
 SYSTEM """Ты являешься ai-ассистентом, который помогает абитуриентам с поступлением в различные вузы Москвы

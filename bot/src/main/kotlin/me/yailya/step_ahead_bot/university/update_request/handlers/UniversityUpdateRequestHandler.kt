@@ -62,7 +62,7 @@ suspend fun BehaviourContext.handleUniversityUpdateRequestCallback(
     val (previous, updateRequest, next) = try {
         universityUpdateRequestForKeyboard(query, updateRequestId)
     } catch (ex: RuntimeException) {
-        answerCallbackQuery(query, ex.message)
+        answerCallbackQuery(query, ex.message, showAlert = true)
         return
     }
 
@@ -111,7 +111,7 @@ suspend fun BehaviourContext.isUpdateRequestMayClosed(
     if (updateRequestEntity == null) {
         answerCallbackQuery(
             query,
-            "❌ Этого запроса не существует"
+            "❌ Этого запроса не существует", showAlert = true
         )
 
         return@databaseQuery false to null
@@ -120,14 +120,14 @@ suspend fun BehaviourContext.isUpdateRequestMayClosed(
     if (updateRequestEntity.botUser != botUserEntity) {
         answerCallbackQuery(
             query,
-            "❌ Вы не можете закрыть не ваш запрос на изменение информации"
+            "❌ Вы не можете закрыть не ваш запрос на изменение информации", showAlert = true
         )
     }
 
     if (updateRequestEntity.status != UniversityUpdateRequestStatus.Open) {
         answerCallbackQuery(
             query,
-            "❌ Этот запрос уже был закрыт"
+            "❌ Этот запрос уже был закрыт", showAlert = true
         )
 
         return@databaseQuery false to updateRequestEntity

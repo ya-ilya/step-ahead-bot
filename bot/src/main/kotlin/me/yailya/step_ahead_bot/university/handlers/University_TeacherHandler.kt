@@ -56,7 +56,7 @@ suspend fun BehaviourContext.universityHandleTeacherCallback(
     val (previous, teacher, next) = try {
         teacherForKeyboard(teacherId, university)
     } catch (ex: RuntimeException) {
-        answerCallbackQuery(query, ex.message)
+        answerCallbackQuery(query, ex.message, showAlert = true)
         return
     }
 
@@ -66,7 +66,7 @@ suspend fun BehaviourContext.universityHandleTeacherCallback(
         buildEntities {
             +bold("${university.shortName} -> Преподаватель ${teacher.fullName}") +
                     "\n- Опыт работы: ${teacher.experience}" +
-                    "\n- Академическая должность: ${teacher.academicTitle}" +
+                    "\n- Академическая должность: ${teacher.academicTitle.text}" +
                     "\n- Специальности: ${teacher.specialities.joinToString()}"
         },
         inlineKeyboard {

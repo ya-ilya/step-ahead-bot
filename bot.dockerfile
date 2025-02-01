@@ -8,7 +8,7 @@ WORKDIR /home/gradle/src
 COPY --chown=gradle:gradle . .
 
 # Build the application and cache dependencies
-RUN --mount=type=cache,target=/root/.gradle gradle --no-daemon build || true  # Allow build to fail gracefully for caching
+RUN --mount=type=cache,target=/root/.gradle gradle --no-daemon build || true
 RUN --mount=type=cache,target=/root/.gradle gradle --no-daemon shadowJar
 
 # Stage 2: Create the final image

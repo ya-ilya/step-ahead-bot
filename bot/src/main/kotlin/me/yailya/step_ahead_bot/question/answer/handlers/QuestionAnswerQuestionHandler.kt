@@ -25,7 +25,7 @@ suspend fun BehaviourContext.handleAnswerQuestionCallback(
         if (answer == null) {
             answerCallbackQuery(
                 query,
-                "❌ Данного ответа на вопрос не существует"
+                "❌ Данного ответа на вопрос не существует", showAlert = true
             )
 
             return@databaseQuery
@@ -34,7 +34,7 @@ suspend fun BehaviourContext.handleAnswerQuestionCallback(
         if (answer.botUser.id != otherBotUser.id) {
             answerCallbackQuery(
                 query,
-                "❌ Вы не можете посмотреть вопрос, ответ на который дали не вы"
+                "❌ Вы не можете посмотреть вопрос, ответ на который дали не вы", showAlert = true
             )
 
             return@databaseQuery

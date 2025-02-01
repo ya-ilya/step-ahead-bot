@@ -33,7 +33,7 @@ suspend fun BehaviourContext.handleTeacherReviewDeleteCallback(
         if (teacherReview == null) {
             answerCallbackQuery(
                 query,
-                "❌ Данного отзыва о преподавателе не существует"
+                "❌ Данного отзыва о преподавателе не существует", showAlert = true
             )
 
             return@databaseQuery
@@ -42,7 +42,7 @@ suspend fun BehaviourContext.handleTeacherReviewDeleteCallback(
         if (teacherReview.botUser.id != otherBotUser.id) {
             answerCallbackQuery(
                 query,
-                "❌ Вы не можете удалить не ваш отзыв о преподавателе"
+                "❌ Вы не можете удалить не ваш отзыв о преподавателе", showAlert = true
             )
 
             return@databaseQuery
@@ -104,7 +104,7 @@ suspend fun BehaviourContext.handleTeacherReviewDeleteCallback(
 
         answerCallbackQuery(
             query,
-            "✅ Ваш отзыв о преподавателе #${teacherReviewId} был удален"
+            "✅ Ваш отзыв о преподавателе #${teacherReviewId} был удален", showAlert = true
         )
     }
 

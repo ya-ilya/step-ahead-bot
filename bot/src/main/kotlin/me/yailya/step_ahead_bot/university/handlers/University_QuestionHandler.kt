@@ -56,7 +56,7 @@ suspend fun BehaviourContext.universityHandleQuestionCallback(
     val (previous, question, next) = try {
         questionForKeyboard(questionId, university)
     } catch (ex: RuntimeException) {
-        answerCallbackQuery(query, ex.message)
+        answerCallbackQuery(query, ex.message, showAlert = true)
         return
     }
 

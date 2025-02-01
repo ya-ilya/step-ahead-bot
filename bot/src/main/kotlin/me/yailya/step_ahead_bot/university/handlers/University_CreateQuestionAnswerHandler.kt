@@ -46,7 +46,7 @@ suspend fun BehaviourContext.universityHandleCreateQuestionAnswerCallback(
     if (questionEntity == null) {
         answerCallbackQuery(
             query,
-            "❌ Данного вопроса не существует"
+            "❌ Данного вопроса не существует", showAlert = true
         )
 
         return
@@ -56,7 +56,7 @@ suspend fun BehaviourContext.universityHandleCreateQuestionAnswerCallback(
         if (databaseQuery { questionEntity.botUser.id == botUserEntity.id }) {
             answerCallbackQuery(
                 query,
-                "❌ Вы не можете оставлять ответы на свой же вопрос"
+                "❌ Вы не можете оставлять ответы на свой же вопрос", showAlert = true
             )
 
             return
@@ -66,7 +66,7 @@ suspend fun BehaviourContext.universityHandleCreateQuestionAnswerCallback(
     if (botUser.lastQuestionAnswerTime != null && LocalDateTime.now() < botUser.lastQuestionAnswerTime.plusMinutes(1)) {
         answerCallbackQuery(
             query,
-            "⏳ Вы должны подождать минуту, прежде чем оставить новый ответ вопрос"
+            "⏳ Вы должны подождать минуту, прежде чем оставить новый ответ вопрос", showAlert = true
         )
 
         return

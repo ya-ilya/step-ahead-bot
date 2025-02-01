@@ -22,7 +22,7 @@ suspend fun BehaviourContext.handleTeacherReviewTeacherCallback(
         if (teacherReview == null) {
             answerCallbackQuery(
                 query,
-                "❌ Данного отзыва о преподавателе не существует"
+                "❌ Данного отзыва о преподавателе не существует", showAlert = true
             )
 
             return@databaseQuery
@@ -31,7 +31,8 @@ suspend fun BehaviourContext.handleTeacherReviewTeacherCallback(
         if (teacherReview.botUser.id != otherBotUser.id) {
             answerCallbackQuery(
                 query,
-                "❌ Вы не можете посмотреть информацию о преподавателе, отзыв на которого оставили не вы"
+                "❌ Вы не можете посмотреть информацию о преподавателе, отзыв на которого оставили не вы",
+                showAlert = true
             )
 
             return@databaseQuery

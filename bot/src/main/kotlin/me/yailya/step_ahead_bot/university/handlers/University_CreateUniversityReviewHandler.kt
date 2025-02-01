@@ -37,7 +37,7 @@ suspend fun BehaviourContext.universityHandleCreateUniversityReviewCallback(
     if (botUser.lastReviewTime != null && LocalDateTime.now() < botUser.lastReviewTime.plusMinutes(1)) {
         answerCallbackQuery(
             query,
-            "⏳ Вы должны подождать минуту, прежде чем оставить новый отзыв"
+            "⏳ Вы должны подождать минуту, прежде чем оставить новый отзыв", showAlert = true
         )
 
         return

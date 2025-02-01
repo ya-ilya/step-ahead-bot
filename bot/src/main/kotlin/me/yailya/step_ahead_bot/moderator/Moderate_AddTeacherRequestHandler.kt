@@ -58,7 +58,7 @@ suspend fun BehaviourContext.moderateHandleAddTeacherRequestCallback(
     val (previous, addTeacherRequest, next) = try {
         addTeacherRequestForKeyboard(updateRequestId)
     } catch (ex: RuntimeException) {
-        answerCallbackQuery(query, ex.message)
+        answerCallbackQuery(query, ex.message, showAlert = true)
         return
     }
 
@@ -127,7 +127,8 @@ suspend fun BehaviourContext.isAddTeacherRequestMayClosed(
     if (addTeacherRequestEntity == null) {
         answerCallbackQuery(
             query,
-            "❌ Этого запроса не существует"
+            "❌ Этого запроса не существует",
+            showAlert = true
         )
 
         return false to null
@@ -136,7 +137,8 @@ suspend fun BehaviourContext.isAddTeacherRequestMayClosed(
     if (databaseQuery { addTeacherRequestEntity.status } != AddTeacherRequestStatus.Open) {
         answerCallbackQuery(
             query,
-            "❌ Этот запрос уже был закрыт"
+            "❌ Этот запрос уже был закрыт",
+            showAlert = true
         )
 
         return false to addTeacherRequestEntity
