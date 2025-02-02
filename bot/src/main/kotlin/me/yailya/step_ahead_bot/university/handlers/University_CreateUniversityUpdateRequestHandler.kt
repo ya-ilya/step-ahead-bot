@@ -30,7 +30,8 @@ suspend fun BehaviourContext.universityHandleCreateUniversityUpdateRequestCallba
     if (botUser.lastUpdateRequestTime != null && LocalDateTime.now() < botUser.lastUpdateRequestTime.plusMinutes(1)) {
         answerCallbackQuery(
             query,
-            "⏳ Вы должны подождать минуту, прежде чем создать новый запрос на изменение информации", showAlert = true
+            "⏳ Вы должны подождать минуту, прежде чем создать новый запрос на изменение информации",
+            showAlert = true
         )
 
         return

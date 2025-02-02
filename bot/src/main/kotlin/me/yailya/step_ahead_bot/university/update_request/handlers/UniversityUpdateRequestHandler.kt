@@ -111,7 +111,8 @@ suspend fun BehaviourContext.isUpdateRequestMayClosed(
     if (updateRequestEntity == null) {
         answerCallbackQuery(
             query,
-            "❌ Этого запроса не существует", showAlert = true
+            "❌ Этого запроса не существует",
+            showAlert = true
         )
 
         return@databaseQuery false to null
@@ -120,14 +121,16 @@ suspend fun BehaviourContext.isUpdateRequestMayClosed(
     if (updateRequestEntity.botUser != botUserEntity) {
         answerCallbackQuery(
             query,
-            "❌ Вы не можете закрыть не ваш запрос на изменение информации", showAlert = true
+            "❌ Вы не можете закрыть не ваш запрос на изменение информации",
+            showAlert = true
         )
     }
 
     if (updateRequestEntity.status != UniversityUpdateRequestStatus.Open) {
         answerCallbackQuery(
             query,
-            "❌ Этот запрос уже был закрыт", showAlert = true
+            "❌ Этот запрос уже был закрыт",
+            showAlert = true
         )
 
         return@databaseQuery false to updateRequestEntity

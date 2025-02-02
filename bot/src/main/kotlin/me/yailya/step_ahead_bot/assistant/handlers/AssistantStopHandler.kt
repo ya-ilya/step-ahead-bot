@@ -22,8 +22,8 @@ suspend fun BehaviourContext.handleAssistantStop(query: DataCallbackQuery, userI
             null
         )
 
-        answerCallbackQuery(query, "✅ Ваша сессия с ассистентом была успешно остановлена")
+        answerCallbackQuery(query, "✅ Ваша сессия с ассистентом была успешно остановлена", showAlert = true)
     } else {
-        answerCallbackQuery(query, "❌ У вас нет активной сессии с ассистентом")
+        answerCallbackQuery(query, "❌ У вас нет активной сессии с ассистентом", showAlert = true)
     }
 }

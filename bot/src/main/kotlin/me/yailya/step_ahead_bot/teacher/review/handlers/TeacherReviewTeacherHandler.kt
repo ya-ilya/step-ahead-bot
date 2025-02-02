@@ -22,7 +22,8 @@ suspend fun BehaviourContext.handleTeacherReviewTeacherCallback(
         if (teacherReview == null) {
             answerCallbackQuery(
                 query,
-                "❌ Данного отзыва о преподавателе не существует", showAlert = true
+                "❌ Данного отзыва о преподавателе не существует",
+                showAlert = true
             )
 
             return@databaseQuery
