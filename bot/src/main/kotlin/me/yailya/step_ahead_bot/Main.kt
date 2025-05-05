@@ -9,7 +9,6 @@ import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onDataCa
 import kotlinx.coroutines.Dispatchers
 import me.yailya.step_ahead_bot.assistant.Assistant
 import me.yailya.step_ahead_bot.assistant.handlers.handleAssistantStop
-import me.yailya.step_ahead_bot.bot_user.BotUserEntity
 import me.yailya.step_ahead_bot.bot_user.BotUsers
 import me.yailya.step_ahead_bot.commands.*
 import me.yailya.step_ahead_bot.moderator.*
@@ -71,16 +70,6 @@ suspend fun main() {
             Olympiads,
             OlympiadUniversityEntries
         )
-    }
-
-    databaseQuery {
-        if (BotUserEntity.all().empty()) {
-            BotUserEntity.new {
-                this.userId = 1005465506
-                this.isModerator = true
-                this.isAdministrator = true
-            }
-        }
     }
 
     try {
